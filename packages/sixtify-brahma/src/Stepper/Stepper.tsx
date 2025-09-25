@@ -1,0 +1,88 @@
+import type {
+  StepperProps as MuiStepperProps,
+  StepLabelProps,
+} from "@mui/material";
+import {
+  Box,
+  Stepper as MuiStepper,
+  Step,
+  StepLabel,
+  Typography,
+  useTheme,
+} from "@mui/material";
+import { useRouter } from "next/navigation";
+
+type StepperProps = MuiStepperProps & {
+  steps: string[];
+  stepUrls?: string[];
+  errorSteps?: number[];
+  showActiveStepIcon?: boolean;
+  stepLabelProps?: StepLabelProps;
+  onStepClick?: (stepIndex: number) => void;
+};
+
+export const Stepper = ({
+  orientation = "horizontal",
+  activeStep = 0,
+  stepLabelProps = {},
+  steps,
+  stepUrls = [],
+  errorSteps = [],
+  onStepClick,
+  ...rest
+}: StepperProps) => {
+  const theme = useTheme();
+
+  const router = useRouter();
+
+  const { butterflyBlue, red } = theme.palette.app.color;
+
+  const handleStepClick = (index: number) => {
+    if (onStepClick) {
+      onStepClick(index);
+    } else if (stepUrls[index]) {
+      router.push(stepUrls[index]);
+    }
+  };
+
+  return (
+    <Box>
+      <MuiStepper activeStep={activeStep} orientation={orientation} {...rest}>
+        {steps.map((label, index) => {
+          const isError = errorSteps.includes(index);
+
+          return (
+            <Step key={label}>
+              <StepLabel
+                {...stepLabelProps}
+                error={isError}
+                sx={{
+                  cursor:
+                    (stepUrls[index] ?? onStepClick) ? "pointer" : "default",
+                  ".Mui-active .MuiStepIcon-root": {
+                    color: `${butterflyBlue[900]} !important`,
+                  },
+                  ".Mui-completed .MuiStepIcon-root": {
+                    color: `${butterflyBlue[900]} !important`,
+                  },
+                  ...(isError && {
+                    ".MuiStepIcon-root": {
+                      color: `${red[900]} !important`,
+                    },
+                    ".MuiStepLabel-label": {
+                      color: `${red[900]} !important`,
+                    },
+                  }),
+                  ...stepLabelProps.sx,
+                }}
+                onClick={() => handleStepClick(index)}
+              >
+                <Typography variant="body2">{label}</Typography>
+              </StepLabel>
+            </Step>
+          );
+        })}
+      </MuiStepper>
+    </Box>
+  );
+};

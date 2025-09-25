@@ -1,0 +1,20 @@
+import {
+  CREATE,
+  DELETE,
+  EDIT,
+  EVENT_MASTER,
+  PERMISSIONS,
+  SUB_MODULES,
+  VIEW,
+} from "@web/constants/permission/permission";
+import { SETTINGS_PATH } from "@web/constants/permission/settings/permission";
+
+export const EVENT_MASTER_PERMISSION_PATH =
+  `${SETTINGS_PATH}.${SUB_MODULES}.${EVENT_MASTER}` as const;
+
+export const EVENT_MASTER_PERMISSION = {
+  CREATE: `${EVENT_MASTER_PERMISSION_PATH}.${PERMISSIONS}.${CREATE}`,
+  DELETE: `${EVENT_MASTER_PERMISSION_PATH}.${PERMISSIONS}.${DELETE}`,
+  EDIT: `${EVENT_MASTER_PERMISSION_PATH}.${PERMISSIONS}.${EDIT}`,
+  MENU: `${EVENT_MASTER_PERMISSION_PATH}.${PERMISSIONS}.${VIEW}`,
+} as const;

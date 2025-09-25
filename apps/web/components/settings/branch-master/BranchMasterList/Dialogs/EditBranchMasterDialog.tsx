@@ -1,0 +1,83 @@
+import { Button, Dialog, toasts } from "@codezee/sixtify-brahma";
+import { Stack } from "@mui/material";
+import { useRef } from "react";
+
+import { EditAction } from "@web/components/common/EditAction";
+import { useEditBranchMaster } from "@web/components/settings/branch-master/BranchMasterList/Dialogs/hooks/useEditBranchMaster";
+import { useGetBranchMasterDetails } from "@web/components/settings/branch-master/BranchMasterList/Dialogs/hooks/useGetBranchMasterDetails";
+import {
+  BranchMasterForm,
+  type FormRef,
+} from "@web/components/settings/branch-master/Dialogs/BranchMasterForm";
+import { useDisabledButtonsCache } from "@web/context/DisabledButtonsCacheContext/DisabledButtonsCacheContext";
+import { submitButtonId } from "@web/hooks/useEnableDisableButtonToggle";
+import { onError } from "@web/utils/errors";
+
+type EditBranchMasterDialogProps = {
+  branchId: string;
+  onClose: () => void;
+  onEditSuccess: () => void;
+  open: boolean;
+};
+
+export const EditBranchMasterDialog = ({
+  branchId,
+  onClose,
+  onEditSuccess,
+  open,
+}: EditBranchMasterDialogProps) => {
+  const formRef = useRef<FormRef>(null);
+
+  const { isDisabled } = useDisabledButtonsCache(submitButtonId);
+
+  const { data: branchMasterData, isPending: isPendingBranchMasterData } =
+    useGetBranchMasterDetails({
+      branchId,
+    });
+
+  const { isPending, mutate } = useEditBranchMaster({
+    branchId,
+    options: {
+      onError: (error) => onError(error, formRef.current?.setError),
+      onSuccess: (data) => {
+        onClose();
+        onEditSuccess();
+        toasts.success({ title: data.message });
+      },
+    },
+  });
+
+  const onEditBranchMaster = () => {
+    formRef.current?.submitForm((formValues) => {
+      mutate(formValues);
+    });
+  };
+
+  return (
+    <Dialog
+      maxWidth="lg"
+      onClose={onClose}
+      open={open}
+      title="Edit Branch"
+      actions={
+        <Stack direction="row" gap="5px">
+          <Button onClick={onClose} variant="outlined">
+            Cancel
+          </Button>
+
+          <EditAction
+            onClick={onEditBranchMaster}
+            loading={isPending}
+            disabled={isDisabled()}
+          />
+        </Stack>
+      }
+    >
+      <BranchMasterForm
+        ref={formRef}
+        defaultValues={branchMasterData}
+        loading={isPendingBranchMasterData}
+      />
+    </Dialog>
+  );
+};

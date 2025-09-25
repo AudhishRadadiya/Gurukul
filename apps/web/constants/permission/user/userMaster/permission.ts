@@ -1,0 +1,20 @@
+import {
+  CREATE,
+  DELETE,
+  EDIT,
+  PERMISSIONS,
+  SUB_MODULES,
+  USER_MASTER,
+  VIEW,
+} from "@web/constants/permission/permission";
+import { USER_PERMISSION_PATH } from "@web/constants/permission/user/permission";
+
+export const USER_MASTER_PERMISSION_PATH =
+  `${USER_PERMISSION_PATH}.${SUB_MODULES}.${USER_MASTER}` as const;
+
+export const USER_MASTER_PERMISSION = {
+  CREATE: `${USER_MASTER_PERMISSION_PATH}.${PERMISSIONS}.${CREATE}`,
+  DELETE: `${USER_MASTER_PERMISSION_PATH}.${PERMISSIONS}.${DELETE}`,
+  EDIT: `${USER_MASTER_PERMISSION_PATH}.${PERMISSIONS}.${EDIT}`,
+  MENU: `${USER_MASTER_PERMISSION_PATH}.${PERMISSIONS}.${VIEW}`,
+} as const;

@@ -1,0 +1,20 @@
+import {
+  CREATE,
+  DELETE,
+  EDIT,
+  PERMISSIONS,
+  SUB_MODULES,
+  TRUST_MASTER,
+  VIEW,
+} from "@web/constants/permission/permission";
+import { SETTINGS_PATH } from "@web/constants/permission/settings/permission";
+
+export const TRUST_MASTER_PERMISSION_PATH =
+  `${SETTINGS_PATH}.${SUB_MODULES}.${TRUST_MASTER}` as const;
+
+export const TRUST_MASTER_PERMISSION = {
+  CREATE: `${TRUST_MASTER_PERMISSION_PATH}.${PERMISSIONS}.${CREATE}`,
+  DELETE: `${TRUST_MASTER_PERMISSION_PATH}.${PERMISSIONS}.${DELETE}`,
+  EDIT: `${TRUST_MASTER_PERMISSION_PATH}.${PERMISSIONS}.${EDIT}`,
+  MENU: `${TRUST_MASTER_PERMISSION_PATH}.${PERMISSIONS}.${VIEW}`,
+} as const;

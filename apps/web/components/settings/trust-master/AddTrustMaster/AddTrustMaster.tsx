@@ -1,0 +1,58 @@
+import { Button, PadBox, toasts } from "@codezee/sixtify-brahma";
+import { Stack } from "@mui/material";
+import { t } from "i18next";
+import { useRouter } from "next/navigation";
+import { useRef } from "react";
+
+import { useAddTrustMaster } from "@web/components/settings/trust-master/AddTrustMaster/hooks/useAddTrustMaster";
+import type { FormRef } from "@web/components/settings/trust-master/AddTrustMaster/TrustMasterForm";
+import { TrustMasterForm } from "@web/components/settings/trust-master/AddTrustMaster/TrustMasterForm";
+import { onError } from "@web/utils/errors";
+
+export const AddTrustMaster = () => {
+  const router = useRouter();
+
+  const formRef = useRef<FormRef>(null);
+
+  const { isPending, mutate } = useAddTrustMaster({
+    options: {
+      onError: (error) => onError(error, formRef.current?.setError),
+
+      onSuccess: (data) => {
+        toasts.success({ title: data.message });
+        router.push("/settings/trust-master");
+      },
+    },
+  });
+
+  const onCreateTrustMaster = () => {
+    formRef.current?.submitForm((formValues) => {
+      mutate(formValues);
+    });
+  };
+
+  return (
+    <PadBox padding={{ padding: "20px" }}>
+      <Stack gap="10px">
+        <TrustMasterForm ref={formRef} loading={isPending} />
+
+        <PadBox padding={{ paddingRight: "20px" }}>
+          <Stack direction="row" justifyContent="end" gap="10px">
+            <Button
+              variant="outlined"
+              onClick={() => {
+                router.push("/settings/trust-master");
+              }}
+            >
+              {t("common.cancel.button")}
+            </Button>
+
+            <Button loading={isPending} onClick={onCreateTrustMaster}>
+              {t("common.save.button")}
+            </Button>
+          </Stack>
+        </PadBox>
+      </Stack>
+    </PadBox>
+  );
+};

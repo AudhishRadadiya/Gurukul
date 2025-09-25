@@ -1,0 +1,37 @@
+{
+  "dependencies": {
+    "msw": "^2.8.4",
+    "next": "^14.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@codezee/sixtify-brahma": "workspace:*",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^20",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "eslint": "^8",
+    "eslint-config-next": "15.0.0-rc.0",
+    "postcss": "^8",
+    "typescript": "^5"
+  },
+  "name": "web",
+  "private": true,
+  "scripts": {
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 next build",
+    "check:format": "prettier --check \"**/*.{ts,tsx,js}\"",
+    "check:types": "tsc --noEmit",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf .next",
+    "dev": "next dev --turbo",
+    "lint": "cross-env NODE_OPTIONS=--max-old-space-size=4096 next lint",
+    "start": "next start"
+  },
+  "version": "0.1.0",
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
+  }
+}

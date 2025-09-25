@@ -1,0 +1,39 @@
+{
+  "$schema": "https://turbo.build/schema.v1.json",
+  "globalEnv": [
+    "NEXT_PUBLIC_MOCKING_ENABLED",
+    "NEXT_PUBLIC_API_SERVER",
+    "NEXTAUTH_URL"
+  ],
+  "pipeline": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**"
+      ],
+      "inputs": ["**/*"]
+    },
+    "check:types": {},
+    "clean": {
+      "cache": false,
+      "persistent": true
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "dependsOn": [
+        "^lint"
+      ]
+    },
+    "start": {
+      "dependsOn": [
+        "build"
+      ]
+    }
+  }
+}

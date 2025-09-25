@@ -1,0 +1,20 @@
+import {
+  BRANCH_MASTER,
+  CREATE,
+  DELETE,
+  EDIT,
+  PERMISSIONS,
+  SUB_MODULES,
+  VIEW,
+} from "@web/constants/permission/permission";
+import { SETTINGS_PATH } from "@web/constants/permission/settings/permission";
+
+export const BRANCH_MASTER_PERMISSION_PATH =
+  `${SETTINGS_PATH}.${SUB_MODULES}.${BRANCH_MASTER}` as const;
+
+export const BRANCH_MASTER_PERMISSION = {
+  CREATE: `${BRANCH_MASTER_PERMISSION_PATH}.${PERMISSIONS}.${CREATE}`,
+  DELETE: `${BRANCH_MASTER_PERMISSION_PATH}.${PERMISSIONS}.${DELETE}`,
+  EDIT: `${BRANCH_MASTER_PERMISSION_PATH}.${PERMISSIONS}.${EDIT}`,
+  MENU: `${BRANCH_MASTER_PERMISSION_PATH}.${PERMISSIONS}.${VIEW}`,
+} as const;

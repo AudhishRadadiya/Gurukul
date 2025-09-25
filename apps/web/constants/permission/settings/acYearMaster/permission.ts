@@ -1,0 +1,20 @@
+import {
+  AC_YEAR_MASTER,
+  CREATE,
+  DELETE,
+  EDIT,
+  PERMISSIONS,
+  SUB_MODULES,
+  VIEW,
+} from "@web/constants/permission/permission";
+import { SETTINGS_PATH } from "@web/constants/permission/settings/permission";
+
+export const AC_YEAR_MASTER_PERMISSION_PATH =
+  `${SETTINGS_PATH}.${SUB_MODULES}.${AC_YEAR_MASTER}` as const;
+
+export const AC_YEAR_MASTER_PERMISSION = {
+  CREATE: `${AC_YEAR_MASTER_PERMISSION_PATH}.${PERMISSIONS}.${CREATE}`,
+  DELETE: `${AC_YEAR_MASTER_PERMISSION_PATH}.${PERMISSIONS}.${DELETE}`,
+  EDIT: `${AC_YEAR_MASTER_PERMISSION_PATH}.${PERMISSIONS}.${EDIT}`,
+  MENU: `${AC_YEAR_MASTER_PERMISSION_PATH}.${PERMISSIONS}.${VIEW}`,
+} as const;
