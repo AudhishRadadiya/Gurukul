@@ -17,7 +17,7 @@ export const DonationSummaryFilter = ({
 }: DonationSummaryFilterProps) => {
   const [currentFilter, setCurrentFilter] = useState<FieldValues>();
 
-  const { data: trustOptions } = useGetTrustOptions();
+  const { data: trustOptions } = useGetTrustOptions({ useShortName: true });
 
   const filterListItems: FilterListType[] = useMemo(
     () => [

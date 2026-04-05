@@ -1,3 +1,4 @@
+import type { Option } from "@codezee/sixtify-brahma";
 import { Button } from "@codezee/sixtify-brahma";
 import { Autocomplete, Stack, TextField } from "@mui/material";
 import type { Editor } from "@tiptap/react";
@@ -16,8 +17,10 @@ import {
 
 import {
   activeButton,
+  AutocompleteOptionStyle,
   fontFamilies,
   fontSizes,
+  styleAutocompleteSX,
 } from "@web/components/common/TextEditor/hooks/constant";
 import { useTextEditorState } from "@web/components/common/TextEditor/hooks/useTextEditorState";
 
@@ -34,6 +37,7 @@ export const TextEditorToolbar = ({ editor }: EditorToolbarProps) => {
     <Stack direction="row" gap="10px" alignItems="center" flexWrap="wrap">
       <Button
         variant="outlined"
+        size="small"
         onClick={() => editor.chain().focus().toggleBold().run()}
         disabled={!editorState.canBold}
         className={editorState.isBold ? "is-active" : ""}
@@ -44,6 +48,7 @@ export const TextEditorToolbar = ({ editor }: EditorToolbarProps) => {
 
       <Button
         variant="outlined"
+        size="small"
         onClick={() => editor.chain().focus().toggleItalic().run()}
         disabled={!editorState.canItalic}
         className={editorState.isItalic ? "is-active" : ""}
@@ -54,6 +59,7 @@ export const TextEditorToolbar = ({ editor }: EditorToolbarProps) => {
 
       <Button
         variant="outlined"
+        size="small"
         onClick={() => editor.chain().focus().toggleStrike().run()}
         disabled={!editorState.canStrike}
         className={editorState.isStrike ? "is-active" : ""}
@@ -64,6 +70,7 @@ export const TextEditorToolbar = ({ editor }: EditorToolbarProps) => {
 
       <Button
         variant="outlined"
+        size="small"
         onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
         className={editorState.isHeading1 ? "is-active" : ""}
         sx={activeButton}
@@ -73,6 +80,7 @@ export const TextEditorToolbar = ({ editor }: EditorToolbarProps) => {
 
       <Button
         variant="outlined"
+        size="small"
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         className={editorState.isHeading2 ? "is-active" : ""}
         sx={activeButton}
@@ -82,6 +90,7 @@ export const TextEditorToolbar = ({ editor }: EditorToolbarProps) => {
 
       <Button
         variant="outlined"
+        size="small"
         onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
         className={editorState.isHeading3 ? "is-active" : ""}
         sx={activeButton}
@@ -91,6 +100,7 @@ export const TextEditorToolbar = ({ editor }: EditorToolbarProps) => {
 
       <Button
         variant="outlined"
+        size="small"
         onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
         className={editorState.isHeading4 ? "is-active" : ""}
         sx={activeButton}
@@ -100,6 +110,7 @@ export const TextEditorToolbar = ({ editor }: EditorToolbarProps) => {
 
       <Button
         variant="outlined"
+        size="small"
         onClick={() => editor.chain().focus().toggleHeading({ level: 5 }).run()}
         className={editorState.isHeading5 ? "is-active" : ""}
         sx={activeButton}
@@ -109,6 +120,7 @@ export const TextEditorToolbar = ({ editor }: EditorToolbarProps) => {
 
       <Button
         variant="outlined"
+        size="small"
         onClick={() => editor.chain().focus().toggleHeading({ level: 6 }).run()}
         className={editorState.isHeading6 ? "is-active" : ""}
         sx={activeButton}
@@ -118,6 +130,7 @@ export const TextEditorToolbar = ({ editor }: EditorToolbarProps) => {
 
       <Button
         variant="outlined"
+        size="small"
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         className={editorState.isBulletList ? "is-active" : ""}
         sx={activeButton}
@@ -127,6 +140,7 @@ export const TextEditorToolbar = ({ editor }: EditorToolbarProps) => {
 
       <Button
         variant="outlined"
+        size="small"
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
         className={editorState.isOrderedList ? "is-active" : ""}
         sx={activeButton}
@@ -136,6 +150,7 @@ export const TextEditorToolbar = ({ editor }: EditorToolbarProps) => {
 
       <Button
         variant="outlined"
+        size="small"
         onClick={() => editor.chain().focus().setTextAlign("left").run()}
         className={editorState.isLeftAligned ? "is-active" : ""}
         sx={activeButton}
@@ -145,6 +160,7 @@ export const TextEditorToolbar = ({ editor }: EditorToolbarProps) => {
 
       <Button
         variant="outlined"
+        size="small"
         onClick={() => editor.chain().focus().setTextAlign("right").run()}
         className={editorState.isRightAligned ? "is-active" : ""}
         sx={activeButton}
@@ -154,6 +170,7 @@ export const TextEditorToolbar = ({ editor }: EditorToolbarProps) => {
 
       <Button
         variant="outlined"
+        size="small"
         onClick={() => editor.chain().focus().setTextAlign("center").run()}
         className={editorState.isCenterAligned ? "is-active" : ""}
         sx={activeButton}
@@ -163,6 +180,8 @@ export const TextEditorToolbar = ({ editor }: EditorToolbarProps) => {
 
       <Button
         variant="outlined"
+        size="small"
+        sx={activeButton}
         onClick={() => editor.chain().focus().undo().run()}
         disabled={!editorState.canUndo}
       >
@@ -171,6 +190,8 @@ export const TextEditorToolbar = ({ editor }: EditorToolbarProps) => {
 
       <Button
         variant="outlined"
+        size="small"
+        sx={activeButton}
         onClick={() => editor.chain().focus().redo().run()}
         disabled={!editorState.canRedo}
       >
@@ -179,7 +200,7 @@ export const TextEditorToolbar = ({ editor }: EditorToolbarProps) => {
 
       <input
         type="color"
-        style={{ borderRadius: "4px", height: "35px", width: "60px" }}
+        style={{ borderRadius: "4px", height: "29px", width: "40px" }}
         onChange={(e) => {
           editor.chain().focus().setColor(e.target.value).run();
         }}
@@ -188,7 +209,9 @@ export const TextEditorToolbar = ({ editor }: EditorToolbarProps) => {
       />
 
       <Button
+        size="small"
         variant="outlined"
+        sx={{ borderRadius: "4px", fontSize: "13px", height: "30px" }}
         onClick={() => {
           editor.chain().focus().unsetColor().run();
         }}
@@ -201,16 +224,16 @@ export const TextEditorToolbar = ({ editor }: EditorToolbarProps) => {
         disableClearable={true}
         options={fontFamilies}
         defaultValue={fontFamilies[0]}
-        sx={{ width: 188 }}
+        sx={{ ...styleAutocompleteSX, width: "150px" }}
         onChange={(_, newValue) => {
           if (newValue) {
             editor.chain().focus().setFontFamily(newValue.value).run();
           }
         }}
         renderInput={(params) => <TextField {...params} />}
-        renderOption={(props, option) => (
-          <li {...props} style={{ fontSize: "15px" }}>
-            {option.label}
+        renderOption={(props, { label }: Option) => (
+          <li {...props} key={label} style={AutocompleteOptionStyle}>
+            {label}
           </li>
         )}
       />
@@ -220,16 +243,16 @@ export const TextEditorToolbar = ({ editor }: EditorToolbarProps) => {
         disableClearable={true}
         options={fontSizes}
         defaultValue={fontSizes[3]}
-        sx={{ width: 100 }}
+        sx={{ ...styleAutocompleteSX, width: "85px" }}
         onChange={(_, newValue) => {
           if (newValue) {
             editor.chain().focus().setFontSize(newValue.value).run();
           }
         }}
         renderInput={(params) => <TextField {...params} />}
-        renderOption={(props, option) => (
-          <li {...props} style={{ fontSize: "15px" }}>
-            {option.label}
+        renderOption={(props, { label }: Option) => (
+          <li {...props} key={label} style={AutocompleteOptionStyle}>
+            {label}
           </li>
         )}
       />

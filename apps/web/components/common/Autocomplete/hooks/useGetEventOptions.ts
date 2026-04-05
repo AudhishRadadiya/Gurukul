@@ -12,13 +12,22 @@ type EventOptionsType = {
   value: string;
 };
 
-export function useGetEventOptions() {
+type UseGetEventOptionsProps = {
+  isUserWise?: boolean;
+};
+
+export function useGetEventOptions({
+  isUserWise = false,
+}: UseGetEventOptionsProps = {}) {
   const { axiosPrivate } = useAxiosPrivate();
 
   const fetchEventOption = async () => {
-    const { data } = await axiosPrivate.get<
-      ApiSuccessResponse<EventOptionsType[]>
-    >(EVENT_MASTER_ROUTES.options);
+    const url = isUserWise
+      ? EVENT_MASTER_ROUTES.optionsUserWise
+      : EVENT_MASTER_ROUTES.options;
+
+    const { data } =
+      await axiosPrivate.get<ApiSuccessResponse<EventOptionsType[]>>(url);
 
     return data.data;
   };
@@ -26,6 +35,6 @@ export function useGetEventOptions() {
   return useQuery({
     initialData: [],
     queryFn: fetchEventOption,
-    queryKey: eventKeys.options(),
+    queryKey: eventKeys.options(isUserWise),
   });
 }

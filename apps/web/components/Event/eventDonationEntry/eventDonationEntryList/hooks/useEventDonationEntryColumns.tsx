@@ -5,6 +5,7 @@ import { AG_GRID_CELL_DEFAULT_VALUE } from "@web/components/common/AgGridV2/AgGr
 import type { EventDonationEntry } from "@web/components/Event/eventDonationEntry/eventDonationEntryList/hooks/useGetEventDonationEntry";
 import type { AgColumnsWithActions } from "@web/types/agGrid";
 import { dateFormat } from "@web/utils/date";
+import { formatToIndianNumber } from "@web/utils/helper";
 
 export const useEventDonationEntryColumns = () => {
   const column: AgColumnsWithActions<EventDonationEntry> = [
@@ -38,6 +39,11 @@ export const useEventDonationEntryColumns = () => {
       headerName: t("common.event.master.name"),
     },
     {
+      cellRenderer: ({ value }: CustomCellRendererProps) => {
+        return !value
+          ? AG_GRID_CELL_DEFAULT_VALUE
+          : formatToIndianNumber(value);
+      },
       field: "amount",
       headerName: t("amount.label"),
     },

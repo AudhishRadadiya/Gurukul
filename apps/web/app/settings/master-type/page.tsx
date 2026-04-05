@@ -1,11 +1,11 @@
 "use client";
 
-import { Button, ContentBox, PadBox } from "@codezee/sixtify-brahma";
-import { Add } from "@mui/icons-material";
+import { ContentBox, PadBox } from "@codezee/sixtify-brahma";
 import { Stack, Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 
+import { ButtonLayoutProvider } from "@web/components/common/responsive/ButtonLayoutProvider";
 import { AddMasterTypeDialog } from "@web/components/settings/master-type/Dialogs/AddMasterTypeDialog";
 import { MasterTypeBreadcrumbs } from "@web/components/settings/master-type/MasterTypeBreadcrumbs";
 import { MasterTypeList } from "@web/components/settings/master-type/MasterTypeList/MasterTypeList";
@@ -56,17 +56,15 @@ export default function Page() {
             <PermissionGuard
               canAccess={validateAccess(MASTER_TYPE_PERMISSION.CREATE)}
             >
-              <Button
+              <ButtonLayoutProvider
                 variant="outlined"
-                startIcon={<Add />}
                 onClick={() => {
                   onDialogOpen("add");
                 }}
-              >
-                {t("common.button.add", {
+                label={t("common.button.add", {
                   label: t("master.type.menu.label"),
                 })}
-              </Button>
+              />
             </PermissionGuard>
           </Stack>
         </PadBox>

@@ -2,9 +2,12 @@ import { Button, PadBox, toasts } from "@codezee/sixtify-brahma";
 import { Stack } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/navigation";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 
-import type { FormRef } from "@web/components/Donation/donationEntry/addDonationEntry/DonationEntryForm";
+import type {
+  DonationEntryFormFieldValues,
+  FormRef,
+} from "@web/components/Donation/donationEntry/addDonationEntry/DonationEntryForm";
 import { DonationEntryForm } from "@web/components/Donation/donationEntry/addDonationEntry/DonationEntryForm";
 import { useEditDonationEntry } from "@web/components/Donation/donationEntry/editDonationEntry/hooks/useEditDonationEntry";
 import { useGetDonationEntryDetails } from "@web/components/Donation/donationEntry/editDonationEntry/hooks/useGetDonationEntryDetails";
@@ -32,10 +35,16 @@ export const EditDonationEntry = ({ donationId }: EditDonationEntryProps) => {
     options: {
       onError: (error) => onError(error, formRef.current?.setError),
 
-      onSuccess: ({ data, message }) => {
+      onSuccess: ({ data, message }, variables) => {
         toasts.success({ title: message });
 
-        window.open(data.receipt, "_blank");
+        if (data.receipt) {
+          const printUrl = `/print-pdf.html?pdf=${encodeURIComponent(data.receipt)}`;
+
+          const url = variables.direct_print ? printUrl : data.receipt;
+
+          window.open(url, "_blank");
+        }
 
         router.push("/donation/donation-entry");
       },
@@ -48,13 +57,34 @@ export const EditDonationEntry = ({ donationId }: EditDonationEntryProps) => {
     });
   };
 
+  const defaultValues = useMemo(() => {
+    if (donationEntryDetails) {
+      const donationEntryFormFieldValues: DonationEntryFormFieldValues = {
+        ...donationEntryDetails,
+        focus_on_trust: false,
+        last_five_entry: true,
+        selected_previousDonation: {
+          address: donationEntryDetails.address ?? null,
+          city: donationEntryDetails.city ?? null,
+          email_id: donationEntryDetails.email_id ?? null,
+          pan_no: donationEntryDetails.pan_no ?? null,
+          pincode: donationEntryDetails.pincode ?? null,
+          state: donationEntryDetails.state ?? null,
+        },
+        show_id_fields: false,
+      };
+
+      return donationEntryFormFieldValues;
+    }
+  }, [donationEntryDetails]);
+
   return (
     <PadBox padding={{ padding: "10px" }}>
       <Stack gap="10px">
         <DonationEntryForm
           ref={formRef}
           loading={isDonationEntryLoading}
-          defaultValues={donationEntryDetails}
+          defaultValues={defaultValues}
         />
 
         <PadBox padding={{ paddingRight: "20px" }}>

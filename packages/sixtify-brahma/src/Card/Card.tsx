@@ -16,15 +16,17 @@ export function Card({ heading, children, action }: Readonly<CardProps>) {
     <Box bgcolor={lightBlue[50]} flex={1} sx={{ borderRadius: "5px" }}>
       <PadBox padding={{ padding: 2 }}>
         <Stack gap="10px">
-          <Stack
-            flexDirection="row"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Typography variant="h6">{heading}</Typography>
+          {(heading || action) && (
+            <Stack
+              flexDirection="row"
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              {heading && <Typography variant="h6">{heading}</Typography>}
 
-            <Box>{action}</Box>
-          </Stack>
+              {action && <Box>{action}</Box>}
+            </Stack>
+          )}
 
           {children}
         </Stack>

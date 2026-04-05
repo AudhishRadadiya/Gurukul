@@ -2,7 +2,7 @@ import type { DonationImportDetails } from "@web/components/Donation/donationImp
 
 export const SAMPLE_FILE =
   // eslint-disable-next-line sonarjs/no-clear-text-protocols
-  "http://15.206.89.254:5001/api/upload/excel/Import_Doantion_Sample.xlsx";
+  "https://api.gurukul.work/api/upload/excel/Import_Doantion_Sample.xlsx";
 
 export const donationFieldLabels: Record<keyof DonationImportDetails, string> =
   {

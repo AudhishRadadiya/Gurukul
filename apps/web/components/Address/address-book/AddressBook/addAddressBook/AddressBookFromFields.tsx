@@ -3,18 +3,20 @@ import {
   FormContainer,
   FormGridLayout,
   FormSection,
-  PhoneInputField,
   TextField,
 } from "@codezee/sixtify-brahma";
 import { t } from "i18next";
+import { useMemo } from "react";
 import { useFormContext } from "react-hook-form";
+import { useDebounceValue } from "usehooks-ts";
 
 import type { AddressBookFormFieldValues } from "@web/components/Address/address-book/AddressBook/addAddressBook/AddressBookFrom";
 import { CommonAddressBookAutocomplete } from "@web/components/Address/address-book/AddressBook/addAddressBook/CommonAddressBookAutocomplete";
 import { BloodGroupAutocomplete } from "@web/components/common/Autocomplete/BloodGroupAutocomplete";
+import { CityAutocomplete } from "@web/components/common/Autocomplete/CityAutocomplete";
 import { GenderAutocomplete } from "@web/components/common/Autocomplete/GenderAutocomplete";
+import { StateAutocomplete } from "@web/components/common/Autocomplete/StateAutocomplete";
 import {
-  CITY,
   CONTACT_NO,
   DISTRICT,
   FIRST_NAME,
@@ -25,7 +27,9 @@ import {
   TALUKO,
   VILLAGE,
 } from "@web/components/common/hooks/constant";
-import { errorMessages } from "@web/utils/helper";
+import { PanCardTextField } from "@web/components/common/PanCardTextField/PanCardTextField";
+import { usePostCityAndStateFromPinCode } from "@web/hooks/address/usePostCityAndStateFromPinCode";
+import { Debounce_Delay, errorMessages } from "@web/utils/helper";
 
 type AddressBookFromFieldsProps = {
   loading?: boolean;
@@ -37,6 +41,8 @@ export const AddressBookFromFields = ({
   const {
     control,
     formState: { errors },
+    setValue,
+    watch,
   } = useFormContext<AddressBookFormFieldValues>();
 
   const getError = (name: keyof AddressBookFormFieldValues) => ({
@@ -44,11 +50,33 @@ export const AddressBookFromFields = ({
     helperText: errorMessages(errors[name]?.message),
   });
 
+  const [pincodeInput] = useDebounceValue(watch("pincode"), Debounce_Delay);
+
+  const { data } = usePostCityAndStateFromPinCode({
+    pinCode: !errors.pincode && pincodeInput ? pincodeInput : "",
+  });
+
+  const { city, state } = useMemo<
+    Pick<AddressBookFormFieldValues, "city" | "state">
+  >(() => {
+    return {
+      city: data?.city ?? null,
+      state: data?.state ?? null,
+    };
+  }, [data]);
+
+  useMemo(() => {
+    setValue("city", city, { shouldValidate: true });
+
+    setValue("state", state, { shouldValidate: true });
+  }, [city, state]);
+
   return (
     <FormSection title={t("address.book.menu.label")}>
       <FormContainer>
         <FormGridLayout columns={3}>
           <CommonAddressBookAutocomplete
+            createOptionOnType
             label={t("common.contact.label")}
             name="contact_no"
             loading={loading}
@@ -62,9 +90,11 @@ export const AddressBookFromFields = ({
           <TextField
             type="number"
             name="g_no"
+            disabled
             required
             loading={loading}
             control={control}
+            characterType="any-character"
             label={t("common.g.no")}
             {...getError("g_no")}
           />
@@ -82,9 +112,11 @@ export const AddressBookFromFields = ({
         <FormGridLayout columns={3}>
           <CommonAddressBookAutocomplete
             loading={loading}
+            createOptionOnType
             label={t("common.first.name")}
             freeSolo
             name="first_name"
+            characterType="string"
             required
             control={control}
             optionsKey={FIRST_NAME}
@@ -93,8 +125,10 @@ export const AddressBookFromFields = ({
 
           <CommonAddressBookAutocomplete
             loading={loading}
+            createOptionOnType
             label={t("common.middle.name")}
             name="middle_name"
+            characterType="string"
             freeSolo
             control={control}
             optionsKey={MIDDLE_NAME}
@@ -102,8 +136,10 @@ export const AddressBookFromFields = ({
 
           <CommonAddressBookAutocomplete
             loading={loading}
+            createOptionOnType
             label={t("common.surname")}
             name="surname"
+            characterType="string"
             freeSolo
             required
             control={control}
@@ -115,25 +151,29 @@ export const AddressBookFromFields = ({
         <FormGridLayout columns={4}>
           <TextField
             name="email_id"
+            letterCase="lowercase"
+            characterType="string-number-special"
             loading={loading}
             control={control}
             label={t("email.label")}
             {...getError("email_id")}
           />
 
-          <PhoneInputField
-            control={control}
-            loading={loading}
-            label={t("common.alternet.no")}
+          <TextField
             name="alternet_mobile_no"
+            loading={loading}
+            control={control}
+            maxLength={10}
+            characterType="string-number"
+            label={t("common.alternet.no")}
             {...getError("alternet_mobile_no")}
           />
 
-          <TextField
+          <PanCardTextField
             name="pan_no"
             loading={loading}
+            placeholder={t("common.pan.no.placeholder")}
             control={control}
-            isCapitalize
             label={t("common.pan.no")}
             {...getError("pan_no")}
           />
@@ -141,6 +181,7 @@ export const AddressBookFromFields = ({
           <TextField
             name="driving_licence_no"
             loading={loading}
+            placeholder={t("dl.no.label.placeholder")}
             control={control}
             isCapitalize
             label={t("license.no.label")}
@@ -153,12 +194,14 @@ export const AddressBookFromFields = ({
             name="aadhar_no"
             loading={loading}
             control={control}
+            placeholder={t("aadhar.no.label.placeholder")}
             label={t("aadhar.no.label")}
             {...getError("aadhar_no")}
           />
 
           <TextField
             name="elector_number"
+            placeholder={t("common.elector.no.placeholder")}
             loading={loading}
             control={control}
             isCapitalize
@@ -170,6 +213,7 @@ export const AddressBookFromFields = ({
             name="passport_no"
             loading={loading}
             control={control}
+            placeholder={t("common.passport.no.placeholder")}
             isCapitalize
             label={t("common.passport.no")}
             {...getError("passport_no")}
@@ -182,7 +226,6 @@ export const AddressBookFromFields = ({
             label={t("common.birth.date")}
             name="birth_date"
             loading={loading}
-            required
             clearable={false}
           />
 
@@ -190,7 +233,6 @@ export const AddressBookFromFields = ({
             control={control}
             label={t("common.anniversary.date")}
             name="anniversary_date"
-            required
             loading={loading}
             clearable={false}
           />
@@ -216,32 +258,40 @@ export const AddressBookFromFields = ({
             name="address"
             control={control}
             loading={loading}
+            isCapitalize
             label={t("address.label")}
           />
         </FormGridLayout>
 
-        <FormGridLayout columns={3}>
-          <CommonAddressBookAutocomplete
-            label={t("common.city")}
-            name="city"
-            loading={loading}
-            control={control}
-            optionsKey={CITY}
-          />
-
+        <FormGridLayout columns={4}>
           <CommonAddressBookAutocomplete
             label={t("pincode.label")}
             name="pincode"
+            createOptionOnType
             required
+            freeSolo
             loading={loading}
             control={control}
             optionsKey={PINCODE}
             {...getError("pincode")}
           />
 
+          <CityAutocomplete
+            label={t("common.city")}
+            createOptionOnType
+            freeSolo
+            name="city"
+            loading={loading}
+            control={control}
+          />
+
+          <StateAutocomplete name="state" control={control} loading={loading} />
+
           <CommonAddressBookAutocomplete
             label={t("landmark.label")}
+            createOptionOnType
             name="landmark"
+            freeSolo
             loading={loading}
             control={control}
             optionsKey={LANDMARK}
@@ -251,7 +301,9 @@ export const AddressBookFromFields = ({
         <FormGridLayout columns={3}>
           <CommonAddressBookAutocomplete
             label={t("common.village")}
+            createOptionOnType
             name="village"
+            freeSolo
             loading={loading}
             control={control}
             optionsKey={VILLAGE}
@@ -259,7 +311,9 @@ export const AddressBookFromFields = ({
 
           <CommonAddressBookAutocomplete
             label={t("common.taluko")}
+            createOptionOnType
             name="taluko"
+            freeSolo
             loading={loading}
             control={control}
             optionsKey={TALUKO}
@@ -268,6 +322,8 @@ export const AddressBookFromFields = ({
           <CommonAddressBookAutocomplete
             label={t("common.district")}
             name="district"
+            createOptionOnType
+            freeSolo
             loading={loading}
             control={control}
             optionsKey={DISTRICT}

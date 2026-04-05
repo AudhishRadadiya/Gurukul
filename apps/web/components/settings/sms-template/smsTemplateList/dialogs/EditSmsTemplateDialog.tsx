@@ -60,6 +60,8 @@ export const EditSmsTemplateDialog = ({
     if (smsTemplateData) {
       const smsTemplateFormFieldValues: SmsTemplateFormFieldValues = {
         is_active: smsTemplateData.is_active,
+        is_sms: smsTemplateData.is_sms,
+        is_whatsapp: smsTemplateData.is_whatsapp,
         temp_template_parameter: null,
         template_name: smsTemplateData.template_name,
         template_parameter_text: smsTemplateData.template_parameter_text,

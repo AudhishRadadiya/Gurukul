@@ -9,7 +9,8 @@ export const BRANCH_ROUTES = {
 
   listing: `${BRANCH_ROUTES_BASE_URL}/${LIST}`,
 
-  options: `${BRANCH_ROUTES_BASE_URL}/${LIST}/${OPTION}`,
+  options: (isUserWise?: boolean) =>
+    `${BRANCH_ROUTES_BASE_URL}/${LIST}/${OPTION}${isUserWise ? "/user-wise" : ""}`,
 
   patch: (branchId: string) => `${BRANCH_ROUTES_BASE_URL}/${branchId}`,
 

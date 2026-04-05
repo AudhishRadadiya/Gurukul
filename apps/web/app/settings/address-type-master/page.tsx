@@ -1,10 +1,10 @@
 "use client";
 
-import { Button, ContentBox, PadBox } from "@codezee/sixtify-brahma";
-import { Add } from "@mui/icons-material";
+import { ContentBox, PadBox } from "@codezee/sixtify-brahma";
 import { Stack, Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 
+import { ButtonLayoutProvider } from "@web/components/common/responsive/ButtonLayoutProvider";
 import { AddressTypeBreadcrumbs } from "@web/components/settings/address-type-master/AddressTypeBreadcrumbs";
 import { AddressTypeMasterList } from "@web/components/settings/address-type-master/AddressTypeMasterList/AddressTypeMasterList";
 import { AddAddressTypeDialog } from "@web/components/settings/address-type-master/Dialogs/AddAddressTypeDialog";
@@ -53,15 +53,13 @@ export default function Page() {
             <PermissionGuard
               canAccess={validateAccess(ADDRESS_TYPE_PERMISSION.CREATE)}
             >
-              <Button
+              <ButtonLayoutProvider
                 variant="outlined"
-                startIcon={<Add />}
                 onClick={() => {
                   onDialogOpen("add");
                 }}
-              >
-                Add Address Type
-              </Button>
+                label="Add Address Type"
+              />
             </PermissionGuard>
           </Stack>
         </PadBox>

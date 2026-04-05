@@ -1,6 +1,6 @@
 import { CheckBox } from "@codezee/sixtify-brahma";
+import type { StackProps } from "@mui/material";
 import { Stack, Typography } from "@mui/material";
-import React from "react";
 import type { Control, FieldValues, Path } from "react-hook-form";
 
 type CheckboxWithLabelProps<T extends FieldValues> = {
@@ -10,7 +10,7 @@ type CheckboxWithLabelProps<T extends FieldValues> = {
   label: string;
   name: Path<T>;
   size?: "small" | "medium";
-};
+} & StackProps;
 
 export const CheckboxWithLabel = <T extends FieldValues>({
   control,
@@ -19,9 +19,10 @@ export const CheckboxWithLabel = <T extends FieldValues>({
   label,
   name,
   size = "small",
+  ...props
 }: CheckboxWithLabelProps<T>) => {
   return (
-    <Stack direction="row" gap={gap} alignItems="center">
+    <Stack {...props} direction="row" gap={gap} alignItems="center">
       <CheckBox name={name} control={control} size={size} />
 
       <Typography fontSize={fontSize}>{label}</Typography>

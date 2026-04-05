@@ -70,6 +70,21 @@ export const uanRegex = /^\d{12}$/;
 
 export const esicNoRegex = /^[0-9]{10}$/;
 
+export const otpRegex = /^\d+$/;
+
 export const mobileNoRegex = /^(91)?[6-9]\d{9}$/;
 
 export const passportNumberRegex = /^[A-PR-WYa-pr-wy][0-9]{7}$/;
+
+export const eventUrlRegex =
+  /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/;
+
+export const uppercaseLetter = /[A-Z]/;
+
+export const lowercaseLetter = /[a-z]/;
+
+export const digit = /\d/;
+
+export const singleLetter = /^[A-Za-z]$/;
+
+export const singleDigit = /^\d$/;

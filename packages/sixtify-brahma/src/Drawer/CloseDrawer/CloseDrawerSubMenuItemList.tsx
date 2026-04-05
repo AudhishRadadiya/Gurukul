@@ -7,6 +7,7 @@ import {
 import { type MenuItem } from "../Drawer";
 import { CloseDrawerMenuItem } from "./CloseDrawerMenuItem";
 import { Popper } from "./Popper";
+import type { OnAction } from "../../utils/types";
 
 export type MenuOpenState = {
   [key: string]: MenuOpenState | boolean;
@@ -16,7 +17,7 @@ type RecursiveMenuItemProps = {
   item: MenuItem;
   parentPath: string;
   currentPathMenuOpen: MenuOpenState;
-  onCloseMenuPopover: () => void;
+  onCloseMenuPopover: OnAction;
   level?: number;
 };
 
@@ -98,7 +99,7 @@ const RecursiveMenuItem = ({
 type CloseDrawerSubMenuItemListProps = {
   currentPathMenuOpen: MenuOpenState;
   currentMenuItem?: MenuItem;
-  onCloseMenuPopover: () => void;
+  onCloseMenuPopover: OnAction;
 };
 
 export const CloseDrawerSubMenuItemList = ({

@@ -17,9 +17,13 @@ import { onError } from "@web/utils/errors";
 
 type AddUserPermissionsProps = {
   userId: string;
+  userName: string;
 };
 
-export const AddUserPermissions = ({ userId }: AddUserPermissionsProps) => {
+export const AddUserPermissions = ({
+  userId,
+  userName,
+}: AddUserPermissionsProps) => {
   const router = useRouter();
 
   const formRef = useRef<FormRef>(null);
@@ -31,6 +35,7 @@ export const AddUserPermissions = ({ userId }: AddUserPermissionsProps) => {
   const defaultValues: RolesPermissionsFormFieldValues = useMemo(() => {
     return {
       is_user_permission: true,
+      login_name: userName,
       modules: permissionModulesData ?? [],
       role_id: null,
       role_name: null,

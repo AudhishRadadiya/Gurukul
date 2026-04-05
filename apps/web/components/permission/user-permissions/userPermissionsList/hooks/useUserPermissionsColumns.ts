@@ -7,11 +7,13 @@ export const useUserPermissionsColumns = () => {
   const column: AgColumnsWithActions<UserPermissionList> = [
     {
       field: "user_full_name",
-      headerName: t("common.username"),
+      headerName: t("userFullName.label"),
     },
     {
-      field: "role",
-      headerName: t("role.menu.label"),
+      field: "user_name",
+      headerName: t("common.name.label", {
+        label: t("login.label"),
+      }),
     },
   ];
 

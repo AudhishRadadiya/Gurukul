@@ -3,13 +3,19 @@ import { IconButton } from "@mui/material";
 import { SvgCalendar } from "../Svgs";
 import { Tooltip } from "../Tooltip";
 
-export type CalendarIconActionProps = IconButtonProps;
+export type CalendarIconActionProps = IconButtonProps & {
+  showTooltip?: boolean;
+  disabled?: boolean;
+};
 
-export const CalendarIconAction = (props: CalendarIconActionProps) => {
+export const CalendarIconAction = ({
+  showTooltip = true,
+  ...props
+}: CalendarIconActionProps) => {
   return (
     <IconButton sx={{ color: "#4C5D70" }} {...props}>
-      <Tooltip toolTipLabel="Calendar">
-        <SvgCalendar />
+      <Tooltip hidden={!showTooltip} toolTipLabel="Calendar">
+        <SvgCalendar disabled={props.disabled} />
       </Tooltip>
     </IconButton>
   );

@@ -1,4 +1,5 @@
 import { InputLabel, Stack, useTheme } from "@mui/material";
+import type { PickerValidDate } from "@mui/x-date-pickers/models";
 import {
   TimeField as MuiTimeField,
   type TimeFieldProps as MuiTimeFieldProps,
@@ -11,7 +12,10 @@ import type {
   UseControllerProps,
 } from "react-hook-form";
 import { useController } from "react-hook-form";
-import type { PickerValidDate } from "@mui/x-date-pickers/models";
+import {
+  getDefaultInputLabelProps,
+  getDefaultTextFieldSx,
+} from "../commonStyles";
 import { Skeleton } from "./Skeleton";
 
 export type TimeFieldProps<P extends FieldValues> = UseControllerProps<P> &
@@ -26,6 +30,7 @@ export type TimeFieldProps<P extends FieldValues> = UseControllerProps<P> &
     format: string;
     isReturnLocalTime: boolean;
     isReturnDateWithTime: boolean;
+    styling?: "custom" | "default";
   }>;
 
 export function TimeField<P extends FieldValues>({
@@ -42,6 +47,7 @@ export function TimeField<P extends FieldValues>({
   format = "HH:mm",
   isReturnLocalTime = false,
   isReturnDateWithTime = false,
+  styling = "custom",
   ...restProps
 }: TimeFieldProps<P>) {
   const {
@@ -61,13 +67,17 @@ export function TimeField<P extends FieldValues>({
     : null;
 
   if (loading) {
-    return <Skeleton label={label} />;
+    return <Skeleton label={label} styling={styling} />;
   }
 
   return (
-    <Stack gap="10px">
-      {label && (
-        <InputLabel required={required} disabled={disabled}>
+    <Stack gap="5px">
+      {label && styling === "custom" && (
+        <InputLabel
+          sx={{ fontSize: { xs: "14px", md: "16px" } }}
+          required={required}
+          disabled={disabled}
+        >
           {label}
         </InputLabel>
       )}
@@ -96,7 +106,11 @@ export function TimeField<P extends FieldValues>({
             disabled,
             helperText,
             error,
+            label: styling === "default" ? label : undefined,
+            required: styling === "default" ? required : undefined,
+            InputLabelProps: getDefaultInputLabelProps(styling),
             sx: {
+              ...getDefaultTextFieldSx(styling),
               backgroundColor: "white",
               "& .Mui-selected": {
                 backgroundColor: butterflyBlue[900],

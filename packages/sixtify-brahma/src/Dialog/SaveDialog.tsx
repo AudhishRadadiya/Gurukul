@@ -1,6 +1,7 @@
 import InfoTwoToneIcon from "@mui/icons-material/InfoTwoTone";
 import { Stack, Typography, useTheme } from "@mui/material";
 import { Button } from "../Button";
+import { ButtonContainer } from "../Layouts";
 import { Dialog } from "./Dialog";
 
 export type SaveDialogProps = {
@@ -32,8 +33,9 @@ export const SaveDialog = ({
       isHideCloseIcon={true}
       isHideDividers={true}
       open={open}
+      onClose={onClose}
       actions={
-        <Stack direction="row" gap="5px">
+        <ButtonContainer>
           <Button onClick={onClose} variant="outlined">
             {cancelText}
           </Button>
@@ -41,7 +43,7 @@ export const SaveDialog = ({
           <Button onClick={onSave} loading={isSaveLoading}>
             {saveText}
           </Button>
-        </Stack>
+        </ButtonContainer>
       }
     >
       <Stack gap="10px" direction="row">

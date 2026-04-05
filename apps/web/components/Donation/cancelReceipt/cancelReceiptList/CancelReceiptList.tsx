@@ -1,7 +1,9 @@
+import { useTheme } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/navigation";
 import type { ForwardedRef } from "react";
 import { forwardRef, useImperativeHandle } from "react";
+import type { FieldValues } from "react-hook-form";
 
 import type { CancelReceiptListRef } from "@web/app/donation/cancel-receipt/page";
 import { AgGridV2 } from "@web/components/common/AgGridV2/AgGridV2";
@@ -9,13 +11,27 @@ import { usePaginationParams } from "@web/components/common/AgGridV2/hooks/usePa
 import { useCancelReceiptColumns } from "@web/components/Donation/cancelReceipt/cancelReceiptList/hooks/useCancelReceiptColumns";
 import type { CancelReceipt } from "@web/components/Donation/cancelReceipt/cancelReceiptList/hooks/useGetCancelReceipt";
 import { useGetCancelReceipt } from "@web/components/Donation/cancelReceipt/cancelReceiptList/hooks/useGetCancelReceipt";
+import { useBranch } from "@web/context/BranchContext";
+
+export type CancelReceiptListProps = {
+  externalFilter?: FieldValues;
+};
 
 export const CancelReceiptList = forwardRef(
-  (_, ref: ForwardedRef<CancelReceiptListRef>) => {
+  (
+    { externalFilter = {} }: CancelReceiptListProps,
+    ref: ForwardedRef<CancelReceiptListRef>
+  ) => {
     const router = useRouter();
+
+    const theme = useTheme();
+
+    const { red } = theme.palette.app.color;
 
     const { onPageChange, onRowsPerPageChange, page, rowsPerPage } =
       usePaginationParams();
+
+    const { branchIds } = useBranch();
 
     const startRow = page * rowsPerPage;
 
@@ -23,6 +39,7 @@ export const CancelReceiptList = forwardRef(
 
     const { data, isFetching, refetch } = useGetCancelReceipt({
       endRow,
+      externalFilter: { ...externalFilter, branch_id: [branchIds] },
       startRow,
     });
 
@@ -38,6 +55,13 @@ export const CancelReceiptList = forwardRef(
 
     return (
       <AgGridV2<CancelReceipt>
+        defaultColDef={{
+          cellStyle: () => {
+            return {
+              color: red[500],
+            };
+          },
+        }}
         isLoading={isFetching}
         page={page}
         columnDefs={column}

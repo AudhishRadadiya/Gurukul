@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import type { DonationEntryFormNonNullFieldValues } from "@web/components/Donation/donationEntry/addDonationEntry/DonationEntryForm";
+import type { DonationEntryFormFieldValues } from "@web/components/Donation/donationEntry/addDonationEntry/DonationEntryForm";
 import type { DonationEntry } from "@web/components/Donation/donationEntry/donationEntryList/hooks/useGetDonationEntry";
 import { DONATION_ROUTES } from "@web/constants/routes/donation/routes";
 import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
@@ -20,7 +20,7 @@ export function useGetDonationEntryDetails({
     const {
       data: { data },
     } = await axiosPrivate.get<
-      ApiSuccessResponse<DonationEntryFormNonNullFieldValues>
+      ApiSuccessResponse<DonationEntryFormFieldValues>
     >(DONATION_ROUTES.get(donationId));
 
     return data;

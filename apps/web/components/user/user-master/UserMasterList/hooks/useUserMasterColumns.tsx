@@ -74,11 +74,6 @@ export const useUserMasterColumns = () => {
       minWidth: 120,
     },
     {
-      field: "allow_donation_login",
-      headerName: t("donationLogin.label"),
-      minWidth: 120,
-    },
-    {
       field: "user_login_otp",
       headerName: t("loginOtp.label"),
       minWidth: 90,

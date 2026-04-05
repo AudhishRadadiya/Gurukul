@@ -5,9 +5,11 @@ import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
 import { eventSummaryKeys } from "@web/queryKeysFactories/eventSummary";
 import type { ApiSuccessResponse } from "@web/types/apiResponse";
 import type { GetListArgsAg2 } from "@web/types/shared-types";
+import { isBranchFilterEnabled } from "@web/utils/reactQuery";
 
 export type EventSummary = {
   event_type: string;
+  event_type_id: string;
   total_amount: number;
   total_receipt: number;
 };
@@ -30,6 +32,7 @@ export function useGetEventSummary(body: GetListArgsAg2) {
   };
 
   return useQuery({
+    enabled: isBranchFilterEnabled(body),
     initialData: { eventSummaryData: [], totalCount: 0 },
     queryFn: () => getEventSummary(body),
     queryKey: eventSummaryKeys.listing(body),

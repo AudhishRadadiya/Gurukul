@@ -11,9 +11,13 @@ import { DeleteRoleDialog } from "@web/components/permission/role/roleList/dialo
 import type { RoleDetails } from "@web/components/permission/role/roleList/hooks/useGetRole";
 import { useGetRole } from "@web/components/permission/role/roleList/hooks/useGetRole";
 import { useRoleColumns } from "@web/components/permission/role/roleList/hooks/useRoleColumns";
+import { ROLL_ENTRY_PERMISSION } from "@web/constants/permission/permissions/rollEntryAndPermission/permissions";
+import { useUserPermissions } from "@web/hooks/useUserPermissions/useUserPermissions";
 
 export const RoleList = () => {
   const router = useRouter();
+
+  const { validateAccess } = useUserPermissions();
 
   const { onDialogClose, onDialogOpen, openedDialog } = useDialogActions();
 
@@ -61,6 +65,7 @@ export const RoleList = () => {
         rowData={roleDetails}
         actions={[
           {
+            isView: validateAccess(ROLL_ENTRY_PERMISSION.DELETE),
             onClick: (data) => {
               onDialogOpen("delete");
               setCurrentRole(data);
@@ -68,6 +73,7 @@ export const RoleList = () => {
             title: t("common.delete"),
           },
           {
+            isView: validateAccess(ROLL_ENTRY_PERMISSION.EDIT),
             onClick: (data) => {
               router.push(
                 `/permission/role?page=edit-roles&id=${data.role_id}`
@@ -80,7 +86,7 @@ export const RoleList = () => {
         count={totalCount}
         onRowsPerPageChange={onRowsPerPageChange}
         onFilterChange={setAgGridFilterModel}
-        height={200}
+        height={255}
       />
 
       {openedDialog && dialogRenderer[openedDialog]}

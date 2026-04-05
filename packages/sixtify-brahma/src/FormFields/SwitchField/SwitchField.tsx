@@ -1,4 +1,4 @@
-import type { SwitchProps } from "@mui/material";
+import { switchClasses, type SwitchProps } from "@mui/material";
 import { Switch as MuiSwitch, useTheme } from "@mui/material";
 import {
   useController,
@@ -52,6 +52,9 @@ export function SwitchField<P extends FieldValues>({
             width: 16,
             height: 16,
             left: 12,
+          },
+          [switchClasses.input]: {
+            width: "80px !important",
           },
           "&::after": {
             content: "unset",

@@ -3,9 +3,9 @@ import type { DurationLikeObject } from "luxon";
 import { DateTime, Duration } from "luxon";
 
 type TimeDifferenceParams = {
-  start: string | null;
   end: string | null;
   format?: Array<keyof DurationLikeObject>;
+  start: string | null;
 };
 
 export const dateDaysPlus = (date: string, days: number) => {
@@ -68,14 +68,14 @@ export const calculateDateDifference = (
 };
 
 export const getTimeDifference = ({
-  start,
   end,
   format = ["hours", "minutes"],
+  start,
 }: TimeDifferenceParams) => {
   if (!start && !end) {
     return {
-      textFormat: "0h 0m",
       duration: Duration.fromObject({ hours: 0, minutes: 0 }),
+      textFormat: "0h 0m",
     };
   }
 
@@ -103,14 +103,14 @@ export const getTimeDifference = ({
 
   if (duration.as("milliseconds") < 0) {
     return {
-      textFormat: "0h 0m",
       duration: Duration.fromObject({ hours: 0, minutes: 0 }),
+      textFormat: "0h 0m",
     };
   }
 
   return {
-    textFormat: `${duration.hours || 0}h ${duration.minutes || 0}m`,
     duration,
+    textFormat: `${duration.hours || 0}h ${duration.minutes || 0}m`,
   };
 };
 
@@ -149,11 +149,11 @@ export const getShiftTime = (
 };
 
 export const getTimeHhMmSs = ({
-  start,
   end,
+  start,
 }: {
-  start: string;
   end: string;
+  start: string;
 }) => {
   const time1 = DateTime.fromISO(start);
 
@@ -211,4 +211,8 @@ export const getAgeCalculate = (date: string): string => {
   }
 
   return result;
+};
+
+export const getDateFromToday = (days: number = 1) => {
+  return DateTime.now().plus({ days }).toISODate();
 };

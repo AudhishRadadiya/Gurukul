@@ -5,6 +5,10 @@ export const addressBookKeys = {
 
   all: ["address-book"] as const,
 
+  autoGno: () => [...addressBookKeys.all, "autoGno"] as const,
+
+  columnsDefault: () => [...addressBookKeys.all, "columnsDefault"] as const,
+
   edit: (addressBookId: string) =>
     [...addressBookKeys.all, "edit", addressBookId] as const,
 

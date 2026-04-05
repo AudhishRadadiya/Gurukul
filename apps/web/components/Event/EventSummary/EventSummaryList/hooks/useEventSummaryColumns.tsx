@@ -2,8 +2,10 @@ import { LoadingCell } from "@codezee/sixtify-brahma";
 import type { CustomCellRendererProps } from "ag-grid-react";
 import { t } from "i18next";
 
+import { AG_GRID_CELL_DEFAULT_VALUE } from "@web/components/common/AgGridV2/AgGridV2";
 import type { EventSummary } from "@web/components/Event/EventSummary/EventSummaryList/hooks/useGetEventSummary";
 import type { AgColumnsArgs, AgColumnsWithActions } from "@web/types/agGrid";
+import { formatToIndianNumber } from "@web/utils/helper";
 
 type UseEventSummaryColumns = {
   loading: boolean;
@@ -45,7 +47,9 @@ export const useEventSummaryColumns = ({
           return <LoadingCell />;
         }
 
-        return value ?? "-";
+        return !value
+          ? AG_GRID_CELL_DEFAULT_VALUE
+          : formatToIndianNumber(Number(value));
       },
       field: "total_amount",
       filter: "agTextColumnFilter",

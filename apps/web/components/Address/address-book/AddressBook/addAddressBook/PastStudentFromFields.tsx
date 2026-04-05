@@ -126,13 +126,13 @@ export const PastStudentFromFields = ({
               options={[
                 {
                   disabled: false,
-                  label: "Yes",
-                  values: true,
+                  label: t("common.school.label"),
+                  values: 1,
                 },
                 {
                   disabled: false,
-                  label: "No",
-                  values: false,
+                  label: t("common.hostel.label"),
+                  values: 2,
                 },
               ]}
             />
@@ -148,13 +148,13 @@ export const PastStudentFromFields = ({
               options={[
                 {
                   disabled: false,
-                  label: "Yes",
-                  values: true,
+                  label: t("common.gujarati.label"),
+                  values: 1,
                 },
                 {
                   disabled: false,
-                  label: "No",
-                  values: false,
+                  label: t("common.english.label"),
+                  values: 2,
                 },
               ]}
             />

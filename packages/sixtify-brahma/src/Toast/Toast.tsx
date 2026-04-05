@@ -13,10 +13,11 @@ import { ToastBody } from "./ToastBody";
 import type { ToastFooterLinkProps } from "./ToastFooterLink";
 import { ToastFooterLink } from "./ToastFooterLink";
 import type { ToastType } from "./types";
+import type { OnAction } from "../utils/types";
 
 export type ToastProps = ToastBodyProps &
   ToastFooterLinkProps & {
-    closeToast?: () => void;
+    closeToast?: OnAction;
     type: ToastType;
   };
 

@@ -49,8 +49,13 @@ export const EditUserMaster = ({ userId }: EditUserMasterProps) => {
     if (userDetails) {
       const userMasterFormFieldValues: UserMasterFormFieldValues = {
         ...userDetails,
+        donation_edit_type:
+          userDetails.donation_edit && userDetails.donation_edit_day
+            ? true
+            : false,
         // eslint-disable-next-line sonarjs/no-hardcoded-credentials
         password: "DummyPassword@123",
+        veo_contact_no: userDetails.is_veo ? "919999999999" : null,
       };
 
       return userMasterFormFieldValues;
@@ -63,6 +68,7 @@ export const EditUserMaster = ({ userId }: EditUserMasterProps) => {
         ref={formRef}
         defaultValues={defaultValues}
         loading={isUserMasterLoading}
+        userId={userId}
       />
 
       <Stack direction="row" gap="15px" justifyContent="flex-end">

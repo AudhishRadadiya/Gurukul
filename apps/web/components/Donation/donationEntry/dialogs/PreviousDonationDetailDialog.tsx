@@ -52,6 +52,7 @@ export const PreviousDonationDetailDialog = ({
         <DonationReceiptEntryList contactNumber={contactNumber} />
       ) : (
         <PreviousDonationList
+          onClose={onClose}
           contactNumber={contactNumber}
           setToggleDonationEntryList={setToggleDonationEntryList}
         />

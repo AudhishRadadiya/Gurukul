@@ -14,9 +14,38 @@ export const TRUST_ROUTES = {
   multipleOptions:
     `${TRUST_ROUTES_BASE_URL}/${LIST}/${OPTION}/branch-wise` as const,
 
-  options: `${TRUST_ROUTES_BASE_URL}/${LIST}/${OPTION}`,
+  options: `${TRUST_ROUTES_BASE_URL}/${LIST}/${OPTION}` as const,
 
-  patch: (trustMasterId: string) => `${TRUST_ROUTES_BASE_URL}/${trustMasterId}`,
+  optionsShortName:
+    `${TRUST_ROUTES_BASE_URL}/${LIST}/${OPTION}/short-name` as const,
 
-  post: TRUST_ROUTES_BASE_URL,
+  optionsUserWise:
+    `${TRUST_ROUTES_BASE_URL}/${LIST}/${OPTION}/user-wise` as const,
+
+  optionsUserWiseShortName:
+    `${TRUST_ROUTES_BASE_URL}/${LIST}/${OPTION}/user-wise/short-name` as const,
+
+  patch: (trustMasterId: string) =>
+    `${TRUST_ROUTES_BASE_URL}/${trustMasterId}` as const,
+
+  post: `${TRUST_ROUTES_BASE_URL}` as const,
 } as const;
+
+export const getTrustOptionsRoute = (
+  useShortName?: boolean,
+  useUserWise?: boolean
+): string => {
+  if (useUserWise && useShortName) {
+    return TRUST_ROUTES.optionsUserWiseShortName;
+  }
+
+  if (useUserWise) {
+    return TRUST_ROUTES.optionsUserWise;
+  }
+
+  if (useShortName) {
+    return TRUST_ROUTES.optionsShortName;
+  }
+
+  return TRUST_ROUTES.options;
+};

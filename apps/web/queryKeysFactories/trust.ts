@@ -23,5 +23,12 @@ export const trustKeys = {
     branchIds,
   ],
 
-  options: () => [...trustKeys.all, "options"],
+  options: (useShortName?: boolean, useUserWise?: boolean) => [
+    ...trustKeys.all,
+    "options",
+    ...(useUserWise ? ["user-wise"] : []),
+    ...(useShortName ? ["short-name"] : []),
+  ],
+
+  userWiseTrust: () => [...trustKeys.all, "user-wise-trust-options"],
 } as const;

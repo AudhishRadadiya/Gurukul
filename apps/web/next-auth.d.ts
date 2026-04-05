@@ -1,15 +1,10 @@
+import type { LoginUser } from "@web/components/auth/sign-in/hooks/usePostSignin";
 import "next-auth";
 import "next-auth/jwt";
 
 declare module "next-auth" {
-  type User = {
+  type User = Omit<LoginUser, "expired_at" | "password"> & {
     avatar?: string;
-    email?: string;
-    enable_two_factor: boolean;
-    expired_at: string;
-    login_name: string;
-    token: string;
-    user_id: string;
   };
 
   type Session = {

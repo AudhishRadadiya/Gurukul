@@ -19,7 +19,9 @@ export type TabPermission = {
 export type GetListArgsAg2 = Partial<
   IGetRowsParams & {
     endRow: number;
-    externalFilter?: FieldValues;
+    externalFilter?: FieldValues & {
+      branch_id?: string[];
+    };
     is_active: boolean;
     responseFields: string[];
     startRow: number;

@@ -1,17 +1,12 @@
 "use client";
 
 import type { DialogRenderer } from "@codezee/sixtify-brahma";
-import {
-  Button,
-  ContentBox,
-  PadBox,
-  useDialogActions,
-} from "@codezee/sixtify-brahma";
-import { Add } from "@mui/icons-material";
+import { ContentBox, PadBox, useDialogActions } from "@codezee/sixtify-brahma";
 import { Stack, Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 
+import { ButtonLayoutProvider } from "@web/components/common/responsive/ButtonLayoutProvider";
 import { AddSmsTemplateDialog } from "@web/components/settings/sms-template/dialogs/AddSmsTemplateDialog";
 import { SmsTemplateBreadcrumbs } from "@web/components/settings/sms-template/SmsTemplateBreadcrumbs";
 import { SmsTemplateList } from "@web/components/settings/sms-template/smsTemplateList/SmsTemplateList";
@@ -60,17 +55,15 @@ export default function Page() {
             <PermissionGuard
               canAccess={validateAccess(SMS_TEMPLATE_PERMISSION.CREATE)}
             >
-              <Button
+              <ButtonLayoutProvider
                 variant="outlined"
                 onClick={() => {
                   onDialogOpen("add");
                 }}
-                startIcon={<Add />}
-              >
-                {t("common.button.add", {
+                label={t("common.button.add", {
                   label: t("sms.template.menu.label"),
                 })}
-              </Button>
+              />
             </PermissionGuard>
           </Stack>
         </PadBox>

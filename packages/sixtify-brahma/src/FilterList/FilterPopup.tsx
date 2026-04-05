@@ -14,9 +14,10 @@ import { useEffect, useState, type PropsWithChildren } from "react";
 import { Button } from "../Button";
 import { PadBox } from "../PadBox";
 import type { FilterListType } from "./FilterTypeWrapper";
+import type { OnAction } from "../utils/types";
 
 type FilterPopupProps = PropsWithChildren<PopoverProps> & {
-  onApply?: () => void;
+  onApply?: OnAction;
   showFooter?: boolean;
   showDivider?: boolean;
   title?: string;
@@ -24,7 +25,7 @@ type FilterPopupProps = PropsWithChildren<PopoverProps> & {
   background?: boolean;
   filterItem?: FilterListType;
   currentFilterValue?: string | string[] | null;
-  reset?: () => void;
+  reset?: OnAction;
 };
 
 export const FilterPopup = ({

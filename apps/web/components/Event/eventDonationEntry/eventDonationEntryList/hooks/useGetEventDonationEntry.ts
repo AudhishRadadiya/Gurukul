@@ -5,10 +5,12 @@ import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
 import { eventDonationEntryKeys } from "@web/queryKeysFactories/eventDonationEntryKeys";
 import type { ApiSuccessResponse } from "@web/types/apiResponse";
 import type { GetListArgsAg2 } from "@web/types/shared-types";
+import { isBranchFilterEnabled } from "@web/utils/reactQuery";
 
 export type EventDonationEntry = {
   address: string;
   amount: number;
+  branch_id: string;
   city: string;
   date: string;
   donar_contact_no: string;
@@ -46,6 +48,7 @@ export function useGetEventDonationEntry(body: GetListArgsAg2) {
   };
 
   return useQuery({
+    enabled: isBranchFilterEnabled(body),
     initialData: { eventDonations: [], totalCount: 0 },
     queryFn: () => getEventDonationEntry(body),
     queryKey: eventDonationEntryKeys.listing(body),

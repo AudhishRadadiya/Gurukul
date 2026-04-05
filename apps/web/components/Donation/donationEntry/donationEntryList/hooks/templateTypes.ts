@@ -4,6 +4,7 @@ export type DonationEntryColumnHideTypes = {
   amount: boolean;
   atg: boolean;
   bank_name: boolean;
+  cancel_date: boolean;
   cheque_no: boolean;
   city: boolean;
   contact_no: boolean;
@@ -25,6 +26,7 @@ export type DonationEntryColumnHideTypes = {
   receipt_name: boolean;
   receipt_no: boolean;
   ref_receipt_no: boolean;
+  remark: boolean;
   state: boolean;
 };
 
@@ -35,6 +37,7 @@ export const DonationEntryColumnHideDefaultValue: DonationEntryColumnHideTypes =
     amount: true,
     atg: true,
     bank_name: true,
+    cancel_date: true,
     cheque_no: true,
     city: true,
     contact_no: true,
@@ -56,5 +59,6 @@ export const DonationEntryColumnHideDefaultValue: DonationEntryColumnHideTypes =
     receipt_name: true,
     receipt_no: true,
     ref_receipt_no: true,
+    remark: true,
     state: true,
   };

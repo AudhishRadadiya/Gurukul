@@ -5,6 +5,7 @@ import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
 import { donationEntryKeys } from "@web/queryKeysFactories/donationEntry";
 import type { ApiSuccessResponse } from "@web/types/apiResponse";
 import type { GetListArgsAg2 } from "@web/types/shared-types";
+import { isBranchFilterEnabled } from "@web/utils/reactQuery";
 
 export type DonationEntry = {
   aadhar_no: string;
@@ -43,6 +44,7 @@ export type DonationEntry = {
   prasad: boolean;
   receipt_name: string;
   receipt_no: string;
+  receipt_sequence: number;
   ref_receipt_no: string;
   remark: string;
   reminder_date: string;
@@ -63,6 +65,9 @@ export function useGetDonationEntry(body: GetListArgsAg2) {
       ApiSuccessResponse<{
         donationDetail: DonationEntry[];
         full_count: number;
+        total_amount: string;
+        total_cancel_amount: string;
+        total_receipt: string;
       }>
     >(DONATION_ROUTES.listing, body);
 
@@ -70,7 +75,14 @@ export function useGetDonationEntry(body: GetListArgsAg2) {
   };
 
   return useQuery({
-    initialData: { donationDetail: [], full_count: 0 },
+    enabled: isBranchFilterEnabled(body),
+    initialData: {
+      donationDetail: [],
+      full_count: 0,
+      total_amount: "0",
+      total_cancel_amount: "0",
+      total_receipt: "0",
+    },
     queryFn: () => getDonationEntry(body),
     queryKey: donationEntryKeys.listing(body),
   });

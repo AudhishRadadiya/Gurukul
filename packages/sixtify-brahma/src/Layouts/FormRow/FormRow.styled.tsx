@@ -31,6 +31,7 @@ export const RowContainerStyled: ComponentType<RowContainerStyledProps> =
       return prop !== "fullWidth" && prop !== "maxColumn";
     },
   })<{ fullWidth: boolean; maxColumn: number }>(({
+    theme,
     children,
     fullWidth,
     maxColumn,
@@ -42,6 +43,9 @@ export const RowContainerStyled: ComponentType<RowContainerStyledProps> =
     return {
       "& > *": {
         flexBasis,
+        [theme.breakpoints.down("sm")]: {
+          flexBasis: "100%",
+        },
       },
     };
   });

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import type { Branch } from "@web/components/settings/branch-master/BranchMasterList/hooks/useGetBranchMaster";
+import type { BranchMasterFormFieldValues } from "@web/components/settings/branch-master/Dialogs/BranchMasterForm";
 import { BRANCH_ROUTES } from "@web/constants/routes/branch/routes";
 import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
 import { branchKeys } from "@web/queryKeysFactories/branch";
@@ -18,7 +19,7 @@ export function useGetBranchMasterDetails({
   const fetchBranchMasterDetails = async () => {
     const {
       data: { data },
-    } = await axiosPrivate.get<ApiSuccessResponse<Branch>>(
+    } = await axiosPrivate.get<ApiSuccessResponse<BranchMasterFormFieldValues>>(
       BRANCH_ROUTES.get(branchId)
     );
 

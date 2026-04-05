@@ -1,5 +1,6 @@
 import type { FilterModel } from "ag-grid-community";
 import { useState } from "react";
+import type { FieldValues } from "react-hook-form";
 
 import { AgGridV2 } from "@web/components/common/AgGridV2/AgGridV2";
 import { usePaginationParams } from "@web/components/common/AgGridV2/hooks/usePaginationParams";
@@ -8,13 +9,11 @@ import { userGetUserLoginReport } from "@web/components/user/userLoginReport/use
 import { useUserLoginReportColumns } from "@web/components/user/userLoginReport/userLoginReportList/hooks/useUserLoginReportColumns";
 
 export type UserLoginReportListProps = {
-  fromDate: string;
-  toDate: string;
+  externalFilter: FieldValues;
 };
 
 export const UserLoginReportList = ({
-  fromDate,
-  toDate,
+  externalFilter,
 }: UserLoginReportListProps) => {
   const { onPageChange, onRowsPerPageChange, page, rowsPerPage } =
     usePaginationParams();
@@ -27,7 +26,7 @@ export const UserLoginReportList = ({
 
   const { data, isFetching } = userGetUserLoginReport({
     endRow,
-    externalFilter: { from_date: fromDate, to_date: toDate },
+    externalFilter,
     filterModel: agGridFilterModel,
     startRow,
   });

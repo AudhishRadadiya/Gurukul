@@ -2,11 +2,12 @@ import type { DialogTypes, TabModel } from "@codezee/sixtify-brahma";
 import {
   Button,
   ContentBox,
+  PadBox,
   TabBar,
   useDialogActions,
 } from "@codezee/sixtify-brahma";
 import { Add } from "@mui/icons-material";
-import { Box, IconButton, useTheme } from "@mui/material";
+import { Box, IconButton, Stack, Typography, useTheme } from "@mui/material";
 import { t } from "i18next";
 import { useMemo, useState } from "react";
 
@@ -175,6 +176,16 @@ export const AddressBook = () => {
           }}
         />
       </Box>
+
+      <ContentBox>
+        <PadBox padding={{ padding: "10px" }}>
+          <Stack direction="row" gap="10px" justifyContent="space-between">
+            <Typography variant="subtitle1">
+              {t("address.book.menu.label")}
+            </Typography>
+          </Stack>
+        </PadBox>
+      </ContentBox>
 
       <ContentBox>
         <AddressBookList

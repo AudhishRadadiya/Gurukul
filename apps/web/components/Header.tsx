@@ -1,9 +1,22 @@
 import { AppBar, UserProfileMenu } from "@codezee/sixtify-brahma";
 import { Close, Logout, Menu } from "@mui/icons-material";
-import { IconButton, Stack, useTheme } from "@mui/material";
+import { IconButton, Stack, Typography, useTheme } from "@mui/material";
 import { t } from "i18next";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
+
+import { BranchSelector } from "@web/components/BranchSelector";
+import { DONATION_ENTRY_PREFERENCES_KEY } from "@web/components/Donation/donationEntry/addDonationEntry/AddDonationEntry";
+import {
+  drawerMenuItems,
+  type DrawerMenuItemsKeys,
+} from "@web/components/Drawer/hooks/useDrawerMenuItems";
+import {
+  REPORT_ROUTES_WITH_BRANCH_SELECTOR,
+  ROUTES_WITHOUT_BRANCH_SELECTOR,
+  ROUTES_WITH_BRANCH_SELECTOR,
+} from "@web/components/user/hooks/constant";
+import { useBranch } from "@web/context/BranchContext";
 
 export const Header = ({
   isDrawerOpen = false,
@@ -16,12 +29,26 @@ export const Header = ({
 
   const router = useRouter();
 
+  const { setBranchIds } = useBranch();
+
+  const DonationEntryStoredPreferences = localStorage.getItem(
+    DONATION_ENTRY_PREFERENCES_KEY
+  );
+
+  const handleBranchChange = (selectedBranchIds: string) => {
+    setBranchIds(selectedBranchIds);
+  };
+
   const { red } = theme.palette.app.color;
 
   const { data } = useSession();
 
   const onClick = () => {
     signOut();
+
+    if (DonationEntryStoredPreferences) {
+      localStorage.removeItem(DONATION_ENTRY_PREFERENCES_KEY);
+    }
   };
 
   const menulist = [
@@ -44,6 +71,31 @@ export const Header = ({
     },
   ];
 
+  const currentPathname = usePathname();
+
+  const searchParams = useSearchParams();
+
+  const menuKey = currentPathname?.split("/")[1] as DrawerMenuItemsKeys;
+
+  const headerTitleItems: Record<DrawerMenuItemsKeys, string> = drawerMenuItems;
+
+  // Check if current route should exclude BranchSelector
+  const shouldExcludeBranchSelector = ROUTES_WITHOUT_BRANCH_SELECTOR.some(
+    (route) => {
+      const pathnameMatches = currentPathname?.startsWith(route.pathname);
+
+      const queryParamMatches =
+        searchParams.get(route.queryParam) === route.queryValue;
+
+      return pathnameMatches && queryParamMatches;
+    }
+  );
+
+  const shouldShowBranchSelector =
+    !shouldExcludeBranchSelector &&
+    (ROUTES_WITH_BRANCH_SELECTOR.includes(menuKey) ||
+      currentPathname == REPORT_ROUTES_WITH_BRANCH_SELECTOR);
+
   return (
     <AppBar drawerOpen={isDrawerOpen}>
       <Stack
@@ -61,16 +113,25 @@ export const Header = ({
           >
             {isDrawerOpen ? <Close /> : <Menu />}
           </IconButton>
+
+          <Typography variant="h6" color="primary">
+            {headerTitleItems[menuKey] || "Home"}
+          </Typography>
         </Stack>
 
-        <UserProfileMenu
-          userDetails={{
-            avatar: data?.user.avatar ?? "",
-            email: data?.user.email ?? "",
-            name: data?.user.login_name ?? "",
-          }}
-          menuItems={menulist}
-        />
+        <Stack direction="row" gap={2} alignItems="center">
+          {shouldShowBranchSelector && (
+            <BranchSelector onBranchChange={handleBranchChange} />
+          )}
+
+          <UserProfileMenu
+            userDetails={{
+              avatar: data?.user.avatar ?? "",
+              name: data?.user.login_name ?? "",
+            }}
+            menuItems={menulist}
+          />
+        </Stack>
       </Stack>
     </AppBar>
   );

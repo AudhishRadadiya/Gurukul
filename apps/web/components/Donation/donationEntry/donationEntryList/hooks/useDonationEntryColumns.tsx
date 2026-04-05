@@ -1,11 +1,17 @@
+import type { IRowNode } from "ag-grid-community";
 import type { CustomCellRendererProps } from "ag-grid-react";
 import { t } from "i18next";
 
 import { AG_GRID_CELL_DEFAULT_VALUE } from "@web/components/common/AgGridV2/AgGridV2";
 import type { DonationEntryColumnHideTypes } from "@web/components/Donation/donationEntry/donationEntryList/hooks/templateTypes";
 import type { DonationEntry } from "@web/components/Donation/donationEntry/donationEntryList/hooks/useGetDonationEntry";
-import type { AgColumnsArgs, AgColumnsWithActions } from "@web/types/agGrid";
+import type {
+  AgColumnsArgs,
+  AgColumnsWithActions,
+  AgDataWithActions,
+} from "@web/types/agGrid";
 import { dateFormat } from "@web/utils/date";
+import { formatToIndianNumber } from "@web/utils/helper";
 
 type UseGetDonationEntryColumnsArgs = {
   columnHide: DonationEntryColumnHideTypes;
@@ -20,6 +26,7 @@ export const useDonationEntryColumns = ({
     amount,
     atg,
     bank_name,
+    cancel_date,
     cheque_no,
     city,
     contact_no,
@@ -41,6 +48,7 @@ export const useDonationEntryColumns = ({
     receipt_name,
     receipt_no,
     ref_receipt_no,
+    remark,
     state,
   } = columnHide || {};
 
@@ -55,6 +63,18 @@ export const useDonationEntryColumns = ({
       minWidth: 100,
     },
     {
+      comparator: (
+        _valueA: string,
+        _valueB: string,
+        nodeA: IRowNode<AgDataWithActions<DonationEntry>>,
+        nodeB: IRowNode<AgDataWithActions<DonationEntry>>
+      ) => {
+        const seqA = nodeA.data?.receipt_sequence ?? 0;
+
+        const seqB = nodeB.data?.receipt_sequence ?? 0;
+
+        return seqA - seqB;
+      },
       field: "receipt_no",
       headerName: t("common.receipt.label", {
         label: t("common.number.label"),
@@ -85,6 +105,11 @@ export const useDonationEntryColumns = ({
       minWidth: 130,
     },
     {
+      cellRenderer: ({ value }: CustomCellRendererProps) => {
+        return !value
+          ? AG_GRID_CELL_DEFAULT_VALUE
+          : formatToIndianNumber(value);
+      },
       field: "amount",
       headerName: t("amount.label"),
       hide: !amount,
@@ -235,6 +260,22 @@ export const useDonationEntryColumns = ({
       headerName: t("atg.label"),
       hide: !atg,
       minWidth: 80,
+    },
+    {
+      cellRenderer: ({ value }: CustomCellRendererProps) => {
+        return !value ? AG_GRID_CELL_DEFAULT_VALUE : dateFormat(value, true);
+      },
+      field: "cancel_date",
+      headerName: t("cancelDate.label"),
+      hide: !cancel_date,
+
+      minWidth: 120,
+    },
+    {
+      field: "remark",
+      headerName: t("common.remark"),
+      hide: !remark,
+      minWidth: 200,
     },
   ];
 

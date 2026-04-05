@@ -1,0 +1,14 @@
+import { ADDRESS_PERMISSION_PATH } from "@web/constants/permission/address/permission";
+import {
+  ADDRESS_BOOK_IMPORT_FROM_EXCEL,
+  PERMISSIONS,
+  SUB_MODULES,
+  VIEW,
+} from "@web/constants/permission/permission";
+
+export const ADDRESS_BOOK_IMPORT_FROM_EXCEL_PERMISSION_PATH =
+  `${ADDRESS_PERMISSION_PATH}.${SUB_MODULES}.${ADDRESS_BOOK_IMPORT_FROM_EXCEL}` as const;
+
+export const ADDRESS_BOOK_IMPORT_FROM_EXCEL_PERMISSION = {
+  MENU: `${ADDRESS_BOOK_IMPORT_FROM_EXCEL_PERMISSION_PATH}.${PERMISSIONS}.${VIEW}`,
+} as const;

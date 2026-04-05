@@ -33,6 +33,14 @@ export const useBranchMasterColumns = () => {
       field: "contact_no",
       headerName: t("common.contact.label"),
     },
+    {
+      field: "is_active",
+      headerName: t("isActive.label"),
+    },
+    {
+      field: "is_online",
+      headerName: t("isOnline.label"),
+    },
   ];
 
   return { column };

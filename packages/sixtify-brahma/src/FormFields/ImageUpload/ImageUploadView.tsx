@@ -1,14 +1,16 @@
-import { Avatar, Box, Stack, useTheme } from "@mui/material";
-import { PadBox } from "../../PadBox";
+import { Avatar, Box, Stack, type SxProps, useTheme } from "@mui/material";
 import { useState } from "react";
+import { PadBox } from "../../PadBox";
 
 export type ImageUploadViewProps = Readonly<{
   defaultValue?: string;
   variant: string;
+  sx?: SxProps;
 }>;
 export function ImageUploadView({
   defaultValue,
   variant,
+  sx,
 }: ImageUploadViewProps) {
   const theme = useTheme();
 
@@ -16,12 +18,15 @@ export function ImageUploadView({
 
   const [hasError, setHasError] = useState(false);
 
+  const imageSize = { xs: "100px", md: "120px" };
+
   return (
     <Box
       sx={{
-        height: "120px",
-        minWidth: "120px",
-        maxWidth: "120px",
+        width: "100%",
+        minWidth: imageSize,
+        maxWidth: imageSize,
+        height: imageSize,
         overflow: "hidden",
         border: `2px solid ${butterflyBlue[900]}`,
         borderRadius: "10px",
@@ -36,6 +41,7 @@ export function ImageUploadView({
               },
             }
           : {}),
+        ...sx,
       }}
     >
       {defaultValue && !hasError ? (

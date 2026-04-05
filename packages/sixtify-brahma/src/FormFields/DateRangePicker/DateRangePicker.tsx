@@ -38,8 +38,8 @@ export function DateRangePicker<P extends FieldValues>({
 
   const [range, setRange] = useState([
     {
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate: defaultValue?.[0] ? new Date(defaultValue[0]) : new Date(),
+      endDate: defaultValue?.[1] ? new Date(defaultValue[1]) : new Date(),
       key: "selection",
     },
   ]);
@@ -49,9 +49,13 @@ export function DateRangePicker<P extends FieldValues>({
   }
 
   return (
-    <Stack gap="10px">
+    <Stack gap="5px">
       {label && (
-        <InputLabel required={required} disabled={disabled}>
+        <InputLabel
+          sx={{ fontSize: { xs: "14px", md: "16px" } }}
+          required={required}
+          disabled={disabled}
+        >
           {label}
         </InputLabel>
       )}

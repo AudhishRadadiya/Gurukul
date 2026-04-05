@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import _isEmpty from "lodash/isEmpty";
 import _isFunction from "lodash/isFunction";
 import _isNull from "lodash/isNull";
 
@@ -27,7 +28,11 @@ export function usePostUserData({ contactNo, onSuccess }: UsePostUserDataArgs) {
       }
     );
 
-    if (_isFunction(onSuccess) && !_isNull(data?.data)) {
+    if (
+      _isFunction(onSuccess) &&
+      !_isNull(data?.data) &&
+      !_isEmpty(data?.data)
+    ) {
       onSuccess(data.data);
     }
 

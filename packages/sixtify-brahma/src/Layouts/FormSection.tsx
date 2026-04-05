@@ -1,11 +1,14 @@
 import { Stack, Typography } from "@mui/material";
 import type { PropsWithChildren } from "react";
 import { PadBox } from "../PadBox";
+import { useGetDeviceType } from "../utils";
 
 export const FormSection = ({
   title,
   children,
 }: PropsWithChildren<{ title?: string }>) => {
+  const { layout } = useGetDeviceType();
+
   return (
     <Stack gap="15px">
       {title && (
@@ -14,7 +17,7 @@ export const FormSection = ({
         </Typography>
       )}
 
-      <PadBox padding={{ padding: "20px" }}>
+      <PadBox padding={{ padding: layout === "mobile" ? "10px" : "15px" }}>
         <Stack gap="15px">{children}</Stack>
       </PadBox>
     </Stack>

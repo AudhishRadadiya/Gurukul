@@ -3,13 +3,15 @@ import { IconButton } from "@mui/material";
 import { SvgColumn } from "../Svgs";
 import { Tooltip } from "../Tooltip";
 
-export type ColumnIconActionProps = IconButtonProps;
+export type ColumnIconActionProps = IconButtonProps & {
+  disabled?: boolean;
+};
 
 export const ColumnIconAction = (props: ColumnIconActionProps) => {
   return (
     <IconButton {...props} sx={{ padding: 0, height: "43px" }}>
       <Tooltip toolTipLabel="Column Chooser">
-        <SvgColumn />
+        <SvgColumn disabled={props.disabled} />
       </Tooltip>
     </IconButton>
   );

@@ -1,5 +1,10 @@
-import { Button, Dialog, toasts } from "@codezee/sixtify-brahma";
-import { Stack } from "@mui/material";
+import {
+  Button,
+  ButtonContainer,
+  Dialog,
+  toasts,
+} from "@codezee/sixtify-brahma";
+import { t } from "i18next";
 import { useRef } from "react";
 
 import {
@@ -52,9 +57,9 @@ export const AddAddressTypeDialog = ({
       open={open}
       title="Add Address Type"
       actions={
-        <Stack direction="row" gap="5px">
+        <ButtonContainer>
           <Button onClick={onClose} variant="outlined">
-            Cancel
+            {t("common.cancel.button")}
           </Button>
 
           <Button
@@ -62,9 +67,9 @@ export const AddAddressTypeDialog = ({
             loading={isPending}
             disabled={isDisabled()}
           >
-            Save
+            {t("common.save.button")}
           </Button>
-        </Stack>
+        </ButtonContainer>
       }
     >
       <AddressTypeFrom ref={formRef} />

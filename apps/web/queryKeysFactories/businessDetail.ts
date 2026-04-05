@@ -1,6 +1,8 @@
 export const businessDetailKeys = {
   all: ["business-detail"] as const,
 
+  export: () => [...businessDetailKeys.all, "export"] as const,
+
   listing: (body: object = {}) => {
     return [...businessDetailKeys.all, "listing", body] as const;
   },

@@ -20,13 +20,19 @@ export const ToasterStyled: ComponentType<ToastContainerProps> = styled(
     "& .Toastify__toast": {
       padding: "0px",
       inlineSize: "400px",
-      marginLeft: "-80px",
+      right: "80px",
       borderRadius: "8px",
       border: `2px solid ${color.iron[700]}`,
     },
 
     "& .Toastify__toast-body": {
       padding: "0px",
+    },
+
+    "@media (min-width: 480px)": {
+      "& .Toastify__toast": {
+        top: "-10px",
+      },
     },
   };
 

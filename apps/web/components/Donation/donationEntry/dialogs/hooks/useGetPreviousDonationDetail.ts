@@ -33,6 +33,7 @@ export type PreviousDonationDetail = {
   event_type_id: string;
   first_name: string;
   is_cancel: boolean;
+  is_have_event_donation: boolean;
   is_reminder: boolean;
   last_name: string;
   middle_name: string;
@@ -41,7 +42,7 @@ export type PreviousDonationDetail = {
   organize_remark: string;
   pan_no: string;
   passport_no: string;
-  pincode: number;
+  pincode: string;
   prasad: boolean;
   print_receipt: boolean;
   receipt_no: string;

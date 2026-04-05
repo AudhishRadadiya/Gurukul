@@ -3,19 +3,33 @@ import {
   ColumnArrangerDialog,
   ColumnIconAction,
   PadBox,
+  toasts,
   useDialogActions,
 } from "@codezee/sixtify-brahma";
-import { Box } from "@mui/material";
+import { Stack } from "@mui/material";
 import type { FilterModel } from "ag-grid-community";
 import { t } from "i18next";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import type { BusinessDetail } from "@web/components/Address/address-book/BusinessDetail/BusinessDetailList/hooks/useGetBusinessDetail";
 import { useGetBusinessDetail } from "@web/components/Address/address-book/BusinessDetail/BusinessDetailList/hooks/useGetBusinessDetail";
 import { useGetBusinessDetailColumns } from "@web/components/Address/address-book/BusinessDetail/BusinessDetailList/hooks/useGetBusinessDetailColumns";
+import type { GetBusinessDetailExportApiSuccessResponse } from "@web/components/Address/address-book/BusinessDetail/BusinessDetailList/hooks/useGetBusinessDetailExport";
+import { useGetBusinessDetailExport } from "@web/components/Address/address-book/BusinessDetail/BusinessDetailList/hooks/useGetBusinessDetailExport";
 import type { BusinessDetailColumnHideTypes } from "@web/components/Address/address-book/template/dialogs/hooks/templateTypes";
 import { AgGridV2 } from "@web/components/common/AgGridV2/AgGridV2";
 import { usePaginationParams } from "@web/components/common/AgGridV2/hooks/usePaginationParams";
+import { DataExport } from "@web/components/common/DataExport/DataExport";
+import {
+  ExportDialog,
+  useExportDialog,
+} from "@web/components/common/ExportDialog";
+import { ExportModule } from "@web/constants/export";
+import { useBranch } from "@web/context/BranchContext";
+import { useUserPermissions } from "@web/hooks/useUserPermissions/useUserPermissions";
+import { PermissionGuard } from "@web/provider/PermissionGuard";
+import type { FilType } from "@web/types/shared-types";
+import { onError } from "@web/utils/errors";
 
 type BusinessDetailListProps = {
   columnHide: BusinessDetailColumnHideTypes;
@@ -31,6 +45,10 @@ export const BusinessDetailList = ({
   const { onPageChange, onRowsPerPageChange, page, rowsPerPage } =
     usePaginationParams();
 
+  const { branchIds } = useBranch();
+
+  const { allowPrintExport } = useUserPermissions();
+
   const [agGridFilterModel, setAgGridFilterModel] = useState<FilterModel>({});
 
   const startRow = page * rowsPerPage;
@@ -39,6 +57,8 @@ export const BusinessDetailList = ({
 
   const { data, isFetching } = useGetBusinessDetail({
     endRow,
+    externalFilter: { branch_id: [branchIds] },
+
     filterModel: agGridFilterModel,
     startRow,
   });
@@ -48,6 +68,58 @@ export const BusinessDetailList = ({
   const { columns } = useGetBusinessDetailColumns({
     columnHide,
   });
+
+  const resetExportStateRef = useRef<(() => void) | null>(null);
+
+  const {
+    isPending: isPendingExportBusinessDetail,
+    mutate: exportBusinessDetail,
+  } = useGetBusinessDetailExport({
+    options: {
+      onError: (error) => onError(error),
+      onSuccess: ({
+        data,
+        message,
+      }: GetBusinessDetailExportApiSuccessResponse) => {
+        resetExportStateRef.current?.();
+        onDialogClose();
+        window.open(data.url, "_blank");
+        toasts.success({ title: message });
+      },
+    },
+  });
+
+  const {
+    handleExport,
+    handleMaskSelect,
+    handleOriginalSelect,
+    handleOtpSubmit,
+    isPendingSendExportOtp,
+    otpError,
+    resetExportState,
+    showOtpForm,
+  } = useExportDialog({
+    exportModule: ExportModule.BUSINESS_DETAIL,
+    onExport: (data) => {
+      exportBusinessDetail(data);
+    },
+  });
+
+  resetExportStateRef.current = resetExportState;
+
+  const getExportBody = () => ({
+    endRow: 0,
+    externalFilter: {
+      branch_id: [branchIds],
+    },
+    filterModel: agGridFilterModel,
+    startRow: 0,
+  });
+
+  const onExport = (fileType: FilType) => {
+    handleExport(fileType, getExportBody());
+    onDialogOpen("exportOptions");
+  };
 
   const dialogRenderer: DialogRenderer = {
     columnChooser: (
@@ -61,18 +133,40 @@ export const BusinessDetailList = ({
         }}
       />
     ),
+    exportOptions: (
+      <ExportDialog
+        error={otpError}
+        open
+        showOtpForm={showOtpForm}
+        onClose={onDialogClose}
+        onMaskSelect={handleMaskSelect}
+        onOriginalSelect={handleOriginalSelect}
+        onSubmit={handleOtpSubmit}
+        isLoading={isPendingExportBusinessDetail}
+        isPendingSendExportOtp={isPendingSendExportOtp}
+      />
+    ),
   };
 
   return (
     <>
       <PadBox padding={{ padding: "3px 5px" }}>
-        <Box display="flex" justifyContent="flex-end">
+        <Stack
+          direction="row"
+          gap="10px"
+          justifyContent="flex-end"
+          alignItems="center"
+        >
+          <PermissionGuard canAccess={allowPrintExport}>
+            <DataExport onExport={onExport} />
+          </PermissionGuard>
+
           <ColumnIconAction
             onClick={() => {
               onDialogOpen("columnChooser");
             }}
           />
-        </Box>
+        </Stack>
       </PadBox>
 
       <AgGridV2<BusinessDetail>

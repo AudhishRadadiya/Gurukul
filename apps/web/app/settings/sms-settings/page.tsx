@@ -1,24 +1,19 @@
 "use client";
 
 import type { DialogRenderer } from "@codezee/sixtify-brahma";
-import {
-  Button,
-  ContentBox,
-  PadBox,
-  useDialogActions,
-} from "@codezee/sixtify-brahma";
-import { Add } from "@mui/icons-material";
+import { ContentBox, PadBox, useDialogActions } from "@codezee/sixtify-brahma";
 import { Stack, Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 
+import { ButtonLayoutProvider } from "@web/components/common/responsive/ButtonLayoutProvider";
 import { AddSmsSettingsDialog } from "@web/components/settings/smsSettings/dialog/AddSmsSettingsDialog";
 import { SmsSettingsBreadcrumbs } from "@web/components/settings/smsSettings/SmsSettingsBreadcrumbs";
 import { SmsSettingsList } from "@web/components/settings/smsSettings/smsSettingsList/SmsSettingsList";
 import { SMS_SETTINGS_PERMISSION } from "@web/constants/permission/settings/smsSettings/permission";
 import { useUserPermissions } from "@web/hooks/useUserPermissions/useUserPermissions";
 import { PermissionGuard } from "@web/provider/PermissionGuard";
-import { suvicharMasterKeys } from "@web/queryKeysFactories/suvicharMaster";
+import { smsSettingKeys } from "@web/queryKeysFactories/smsSetting";
 
 // eslint-disable-next-line import/no-default-export
 export default function Page() {
@@ -35,7 +30,7 @@ export default function Page() {
         onClose={onDialogClose}
         onAddSuccess={() => {
           queryClient.invalidateQueries({
-            queryKey: suvicharMasterKeys.listing(),
+            queryKey: smsSettingKeys.listing(),
           });
         }}
       />
@@ -62,17 +57,15 @@ export default function Page() {
             <PermissionGuard
               canAccess={validateAccess(SMS_SETTINGS_PERMISSION.CREATE)}
             >
-              <Button
+              <ButtonLayoutProvider
                 variant="outlined"
                 onClick={() => {
                   onDialogOpen("add");
                 }}
-                startIcon={<Add />}
-              >
-                {t("common.button.add", {
+                label={t("common.button.add", {
                   label: t("sms.settings.menu.label"),
                 })}
-              </Button>
+              />
             </PermissionGuard>
           </Stack>
         </PadBox>

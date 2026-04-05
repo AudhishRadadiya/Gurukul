@@ -11,12 +11,7 @@ export function LockedColumnItem({ column }: Readonly<LockedColumnItemProps>) {
   const { lightBlue, iron } = theme.palette.app.color;
 
   return (
-    <Stack
-      border="1px solid"
-      width="100%"
-      bgcolor={lightBlue[100]}
-      borderColor={iron[700]}
-    >
+    <Stack border="1px solid" bgcolor={lightBlue[100]} borderColor={iron[700]}>
       <PadBox padding={{ padding: "0px 24px" }}>
         <Stack
           direction="row"

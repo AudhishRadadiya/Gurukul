@@ -20,6 +20,11 @@ export const TrustAutocompleteFromMultipleBranch = <P extends FieldValues>({
   });
 
   return (
-    <Autocomplete loading={loading} options={businessUnitOptions} {...props} />
+    <Autocomplete
+      placeholder="Select Trust"
+      loading={loading}
+      options={businessUnitOptions}
+      {...props}
+    />
   );
 };

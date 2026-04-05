@@ -5,6 +5,7 @@ import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
 import { familyMember } from "@web/queryKeysFactories/familyMember";
 import type { ApiSuccessResponse } from "@web/types/apiResponse";
 import type { GetListArgsAg2 } from "@web/types/shared-types";
+import { isBranchFilterEnabled } from "@web/utils/reactQuery";
 
 export type FamilyMemberDetail = {
   age: number;
@@ -39,6 +40,7 @@ export function useGetFamilyMember(body: GetListArgsAg2) {
   };
 
   return useQuery({
+    enabled: isBranchFilterEnabled(body),
     initialData: { family_memberDetail: [], totalCount: 0 },
     queryFn: () => getFamilyMemberData(body),
     queryKey: familyMember.listing(body),

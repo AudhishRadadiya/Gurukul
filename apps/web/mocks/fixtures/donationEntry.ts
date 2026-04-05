@@ -49,6 +49,7 @@ export function getDonationEntryDetails(): DonationEntry {
     prasad: faker.datatype.boolean(),
     receipt_name: faker.person.fullName(),
     receipt_no: faker.string.alphanumeric(10).toUpperCase(),
+    receipt_sequence: faker.number.int({ max: 100000, min: 100 }),
     ref_receipt_no: faker.string.alphanumeric(8).toUpperCase(),
     remark: faker.lorem.sentence(),
     reminder_date: faker.date.soon().toISOString(),

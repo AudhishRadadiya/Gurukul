@@ -4,15 +4,21 @@ import { BRANCH_ROUTES } from "@web/constants/routes/branch/routes";
 import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
 import { branchKeys } from "@web/queryKeysFactories/branch";
 import type { ApiSuccessResponse } from "@web/types/apiResponse";
-import type { OptionsType } from "@web/types/options";
+import type { StringValueOptionsType } from "@web/types/options";
 
-export function useGetBranchOptions() {
+type UseGetBranchOptionsProps = {
+  isUserWise?: boolean;
+};
+
+export function useGetBranchOptions({
+  isUserWise = false,
+}: UseGetBranchOptionsProps = {}) {
   const { axiosPrivate } = useAxiosPrivate();
 
   const fetchBranchOption = async () => {
-    const { data } = await axiosPrivate.get<ApiSuccessResponse<OptionsType[]>>(
-      BRANCH_ROUTES.options
-    );
+    const { data } = await axiosPrivate.get<
+      ApiSuccessResponse<StringValueOptionsType[]>
+    >(BRANCH_ROUTES.options(isUserWise));
 
     return data.data;
   };
@@ -20,6 +26,6 @@ export function useGetBranchOptions() {
   return useQuery({
     initialData: [],
     queryFn: fetchBranchOption,
-    queryKey: branchKeys.options(),
+    queryKey: branchKeys.options(isUserWise),
   });
 }

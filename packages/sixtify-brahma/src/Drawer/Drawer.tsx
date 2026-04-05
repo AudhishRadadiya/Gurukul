@@ -1,6 +1,6 @@
 "use client";
 
-import { Box } from "@mui/material";
+import { Box, ClickAwayListener } from "@mui/material";
 import List from "@mui/material/List";
 import {
   useState,
@@ -9,8 +9,7 @@ import {
 } from "react";
 
 import { PadBox } from "../PadBox";
-import { AppLogoMedium } from "../Svgs/AppLogo/AppLogoMedium";
-import { AppLogoSmall } from "../Svgs/AppLogo/AppLogoSmall";
+import { useGetDeviceType } from "../utils/hooks/useGetDeviceType";
 import { CloseDrawerMenuItemList } from "./CloseDrawer/CloseDrawerMenuItemList";
 import { StyledDrawer } from "./Drawer.styled";
 import { OpenDrawerMenuItemList } from "./OpenDrawer/OpenDrawerMenuItemList";
@@ -28,12 +27,16 @@ export type DrawerProps = {
   menuItems?: MenuItem[];
   open: boolean;
   currentPathname: string;
+  appLogoMedium: ReactNode;
+  appLogoSmall: ReactNode;
 };
 
 export const Drawer = ({
   menuItems = [],
   open,
   currentPathname,
+  appLogoMedium,
+  appLogoSmall,
 }: DrawerProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
 
@@ -41,29 +44,56 @@ export const Drawer = ({
     setAnchorEl(null);
   };
 
+  const { layout } = useGetDeviceType();
+
+  const isDesktop = layout === "desktop";
+
   return (
     <StyledDrawer variant="permanent" open={open}>
       <Box textAlign="center">
-        <PadBox padding={{ paddingTop: "1.5rem" }}>
-          {open ? <AppLogoMedium /> : <AppLogoSmall />}
-        </PadBox>
+        {isDesktop && (
+          <PadBox padding={{ paddingTop: "1.5rem" }}>
+            {open ? appLogoMedium : appLogoSmall}
+          </PadBox>
+        )}
+
+        {!isDesktop && (
+          <PadBox padding={{ paddingTop: "0.5rem", paddingBottom: "0.5rem" }}>
+            {appLogoSmall}
+          </PadBox>
+        )}
       </Box>
 
-      <List component="nav" onMouseLeave={handleClose}>
-        {open ? (
-          <OpenDrawerMenuItemList
-            menuItems={menuItems}
-            currentPathname={currentPathname}
-          />
-        ) : (
-          <CloseDrawerMenuItemList
-            menuItems={menuItems}
-            currentPathname={currentPathname}
-            anchorEl={anchorEl}
-            setAnchorEl={setAnchorEl}
-          />
-        )}
-      </List>
+      {isDesktop && (
+        <List component="nav" onMouseLeave={handleClose}>
+          {open ? (
+            <OpenDrawerMenuItemList
+              menuItems={menuItems}
+              currentPathname={currentPathname}
+            />
+          ) : (
+            <CloseDrawerMenuItemList
+              menuItems={menuItems}
+              currentPathname={currentPathname}
+              anchorEl={anchorEl}
+              setAnchorEl={setAnchorEl}
+            />
+          )}
+        </List>
+      )}
+
+      {!isDesktop && (
+        <ClickAwayListener onClickAway={handleClose}>
+          <List component="nav" onMouseLeave={handleClose}>
+            <CloseDrawerMenuItemList
+              menuItems={menuItems}
+              currentPathname={currentPathname}
+              anchorEl={anchorEl}
+              setAnchorEl={setAnchorEl}
+            />
+          </List>
+        </ClickAwayListener>
+      )}
     </StyledDrawer>
   );
 };

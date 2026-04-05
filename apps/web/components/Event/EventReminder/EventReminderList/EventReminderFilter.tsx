@@ -8,7 +8,7 @@ import {
   fromFilterDate,
   toFilterDate,
 } from "@web/app/event/event-reminder/page";
-import { useGetEventOptions } from "@web/components/common/Autocomplete/hooks/useGetEventOptions";
+import { useGetFilterEventOptions } from "@web/components/common/Autocomplete/hooks/useGetFilterEventOptions";
 
 type EventReminderFilterProps = {
   filterListData: FieldValues;
@@ -21,7 +21,7 @@ export const EventReminderFilter = ({
 }: EventReminderFilterProps) => {
   const [currentFilter, setCurrentFilter] = useState<FieldValues>({});
 
-  const { data: eventOptions } = useGetEventOptions();
+  const { data: filterEventOptions } = useGetFilterEventOptions();
 
   const fromDate = currentFilter.from_date ?? fromFilterDate;
 
@@ -32,7 +32,7 @@ export const EventReminderFilter = ({
       {
         key: "event_type",
         label: t("eventType.label"),
-        options: eventOptions,
+        options: filterEventOptions,
         type: "autoComplete",
         value: currentFilter.event_type,
       },
@@ -52,7 +52,7 @@ export const EventReminderFilter = ({
         value: toDate,
       },
     ],
-    [eventOptions, currentFilter]
+    [filterEventOptions, currentFilter]
   );
 
   const onChange = (data: FieldValues, isPopup: boolean) => {

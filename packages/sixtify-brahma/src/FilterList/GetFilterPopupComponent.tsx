@@ -20,6 +20,7 @@ type GetFilterPopupComponentArgs = {
   control: Control<FieldValues>;
   errors: FieldErrors<FieldValues>;
   setIsPopupOpen?: (isOpen: boolean) => void;
+  autoFocus?: boolean;
 };
 
 export function getFilterPopupComponent({
@@ -27,6 +28,7 @@ export function getFilterPopupComponent({
   control,
   errors,
   setIsPopupOpen,
+  autoFocus = false,
 }: GetFilterPopupComponentArgs): FilterPopupComponentType {
   const theme = useTheme();
 
@@ -47,6 +49,7 @@ export function getFilterPopupComponent({
         options={selectedFilter.options ?? []}
         onOpen={() => setIsPopupOpen?.(true)}
         onClose={() => setIsPopupOpen?.(false)}
+        autoFocus={autoFocus}
         sx={{
           maxHeight: "250px",
           overflowY: "auto",
@@ -78,6 +81,7 @@ export function getFilterPopupComponent({
         placeholder={selectedFilter.label}
         error={!!errorSelectedKey}
         helperText={errorSelectedKey?.message as string}
+        autoFocus={autoFocus}
       />
     ),
     date: (
@@ -87,6 +91,7 @@ export function getFilterPopupComponent({
         disabled={selectedFilter.isDisabled}
         error={!!errorSelectedKey}
         helperText={errorSelectedKey?.message as string}
+        autoFocus={autoFocus}
         {...(selectedFilter.monthYearFormat && {
           format: "MMM yyyy",
           views: ["year", "month"],

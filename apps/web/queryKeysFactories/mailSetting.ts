@@ -6,5 +6,11 @@ export const mailSettingKeys = {
   edit: (emailSettingId: string) =>
     [...mailSettingKeys.all, "edit", emailSettingId] as const,
 
-  get: () => [...mailSettingKeys.all, "get"] as const,
+  get: (emailSettingId: string) =>
+    [...mailSettingKeys.all, "get", emailSettingId] as const,
+
+  listing: (body: object = {}) =>
+    [...mailSettingKeys.all, "listing", body] as const,
+
+  options: () => [...mailSettingKeys.all, "options"] as const,
 } as const;

@@ -1,23 +1,25 @@
 import { Stack, InputLabel, Typography } from "@mui/material";
 import { red } from "@mui/material/colors";
 import { EditorContent } from "@tiptap/react";
-import { useEffect, useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import {
   useController,
+  useFormContext,
   type FieldValues,
   type UseControllerProps,
 } from "react-hook-form";
 
 import { useTextEditorInstance } from "@web/components/common/TextEditor/hooks/useTextEditorInstance";
+import { errorMessages } from "@web/utils/helper";
 
 import { Skeleton } from "./Skeleton";
 import { TextEditorToolbar } from "./TextEditorToolbar";
 
 export type TextEditorProps<P extends FieldValues> = UseControllerProps<P> & {
-  error?: boolean;
-  helperText?: string;
+  height?: string | number;
   label?: string;
   loading: boolean;
+  minHeight?: number;
   name: string;
   required?: boolean;
 };
@@ -25,26 +27,36 @@ export type TextEditorProps<P extends FieldValues> = UseControllerProps<P> & {
 export const TextEditor = <T extends FieldValues>({
   control,
   defaultValue,
-  error,
-  helperText,
+  height = 290,
   label,
   loading = false,
+  minHeight = 120,
   name,
   required,
   rules,
+  ...inputFieldProps
 }: TextEditorProps<T>) => {
   const {
     field: { onChange, value },
+    fieldState: { error },
   } = useController({ control, defaultValue, name, rules });
+
+  const { trigger } = useFormContext();
 
   const { editor } = useTextEditorInstance(value);
 
   const onEditorUpdate = useCallback(() => {
-    const html = editor?.getHTML();
-
-    if (html) {
-      onChange(html);
+    if (!editor) {
+      return;
     }
+
+    const html = editor.getHTML();
+
+    const text = editor.getText().trim();
+
+    const finalValue = text ? html : "";
+
+    onChange(finalValue);
   }, [editor, onChange]);
 
   useEffect(() => {
@@ -54,10 +66,14 @@ export const TextEditor = <T extends FieldValues>({
 
     editor.on("update", onEditorUpdate);
 
+    editor.on("blur", () => trigger(name));
+
     return () => {
       editor.off("update", onEditorUpdate);
+
+      editor.off("blur", () => trigger(name));
     };
-  }, [editor, onEditorUpdate]);
+  }, [editor, onEditorUpdate, name, trigger]);
 
   if (loading) {
     return <Skeleton />;
@@ -72,37 +88,56 @@ export const TextEditor = <T extends FieldValues>({
       <Stack
         className="editor-box"
         style={{
-          border: "1px solid #ccc",
+          border: `1px solid ${error ? red[400] : "#ccc"}`,
           display: "flex",
-          height: 290,
+          height,
+          minHeight,
           overflow: "auto",
           padding: 10,
         }}
         sx={{
+          "& .ProseMirror": {
+            flex: 1,
+            minHeight: "100%",
+          },
+          "& .ProseMirror p, & .ProseMirror h1, & .ProseMirror h2, & .ProseMirror h3, & .ProseMirror h4, & .ProseMirror h5, & .ProseMirror h6":
+            {
+              margin: "0 0 4px 0",
+            },
           "& .ProseMirror:focus-visible": {
             outline: "none !important",
+          },
+          "& > *": {
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            minHeight: "100%",
           },
         }}
       >
         <EditorContent
           editor={editor}
-          value={value}
-          style={{ height: "100%", width: "100%" }}
+          style={{
+            height: "100%",
+            minHeight: "100%",
+            width: "100%",
+          }}
+          {...inputFieldProps}
         />
-
-        {error && (
-          <Typography
-            variant="caption"
-            sx={{
-              color: `${red[400]}`,
-              textWrap: "wrap",
-              whiteSpace: "pre",
-            }}
-          >
-            {helperText}
-          </Typography>
-        )}
       </Stack>
+
+      {Boolean(error) && (
+        <Typography
+          variant="caption"
+          sx={{
+            color: `${red["A700"]}`,
+            textWrap: "wrap",
+            whiteSpace: "pre",
+          }}
+        >
+          {errorMessages(error?.message)}
+        </Typography>
+      )}
     </Stack>
   );
 };

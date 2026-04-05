@@ -18,10 +18,12 @@ import type { UseFormSetError } from "react-hook-form";
 import { FormProvider, useForm } from "react-hook-form";
 import z from "zod";
 
-import { EventAutocomplete } from "@web/components/common/Autocomplete/EventAutocomplete";
+import { BranchWiseEventAutocomplete } from "@web/components/common/Autocomplete/BranchWiseEventAutocomplete";
+import { NumericTextField } from "@web/components/common/NumericTextField/NumericTextField";
 import { AddressDetailDialog } from "@web/components/Event/eventDonationEntry/dialogs/addressDetailDialog/AddressDetailDialog";
+import { useBranch } from "@web/context/BranchContext";
 import { useEnableDisableButton } from "@web/hooks/useEnableDisableButton";
-import { filterChangedFormFields, errorMessages } from "@web/utils/helper";
+import { errorMessages, filterChangedFormFields } from "@web/utils/helper";
 
 const EventDonationEntryFormSchema = z.object({
   amount: z
@@ -30,6 +32,7 @@ const EventDonationEntryFormSchema = z.object({
     .refine((value) => !!value, {
       message: "common.required",
     }),
+  branch_id: z.string().nullable(),
   date: z
     .string()
     .nullable()
@@ -82,6 +85,7 @@ export type FormRef = {
 
 const formDefaultValues: EventDonationEntryFormFieldValues = {
   amount: null,
+  branch_id: null,
   date: DateTime.now().toISODate(),
   donar_id: null,
   donar_name: null,
@@ -107,6 +111,8 @@ export const EventDonationEntryForm = forwardRef(
       values: defaultValues,
     });
 
+    const { branchIds } = useBranch();
+
     const {
       control,
       formState: { dirtyFields, errors },
@@ -126,7 +132,7 @@ export const EventDonationEntryForm = forwardRef(
             date: true,
           });
 
-          onSubmit(filterFormValues);
+          onSubmit({ ...filterFormValues, branch_id: branchIds });
         })();
       },
     }));
@@ -156,12 +162,14 @@ export const EventDonationEntryForm = forwardRef(
       <FormProvider {...methods}>
         <FormContainer>
           <FormGridLayout columns={2}>
-            <EventAutocomplete
+            <BranchWiseEventAutocomplete
               loading={loading}
               name="event_id"
+              label={t("common.event.label")}
               required
               control={control}
               error={!!event_id}
+              branchIds={[branchIds]}
               helperText={errorMessages(event_id?.message)}
             />
 
@@ -232,15 +240,15 @@ export const EventDonationEntryForm = forwardRef(
           </FormGridLayout>
 
           <FormGridLayout columns={2}>
-            <TextField
-              type="number"
+            <NumericTextField
               control={control}
               loading={loading}
               label={t("amount.label")}
               required
               name="amount"
-              setError={setError}
               error={!!amount}
+              thousandSeparator
+              removeDecimalScale
               helperText={errorMessages(amount?.message)}
             />
 
@@ -250,6 +258,8 @@ export const EventDonationEntryForm = forwardRef(
               loading={loading}
               control={control}
               multiline
+              letterCase="mixed"
+              characterType="any-character"
               error={!!note}
               helperText={errorMessages(note?.message)}
             />

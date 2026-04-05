@@ -1,10 +1,15 @@
+import type { FilType } from "@web/types/shared-types";
+
 export const donorAddressKeys = {
-  add: (status: string) => [...donorAddressKeys.all, "add", status] as const,
+  add: (fileType: FilType) =>
+    [...donorAddressKeys.all, "add", fileType] as const,
 
   all: ["donor-address-list"],
 
   edit: () => [...donorAddressKeys.all, "edit"] as const,
 
+  export: () => [...donorAddressKeys.all, "export"] as const,
+
   listing: (body: object = {}) =>
-    [...donorAddressKeys.all, "listing", body] as const,
+    [...donorAddressKeys.all, "list", body] as const,
 } as const;

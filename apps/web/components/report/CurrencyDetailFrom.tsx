@@ -6,9 +6,9 @@ import { forwardRef, Fragment, useImperativeHandle, useMemo } from "react";
 import type { UseFormSetError } from "react-hook-form";
 import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 
+import { BranchAutocomplete } from "@web/components/common/Autocomplete/BranchAutocomplete";
 import { useEnableDisableButton } from "@web/hooks/useEnableDisableButton";
 import { errorMessages } from "@web/utils/helper";
 
@@ -22,6 +22,12 @@ const CurrencyRowSchema = z.object({
 
 const CurrencyFormSchema = z
   .object({
+    branch_id: z
+      .string()
+      .nullable()
+      .refine((value) => !!value, {
+        message: "common.required",
+      }),
     data: z.array(CurrencyRowSchema),
     total_amount: z.number(),
     total_qty: z.number(),
@@ -53,6 +59,7 @@ export type FormRef = {
 };
 
 const formDefaultValues: CurrencyFormFieldValues = {
+  branch_id: null,
   data: currencyValues.map((c) => ({
     amount: 0,
     currency: c,
@@ -119,8 +126,18 @@ export const CurrencyDetailFrom = forwardRef(
 
     return (
       <Stack gap="15px">
+        <BranchAutocomplete
+          isUserWise
+          label=""
+          loading={loading}
+          name="branch_id"
+          control={control}
+          required
+          error={!!errors?.branch_id}
+          helperText={errorMessages(errors?.branch_id?.message)}
+        />
         <FormContainer>
-          <Grid container spacing={2}>
+          <Grid container spacing={1}>
             <Grid item xs={4}>
               <Typography fontWeight={600}>
                 {t("currency.detail.currency")}
@@ -140,7 +157,8 @@ export const CurrencyDetailFrom = forwardRef(
             </Grid>
 
             {currencyValues.map((currency, index) => (
-              <Fragment key={uuidv4()}>
+              // eslint-disable-next-line sonarjs/no-array-index-key
+              <Fragment key={index}>
                 <Grid item xs={4}>
                   <Typography>{currency}</Typography>
                 </Grid>

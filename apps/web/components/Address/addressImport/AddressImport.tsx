@@ -9,10 +9,11 @@ import { AddressImportForm } from "@web/components/Address/addressImport/Address
 import { useAddressFieldMetadata } from "@web/components/Address/addressImport/hooks/useAddressFieldMetadata";
 import {
   useAddressImport,
-  type AddressImport as AddressImportFields,
   type AddressImportDetails,
+  type AddressImport as AddressImportFields,
 } from "@web/components/Address/addressImport/hooks/useAddressImport";
 import { useAddressImportFormatter } from "@web/components/Address/addressImport/hooks/useAddressImportFormatter";
+import { useBranch } from "@web/context/BranchContext";
 import { onError } from "@web/utils/errors";
 
 export type ExcelImportData = {
@@ -28,6 +29,8 @@ export type AddressFieldMetaData = {
 
 export const AddressImport = () => {
   const formRef = useRef<FormRef>(null);
+
+  const { branchIds } = useBranch();
 
   const [excelAddressImportData, setExcelAddressImportData] =
     useState<ExcelImportData>({
@@ -70,6 +73,7 @@ export const AddressImport = () => {
 
       const payload = {
         address_book: updatedExcelData,
+        branch_id: branchIds,
       };
 
       mutate(payload);

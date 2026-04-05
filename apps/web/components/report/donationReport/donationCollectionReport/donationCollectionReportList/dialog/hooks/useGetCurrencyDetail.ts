@@ -12,6 +12,7 @@ export type CurrencyData = {
 };
 
 export type CurrencyDetail = {
+  branch_id: string | null;
   data: CurrencyData[];
   total_amount: number;
   total_qty: number;
@@ -38,7 +39,7 @@ export function useGetCurrencyDetail({
 
   return useQuery({
     enabled: !!dailyDonationId,
-    initialData: { data: [], total_amount: 0, total_qty: 0 },
+    initialData: { branch_id: null, data: [], total_amount: 0, total_qty: 0 },
     queryFn: fetchSuvicharMasterDetails,
     queryKey: donationCollectionKeys.getCurrencyDetail(dailyDonationId),
   });

@@ -18,7 +18,9 @@ export const StyledAppBar: ComponentType<StyledAppBarProps> = styled(
 
   const collapsedWidth = 80;
 
-  const width = open ? drawerWidth : collapsedWidth;
+  const mobileOffset = open ? collapsedWidth : 0;
+
+  const desktopOffset = open ? drawerWidth : collapsedWidth;
 
   return {
     background: theme.palette.app.color.iron[600],
@@ -29,18 +31,24 @@ export const StyledAppBar: ComponentType<StyledAppBarProps> = styled(
       duration: theme.transitions.duration.standard,
     }),
 
-    // ✅ Mobile: full width
     width: "100%",
 
-    // ✅ Tablet & Desktop (collapsed drawer)
-    [theme.breakpoints.up("sm")]: {
-      marginLeft: `${collapsedWidth}px`,
-      width: `calc(100% - ${width}px)`,
+    [theme.breakpoints.down("md")]: {
+      paddingLeft: "0px",
+      paddingRight: "0px",
+      marginLeft: `${mobileOffset}px`,
+      width: `calc(100% - ${mobileOffset}px)`,
     },
 
-    // ✅ When drawer is open
+    [theme.breakpoints.up("md")]: {
+      paddingLeft: "0px",
+      paddingRight: "0px",
+      marginLeft: `${desktopOffset}px`,
+      width: `calc(100% - ${desktopOffset}px)`,
+    },
+
     ...(open && {
-      marginLeft: drawerWidth,
+      marginLeft: "300px",
       width: "calc(100% - 300px)",
       transition: theme.transitions.create(["width", "margin"], {
         easing: theme.transitions.easing.sharp,

@@ -232,7 +232,13 @@ export const validateMaxDigit = (
 
 export const formatToIndianNumber = (num: number | null) => {
   if (num) {
-    return replace(num.toLocaleString("en-IN"), /,/g, ",");
+    return replace(
+      num.toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+      }),
+      /,/g,
+      ","
+    );
   }
 
   return num;

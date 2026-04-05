@@ -1,13 +1,12 @@
 import type {
   AutocompleteValue,
   AutocompleteProps as MuiAutocompleteProps,
+  StackProps,
 } from "@mui/material";
-
 import {
   Avatar,
   Box,
   Checkbox,
-  Chip,
   Divider,
   InputLabel,
   Autocomplete as MuiAutocomplete,
@@ -18,19 +17,33 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { alpha, styled } from "@mui/material/styles";
+import _isFunction from "lodash/isFunction";
 import { useMemo, useRef, useState } from "react";
 import {
   useController,
   type ControllerRenderProps,
+  type FieldError,
   type FieldValues,
+  type PathValue,
   type UseControllerProps,
+  type UseFormSetValue,
 } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { EditIconAction } from "../../Actions";
 import { toasts } from "../../Toast";
+import { Tooltip } from "../../Tooltip";
+import type { OnAction } from "../../utils/types";
 import { BoxStyled, CheckStyled } from "../CheckBox/CheckBox.styled";
+import {
+  getDefaultInputLabelProps,
+  getDefaultTextFieldSx,
+} from "../commonStyles";
+import type { AllowedCharacterType, LetterCase } from "../TextField";
+import { characterTypeMessages } from "../TextField";
+import { StyledChipV2 } from "./ChipV2.styled";
 import { Skeleton } from "./Skeleton";
+import { Tags } from "./Tags";
 
 export type Option = {
   heading?: string;
@@ -58,9 +71,10 @@ export type AutocompleteProps<P extends FieldValues> = UseControllerProps<P> &
     placeholder?: string;
     isShowAvatar?: boolean;
     shouldCloseOnSelect?: boolean;
-    onAction?: () => void;
+    onAction?: OnAction;
     isShowSelectAll?: boolean;
     isShowOptionsOnType?: boolean;
+    autoFocus?: boolean;
     isShowEmployeeData?: boolean;
     maxLimit?: number;
     renderOption?: (
@@ -71,6 +85,16 @@ export type AutocompleteProps<P extends FieldValues> = UseControllerProps<P> &
     getOptionLabel?: (option: string) => string;
     defaultOption?: AutocompleteValue<Option, boolean, boolean, boolean>;
     disableClearable?: boolean;
+    characterType?: AllowedCharacterType;
+    setError?: (
+      name: keyof P,
+      error: FieldError | { type: string; message?: string }
+    ) => void;
+    letterCase?: LetterCase;
+    createOptionOnType?: boolean;
+    setValue?: UseFormSetValue<P>;
+    containerProps?: StackProps;
+    styling?: "custom" | "default";
   };
 
 export function Autocomplete<P extends FieldValues>({
@@ -98,8 +122,17 @@ export function Autocomplete<P extends FieldValues>({
   renderOption,
   getOptionLabel,
   maxLimit,
+  autoFocus = false,
   defaultOption,
+  characterType = "string-number-special",
+  letterCase = "mixed",
+  setError,
+  createOptionOnType = false,
   disableClearable = required ? true : false,
+  containerProps,
+  setValue,
+  limitTags = 0,
+  styling = "default",
   ...restProps
 }: AutocompleteProps<P>) {
   const {
@@ -116,12 +149,16 @@ export function Autocomplete<P extends FieldValues>({
   const [inputValue, setInputValue] = useState("");
 
   const handleSelectAll = (isSelected: boolean) => {
+    const disabledOptions = options.filter((option) => option.disabled);
+
+    const disabledValues = disabledOptions.map((option) => option.value);
+
     if (isSelected) {
       const allValues = options.map((option) => option.value);
 
       onChange(allValues);
     } else {
-      onChange([]);
+      onChange(disabledValues);
     }
   };
 
@@ -132,7 +169,7 @@ export function Autocomplete<P extends FieldValues>({
       multiple &&
       isShowSelectAll &&
       options.length > 0 &&
-      value?.length === options.filter((option) => !option.disabled).length
+      value?.length === options.length
     );
   }, [multiple, isShowSelectAll, options, value]);
 
@@ -154,6 +191,14 @@ export function Autocomplete<P extends FieldValues>({
       option.label.toLowerCase().includes(inputValue.toLowerCase())
     );
   }, [inputValue]);
+
+  useMemo(() => {
+    if (_isFunction(setValue) && required && options.length === 1 && !value) {
+      setValue(name, options[0]?.value as PathValue<P, typeof name>, {
+        shouldDirty: true,
+      });
+    }
+  }, [required, options, value]);
 
   // eslint-disable-next-line sonarjs/function-return-type
   const selectedValue = useMemo(() => {
@@ -186,9 +231,9 @@ export function Autocomplete<P extends FieldValues>({
 
   const StyledPaper = styled(Paper)(({ theme }) => ({
     "& .MuiAutocomplete-listbox": {
-      maxHeight: 200,
+      maxHeight: 150,
       overflowY: "auto",
-      marginTop: "10px",
+      marginTop: "0px",
       "&::-webkit-scrollbar": {
         width: "6px",
       },
@@ -200,7 +245,7 @@ export function Autocomplete<P extends FieldValues>({
         backgroundColor: color.lightBlue[100],
       },
       "& .MuiAutocomplete-option": {
-        fontSize: "14px", // Change this to your desired font size
+        fontSize: "14px",
       },
     },
   }));
@@ -218,13 +263,65 @@ export function Autocomplete<P extends FieldValues>({
     padding: 0,
   });
 
+  const getCharacterRegex = (type: AllowedCharacterType) => {
+    switch (type) {
+      case "string":
+        return /^[A-Za-z\s]*$/;
+
+      case "string-number":
+        return /^[A-Za-z0-9\s]*$/;
+
+      case "string-number-special":
+        return /^[A-Za-z0-9 !"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~\n\r]*$/;
+
+      default:
+        return /^[\s\S]*$/;
+    }
+  };
+
+  const validateAndTransformInput = (
+    input: string
+  ): { isValid: boolean; cleanedValue: string; errorMessage?: string } => {
+    let transformedValue = input;
+
+    if (!transformedValue) {
+      return { isValid: true, cleanedValue: "" };
+    }
+
+    const regex = getCharacterRegex(characterType);
+
+    if (!regex.test(transformedValue)) {
+      return {
+        isValid: false,
+        cleanedValue: transformedValue,
+        errorMessage: characterTypeMessages[characterType],
+      };
+    }
+
+    if (letterCase === "uppercase") {
+      transformedValue = input.toUpperCase();
+    } else if (letterCase === "lowercase") {
+      transformedValue = input.toLowerCase();
+    }
+
+    return { isValid: true, cleanedValue: transformedValue };
+  };
+
   if (loading) {
-    return <Skeleton label={label} />;
+    return <Skeleton label={label} styling={styling} />;
   }
 
   return (
-    <Stack gap="10px">
-      {label && <InputLabel required={required}>{label}</InputLabel>}
+    <Stack gap="5px" {...containerProps}>
+      {label && styling === "custom" && (
+        <InputLabel
+          sx={{ fontSize: { xs: "14px", md: "16px" } }}
+          required={required}
+          disabled={disabled}
+        >
+          {label}
+        </InputLabel>
+      )}
 
       <Stack
         direction="row"
@@ -237,8 +334,15 @@ export function Autocomplete<P extends FieldValues>({
           PaperComponent={StyledPaper}
           sx={{
             "& .MuiAutocomplete-tag": {
-              backgroundColor: color.slate[700],
-              color: "black",
+              backgroundColor: alpha(color.iron[700], 0.6),
+              color: color.black[900],
+              borderRadius: "50px",
+              padding: "0",
+            },
+            "& .MuiChip-deleteIcon": {
+              color: alpha(color.iron[800], 0.7),
+              "&:hover": { color: color.iron[800], transition: "100ms ease" },
+              borderRadius: "50%",
             },
             width: "100%",
           }}
@@ -255,43 +359,56 @@ export function Autocomplete<P extends FieldValues>({
           {...restProps}
           {...restField}
           disableClearable={disableClearable}
-          renderTags={(value: Option[], getTagProps) =>
-            value.map((option: Option, index: number) => {
-              const { key, ...tagProps } = getTagProps({ index });
+          renderTags={(value: Option[], getTagProps) => {
+            const visibleTags = limitTags ? value.slice(0, limitTags) : value;
 
-              const label = typeof option === "string" ? option : option.label;
+            const hiddenCount = value.length - visibleTags.length;
 
-              let avatarContent = "";
+            const hiddenTags = limitTags ? value.slice(limitTags) : value;
 
-              let avatar = undefined;
-
-              if (isShowAvatar) {
-                if (!option.avatar) {
-                  const initials = option.label
-                    .split(" ")
-                    .map((word) => word[0]?.toUpperCase())
-                    .join("");
-
-                  avatarContent = `${initials}`;
-                }
-                avatar = option.avatar ? (
-                  <Avatar src={option.avatar} alt={option.label} />
-                ) : (
-                  <Avatar>{avatarContent}</Avatar>
-                );
-              }
-
-              return (
-                <Chip
-                  avatar={avatar}
-                  label={label}
-                  key={key}
-                  {...tagProps}
-                  disabled={option.disabled || disabled}
+            return (
+              <Stack
+                flexWrap="wrap"
+                flexDirection="row"
+                gap={0.2}
+                maxHeight={150}
+                alignItems="center"
+                sx={{
+                  overflowY: "auto",
+                }}
+              >
+                <Tags
+                  disabled={disabled}
+                  getTagProps={getTagProps}
+                  isShowAvatar={isShowAvatar}
+                  tags={visibleTags}
+                  startIndex={0}
                 />
-              );
-            })
-          }
+
+                {hiddenCount > 0 && (
+                  <Tooltip
+                    toolTipLabel={
+                      <Stack
+                        maxHeight="200px"
+                        alignItems="start"
+                        overflow="auto"
+                      >
+                        <Tags
+                          disabled={disabled}
+                          getTagProps={getTagProps}
+                          isShowAvatar={isShowAvatar}
+                          tags={hiddenTags}
+                          startIndex={limitTags}
+                        />
+                      </Stack>
+                    }
+                  >
+                    <StyledChipV2 label={`+${hiddenCount}`} />
+                  </Tooltip>
+                )}
+              </Stack>
+            );
+          }}
           renderOption={(props, option, { selected }) => {
             if (renderOption) {
               return renderOption(props, option, { selected });
@@ -338,9 +455,11 @@ export function Autocomplete<P extends FieldValues>({
                             {`${label} (${employee_code ?? "-"})`}
                           </Typography>
 
-                          <Typography variant="body2" color={color.iron[800]}>
-                            {punch_code ?? "-"}
-                          </Typography>
+                          {punch_code && (
+                            <Typography variant="body2" color={color.iron[800]}>
+                              {punch_code}
+                            </Typography>
+                          )}
                         </Box>
                       </>
                     ) : (
@@ -368,19 +487,65 @@ export function Autocomplete<P extends FieldValues>({
               );
             }
 
+            const getPlaceholder = () => {
+              if (styling === "default") {
+                return placeholder;
+              }
+
+              return placeholder || `Select ${label}`;
+            };
+
             return (
               <TextField
                 {...params}
-                placeholder={placeholder || `Select ${label}`}
+                placeholder={getPlaceholder()}
+                label={styling === "default" ? label : undefined}
+                required={styling === "default" ? required : undefined}
                 error={error}
+                autoFocus={autoFocus}
                 helperText={helperText}
+                sx={getDefaultTextFieldSx(styling)}
+                InputLabelProps={getDefaultInputLabelProps(styling)}
                 InputProps={{
                   ...params.InputProps,
                   startAdornment,
                 }}
                 onChange={(e) => {
+                  const rawValue = e.target.value;
+
+                  const { isValid, cleanedValue, errorMessage } =
+                    validateAndTransformInput(rawValue);
+
+                  if (!isValid && setError && errorMessage) {
+                    setError(name, { type: "manual", message: errorMessage });
+
+                    return;
+                  } else if (setError) {
+                    setError(name, { type: "", message: "" });
+                  }
+
+                  if (!multiple && freeSolo && createOptionOnType) {
+                    onChange(cleanedValue);
+                  } else if (!cleanedValue) {
+                    onChange(null);
+                  }
+
                   if (isShowOptionsOnType) {
-                    setInputValue(e.target.value);
+                    setInputValue(cleanedValue);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  const regex = getCharacterRegex(characterType);
+
+                  if (!regex.test(e.key)) {
+                    e.preventDefault();
+
+                    if (setError) {
+                      setError(name, {
+                        type: "manual",
+                        message: characterTypeMessages[characterType],
+                      });
+                    }
                   }
                 }}
               />
@@ -453,7 +618,9 @@ export function Autocomplete<P extends FieldValues>({
             }
 
             if (typeof newValue === "string") {
-              return onChange(newValue ?? null);
+              const { cleanedValue } = validateAndTransformInput(newValue);
+
+              return onChange(cleanedValue ?? null);
             }
 
             if (Array.isArray(newValue)) {
@@ -472,12 +639,18 @@ export function Autocomplete<P extends FieldValues>({
             onChange(newValue ? newValue.value : null);
           }}
           groupBy={(option) => option.heading ?? ""}
-          renderGroup={(params) => (
-            <li key={params.key}>
-              <GroupHeader>{params.group}</GroupHeader>
-              <GroupItems>{params.children}</GroupItems>
-            </li>
-          )}
+          renderGroup={(params) => {
+            if (!params.group) {
+              return <Box>{params.children}</Box>;
+            }
+
+            return (
+              <li key={params.key}>
+                <GroupHeader>{params.group}</GroupHeader>
+                <GroupItems>{params.children}</GroupItems>
+              </li>
+            );
+          }}
           getOptionDisabled={(option) => !!option.disabled}
           onBlur={() => {
             setInputValue("");

@@ -5,6 +5,7 @@ import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
 import { addressBookKeys } from "@web/queryKeysFactories/addressBook";
 import type { ApiSuccessResponse } from "@web/types/apiResponse";
 import type { GetListArgsAg2 } from "@web/types/shared-types";
+import { isBranchFilterEnabled } from "@web/utils/reactQuery";
 
 export type AddressBookDetails = {
   address: string;
@@ -88,6 +89,7 @@ export function useGetAddress(body: GetListArgsAg2) {
   };
 
   return useQuery({
+    enabled: isBranchFilterEnabled(body),
     initialData: { addressBookDetails: [], totalCount: 0 },
     queryFn: () => getAddressBook(body),
     queryKey: addressBookKeys.listing(body),

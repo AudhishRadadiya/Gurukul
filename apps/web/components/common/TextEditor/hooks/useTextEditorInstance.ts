@@ -44,7 +44,12 @@ export const useTextEditorInstance = (content: string) => {
   });
 
   useEffect(() => {
-    if (editor && content && content !== editor.getHTML()) {
+    if (
+      editor &&
+      content &&
+      !editor.isFocused &&
+      content !== editor.getHTML()
+    ) {
       editor.commands.setContent(content);
     }
   }, [editor, content]);

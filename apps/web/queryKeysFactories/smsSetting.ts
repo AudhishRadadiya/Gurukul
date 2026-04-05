@@ -14,4 +14,6 @@ export const smsSettingKeys = {
   listing: (body: object = {}) => {
     return [...smsSettingKeys.all, "listing", body] as const;
   },
+
+  options: () => [...smsSettingKeys.all, "options"],
 } as const;

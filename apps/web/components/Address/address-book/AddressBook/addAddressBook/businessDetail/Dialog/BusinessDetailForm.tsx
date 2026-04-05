@@ -3,14 +3,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Stack } from "@mui/material";
 import { t } from "i18next";
 import type { ForwardedRef } from "react";
-import { forwardRef, useImperativeHandle } from "react";
+import { forwardRef, useImperativeHandle, useMemo } from "react";
 import type { UseFormSetError } from "react-hook-form";
 import { FormProvider, useForm } from "react-hook-form";
+import { useDebounceValue } from "usehooks-ts";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 
-import { errorMessages } from "@web/utils/helper";
-import { emailRegex, panCardRegex } from "@web/utils/regex";
+import { CityAutocomplete } from "@web/components/common/Autocomplete/CityAutocomplete";
+import { StateAutocomplete } from "@web/components/common/Autocomplete/StateAutocomplete";
+import type { DonationEntryFormFieldValues } from "@web/components/Donation/donationEntry/addDonationEntry/DonationEntryForm";
+import { usePostCityAndStateFromPinCode } from "@web/hooks/address/usePostCityAndStateFromPinCode";
+import { Debounce_Delay, errorMessages } from "@web/utils/helper";
+import { emailRegex, panCardRegex, pinCodeRegex } from "@web/utils/regex";
 
 export const BusinessDetailFormSchema = z.object({
   address: z.string().nullable(),
@@ -21,6 +26,7 @@ export const BusinessDetailFormSchema = z.object({
     .refine((value) => !!value, {
       message: "common.required",
     }),
+  city: z.string().nullable().optional(),
   email: z
     .string()
     .regex(emailRegex, "common.email.invalid")
@@ -32,6 +38,14 @@ export const BusinessDetailFormSchema = z.object({
     .regex(panCardRegex, "common.pan_card_no.invalid")
     .optional()
     .nullable(),
+  pincode: z
+    .string()
+    .regex(pinCodeRegex, "common.pin_code.invalid")
+    .nullable()
+    .refine((value) => !!value, {
+      message: "common.required",
+    }),
+  state: z.string().nullable().optional(),
 });
 
 export type BusinessDetailFormFieldValues = z.infer<
@@ -52,8 +66,11 @@ export type FormRef = {
 const formDefaultValues: BusinessDetailFormFieldValues = {
   address: null,
   business_name: null,
+  city: null,
   email: null,
   pan: null,
+  pincode: null,
+  state: null,
 };
 
 export const BusinessDetailForm = forwardRef(
@@ -72,7 +89,29 @@ export const BusinessDetailForm = forwardRef(
       formState: { errors },
       handleSubmit,
       setError,
+      setValue,
+      watch,
     } = formMethods;
+
+    const [pincodeInput] = useDebounceValue(watch("pincode"), Debounce_Delay);
+
+    const { data } = usePostCityAndStateFromPinCode({
+      pinCode: !errors.pincode && pincodeInput ? pincodeInput : "",
+    });
+
+    const { city, state } = useMemo<
+      Pick<DonationEntryFormFieldValues, "city" | "state">
+    >(() => {
+      return {
+        city: data?.city ?? null,
+        state: data?.state ?? null,
+      };
+    }, [data]);
+
+    useMemo(() => {
+      setValue("city", city ?? null, { shouldValidate: true });
+      setValue("state", state ?? null, { shouldValidate: true });
+    }, [city, state]);
 
     useImperativeHandle(ref, () => ({
       setError,
@@ -83,7 +122,7 @@ export const BusinessDetailForm = forwardRef(
       },
     }));
 
-    const { business_name, email, pan } = errors;
+    const { business_name, email, pan, pincode } = errors;
 
     return (
       <FormProvider {...formMethods}>
@@ -112,14 +151,46 @@ export const BusinessDetailForm = forwardRef(
               name="email"
               control={control}
               label={t("email.label")}
+              letterCase="lowercase"
               error={!!email}
               helperText={errorMessages(email?.message)}
             />
 
             <TextField
+              name="pincode"
+              control={control}
+              label={t("common.pincode")}
+              required
+              maxLength={6}
+              setError={setError}
+              error={!!pincode}
+              helperText={errorMessages(pincode?.message)}
+            />
+          </FormGridLayout>
+
+          <FormGridLayout columns={2}>
+            <CityAutocomplete
+              name="city"
+              control={control}
+              error={!!errors.city}
+              helperText={errorMessages(errors.city?.message)}
+            />
+
+            <StateAutocomplete
+              name="state"
+              control={control}
+              error={!!errors.state}
+              helperText={errorMessages(errors.state?.message)}
+            />
+          </FormGridLayout>
+
+          <FormGridLayout columns={1}>
+            <TextField
               name="address"
               control={control}
               multiline
+              letterCase="mixed"
+              characterType="any-character"
               label={t("address.label")}
             />
           </FormGridLayout>

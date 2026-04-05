@@ -16,7 +16,11 @@ import { useUserPermissions } from "@web/hooks/useUserPermissions/useUserPermiss
 import type { DialogRenderer } from "@web/types/dialogs";
 import { useDialogActions } from "@web/types/useDialogActions";
 
-export const BranchMasterList = () => {
+type BranchMasterListProps = {
+  isActive: number;
+};
+
+export const BranchMasterList = ({ isActive }: BranchMasterListProps) => {
   const { validateAccess } = useUserPermissions();
 
   const { onDialogClose, onDialogOpen, openedDialog } = useDialogActions();
@@ -34,6 +38,9 @@ export const BranchMasterList = () => {
 
   const { data, isFetching, refetch } = useGetBranchMaster({
     endRow,
+    externalFilter: {
+      is_active: isActive,
+    },
     filterModel: agGridFilterModel,
     startRow,
   });

@@ -7,21 +7,22 @@ import { DateRangePickerPopUp } from "./DateRangePickerPopUp";
 import { FilterPopup } from "./FilterPopup";
 import type { FilterListType } from "./FilterTypeWrapper";
 import { getFilterPopupComponent } from "./GetFilterPopupComponent";
+import type { OnAction } from "../utils/types";
 
 type FilterPopupWrapperProp = PropsWithChildren<PopoverProps> & {
   filterItem: FilterListType;
   control: Control<FieldValues>;
   errors: FieldErrors<FieldValues>;
   currentFilterValue?: string | string[] | null;
-  onApply: () => void;
-  reset?: () => void;
+  onApply: OnAction;
+  reset?: OnAction;
 };
 
 type FilterDateRangePickerWrapperProp = PropsWithChildren<PopoverProps> & {
   filterItem: FilterListType;
   control: Control<FieldValues>;
   errors: FieldErrors<FieldValues>;
-  onApply: () => void;
+  onApply: OnAction;
 };
 
 export type FilterPopupComponentType = {
@@ -104,7 +105,6 @@ export const FilterPopUpDateRangeWrapper = ({
       onClose={onClose}
       anchorEl={anchorEl}
       onApply={onApply}
-      showFooter
       showDivider
       background
     >

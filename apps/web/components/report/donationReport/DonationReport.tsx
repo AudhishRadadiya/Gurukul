@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import { useRef } from "react";
 
 import type { FormRef } from "@web/components/report/donationReport/DonationReportFrom";
-import { DonationReportFrom } from "@web/components/report/donationReport/DonationReportFrom";
+import {
+  DonationReportFrom,
+  formDefaultValues,
+} from "@web/components/report/donationReport/DonationReportFrom";
 import type { GetDonationReportApiSuccessResponse } from "@web/components/report/donationReport/hooks/useGetDonationReport";
 import { useGetDonationReport } from "@web/components/report/donationReport/hooks/useGetDonationReport";
 import { onError } from "@web/utils/errors";
@@ -41,7 +44,7 @@ export const DonationReport = () => {
           <Button
             variant="outlined"
             onClick={() => {
-              router.push("/user/user-master");
+              formRef.current?.reset(formDefaultValues);
             }}
           >
             {t("common.cancel.button")}

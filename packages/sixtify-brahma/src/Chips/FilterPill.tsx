@@ -1,10 +1,11 @@
+import { useTheme } from "@mui/material";
+import { ClearIcon } from "@mui/x-date-pickers/icons";
 import React, { forwardRef } from "react";
 import { Chip } from "../Chips";
-import { ClearIcon } from "@mui/x-date-pickers/icons";
-import { useTheme } from "@mui/material";
+import type { OnAction } from "../utils/types";
 
 type FilterPillProps = {
-  onDelete?: () => void;
+  onDelete?: OnAction;
   label: React.ReactNode;
   onClick?: (e: { currentTarget: HTMLDivElement | null }) => void;
 };

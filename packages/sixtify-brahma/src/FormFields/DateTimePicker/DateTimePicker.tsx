@@ -15,6 +15,10 @@ import type {
 } from "react-hook-form";
 import { useController } from "react-hook-form";
 import { CalendarIconAction } from "../../Actions";
+import {
+  getDefaultInputLabelProps,
+  getDefaultTextFieldSx,
+} from "../commonStyles";
 import { Skeleton } from "./Skeleton";
 
 export type DateTimePickerProps<P extends FieldValues> = UseControllerProps<P> &
@@ -35,6 +39,7 @@ export type DateTimePickerProps<P extends FieldValues> = UseControllerProps<P> &
       name: keyof P,
       error: FieldError | { type: string; message?: string }
     ) => void;
+    styling?: "custom" | "default";
   }>;
 
 const hoverTextStyle = (color: string) => ({
@@ -92,6 +97,7 @@ export function DateTimePicker<P extends FieldValues>({
   helperIcon,
   toolTipText,
   timeStepsMinutes = 1,
+  styling = "default",
   ...restProps
 }: DateTimePickerProps<P>) {
   const {
@@ -115,7 +121,7 @@ export function DateTimePicker<P extends FieldValues>({
   if (loading) {
     return (
       <Box sx={{ width: "350px" }}>
-        <Skeleton label={label} />
+        <Skeleton label={label} styling={styling} />
       </Box>
     );
   }
@@ -123,12 +129,19 @@ export function DateTimePicker<P extends FieldValues>({
   const EmptyIcon = () => null;
 
   return (
-    <Stack gap="10px">
-      {label && (
+    <Stack gap="5px">
+      {label && styling === "custom" && (
         <Stack alignItems="center" flexDirection="row" gap="5px">
-          <InputLabel required={required} disabled={disabled}>
-            {label}
-          </InputLabel>
+          {label && (
+            <InputLabel
+              sx={{ fontSize: { xs: "14px", md: "16px" } }}
+              required={required}
+              disabled={disabled}
+            >
+              {label}
+            </InputLabel>
+          )}
+
           {helperIcon && toolTipText && (
             <Tooltip title={toolTipText} placement="bottom">
               {helperIcon}
@@ -160,9 +173,15 @@ export function DateTimePicker<P extends FieldValues>({
             disabled,
             helperText,
             error,
+            label: styling === "default" ? label : undefined,
+            required: styling === "default" ? required : undefined,
             InputProps: {
               endAdornment: (
-                <CalendarIconAction onClick={() => setOpen(true)} />
+                <CalendarIconAction
+                  showTooltip={false}
+                  disabled={disabled}
+                  onClick={() => setOpen(true)}
+                />
               ),
               sx: {
                 "& .MuiInputAdornment-root": {
@@ -170,6 +189,8 @@ export function DateTimePicker<P extends FieldValues>({
                 },
               },
             },
+            sx: getDefaultTextFieldSx(styling),
+            InputLabelProps: getDefaultInputLabelProps(styling),
           },
           popper: {
             sx: {

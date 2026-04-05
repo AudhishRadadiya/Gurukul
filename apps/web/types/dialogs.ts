@@ -15,6 +15,11 @@ export type DialogTypes =
   | "AddressBook"
   | "DialogTypes"
   | "receiptEntry"
-  | "columnChooser";
+  | "columnChooser"
+  | "branchConfirmation"
+  | "cancelConfirmation"
+  | "confirmation"
+  | "exportOptions"
+  | "cancelDonationEntryConfirmation";
 
 export type DialogRenderer = { [key in DialogTypes]?: ReactNode };

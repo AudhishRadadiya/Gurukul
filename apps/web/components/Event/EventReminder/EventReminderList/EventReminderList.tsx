@@ -5,6 +5,7 @@ import { AgGridV2 } from "@web/components/common/AgGridV2/AgGridV2";
 import { useEventReminderColumns } from "@web/components/Event/EventReminder/EventReminderList/hooks/useEventReminderColumns";
 import type { EventReminder } from "@web/components/Event/EventReminder/EventReminderList/hooks/useGetEventReminder";
 import { useGetEventReminder } from "@web/components/Event/EventReminder/EventReminderList/hooks/useGetEventReminder";
+import { useBranch } from "@web/context/BranchContext";
 
 export type EventReminderListProps = {
   agGridFilterModel: FilterModel;
@@ -29,9 +30,11 @@ export const EventReminderList = ({
   setAgGridFilterModel,
   startRow,
 }: EventReminderListProps) => {
+  const { branchIds } = useBranch();
+
   const { data, isFetching } = useGetEventReminder({
     endRow,
-    externalFilter,
+    externalFilter: { ...externalFilter, branch_id: [branchIds] },
     filterModel: agGridFilterModel,
     startRow,
   });

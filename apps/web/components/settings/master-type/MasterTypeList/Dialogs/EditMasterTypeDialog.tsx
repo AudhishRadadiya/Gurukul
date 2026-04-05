@@ -1,5 +1,9 @@
-import { Button, Dialog, toasts } from "@codezee/sixtify-brahma";
-import { Stack } from "@mui/material";
+import {
+  Button,
+  ButtonContainer,
+  Dialog,
+  toasts,
+} from "@codezee/sixtify-brahma";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -63,7 +67,7 @@ export const EditMasterTypeDialog = ({
         label: t("master.type.menu.label"),
       })}
       actions={
-        <Stack direction="row" gap="5px">
+        <ButtonContainer>
           <Button onClick={onClose} variant="outlined">
             {t("common.cancel.button")}
           </Button>
@@ -73,7 +77,7 @@ export const EditMasterTypeDialog = ({
             loading={isPending}
             disabled={isDisabled()}
           />
-        </Stack>
+        </ButtonContainer>
       }
     >
       <MasterTypeFrom

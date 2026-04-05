@@ -3,13 +3,15 @@ import { IconButton } from "@mui/material";
 import { SvgView } from "../Svgs";
 import { Tooltip } from "../Tooltip";
 
-export type ViewIconActionProps = IconButtonProps;
+export type ViewIconActionProps = IconButtonProps & {
+  disabled?: boolean;
+};
 
 export const ViewIconAction = (props: ViewIconActionProps) => {
   return (
     <IconButton {...props}>
       <Tooltip toolTipLabel="View">
-        <SvgView />
+        <SvgView disabled={props.disabled} />
       </Tooltip>
     </IconButton>
   );

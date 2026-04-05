@@ -1,5 +1,5 @@
 import type { SxProps, Theme } from "@mui/material";
-import { Box, Skeleton, Stack, Typography } from "@mui/material";
+import { Box, Skeleton, Stack, Typography, useTheme } from "@mui/material";
 import type { PropsWithChildren, ReactNode } from "react";
 import { DeleteIconAction } from "../../../Actions";
 import { Chip } from "../../../Chips";
@@ -25,6 +25,10 @@ export function ProfileCardHeader({
   isDraft = false,
   onDeleteClick,
 }: ProfileCardHeaderProps) {
+  const theme = useTheme();
+
+  const { slate } = theme.palette.app.color;
+
   return (
     <Box>
       <Stack
@@ -79,7 +83,7 @@ export function ProfileCardHeader({
               WebkitLineClamp: 1,
               WebkitBoxOrient: "vertical",
             }}
-            width="330px"
+            maxWidth="330px"
             fontWeight="500"
             textAlign="center"
           >
@@ -87,7 +91,23 @@ export function ProfileCardHeader({
           </Typography>
         )}
 
-        <CardItemValue title={designation} loading={loading} />
+        {loading ? (
+          <Skeleton
+            variant="rounded"
+            height={30}
+            animation="wave"
+            width="200px"
+          />
+        ) : (
+          <Typography
+            variant="body1"
+            fontWeight={400}
+            color={slate[900]}
+            noWrap
+          >
+            {designation ? designation : "-"}
+          </Typography>
+        )}
       </Stack>
     </Box>
   );

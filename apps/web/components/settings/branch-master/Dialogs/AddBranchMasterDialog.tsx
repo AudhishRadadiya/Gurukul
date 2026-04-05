@@ -1,5 +1,10 @@
-import { Button, Dialog, toasts } from "@codezee/sixtify-brahma";
-import { Stack } from "@mui/material";
+import {
+  Button,
+  ButtonContainer,
+  Dialog,
+  toasts,
+} from "@codezee/sixtify-brahma";
+import { t } from "i18next";
 import { useRef } from "react";
 
 import {
@@ -52,9 +57,9 @@ export const AddBranchMasterDialog = ({
       open={open}
       title="Add Branch"
       actions={
-        <Stack direction="row" gap="5px">
+        <ButtonContainer>
           <Button onClick={onClose} variant="outlined">
-            Cancel
+            {t("common.cancel.button")}
           </Button>
 
           <Button
@@ -62,9 +67,9 @@ export const AddBranchMasterDialog = ({
             loading={isPending}
             disabled={isDisabled()}
           >
-            Save
+            {t("common.save.button")}
           </Button>
-        </Stack>
+        </ButtonContainer>
       }
     >
       <BranchMasterForm ref={formRef} />

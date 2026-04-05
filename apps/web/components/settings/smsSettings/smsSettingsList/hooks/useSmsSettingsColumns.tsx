@@ -13,13 +13,6 @@ export const useSmsSettingsColumns = () => {
       minWidth: 130,
     },
     {
-      field: "sms_password",
-      headerName: t("common.sms.label", {
-        label: t("common.password"),
-      }),
-      minWidth: 160,
-    },
-    {
       field: "sms_sender_id",
       headerName: t("common.sms.label", {
         label: t("common.sender"),

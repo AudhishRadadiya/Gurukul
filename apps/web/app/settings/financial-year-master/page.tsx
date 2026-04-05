@@ -1,10 +1,10 @@
 "use client";
 
-import { Button, ContentBox, PadBox } from "@codezee/sixtify-brahma";
-import { Add } from "@mui/icons-material";
+import { ContentBox, PadBox } from "@codezee/sixtify-brahma";
 import { Stack, Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 
+import { ButtonLayoutProvider } from "@web/components/common/responsive/ButtonLayoutProvider";
 import { AddFinancialYearMasterDialog } from "@web/components/settings/financial-year-master/Dialogs/AddFinancialYearMasterDialog";
 import { FinancialYearMasterBreadcrumbs } from "@web/components/settings/financial-year-master/FinancialYearMasterBreadcrumbs";
 import { FinancialYearMasterList } from "@web/components/settings/financial-year-master/FinancialYearMasterList/FinancialYearMasterList";
@@ -53,15 +53,13 @@ export default function Page() {
             <PermissionGuard
               canAccess={validateAccess(AC_YEAR_MASTER_PERMISSION.CREATE)}
             >
-              <Button
+              <ButtonLayoutProvider
                 variant="outlined"
-                startIcon={<Add />}
                 onClick={() => {
                   onDialogOpen("add");
                 }}
-              >
-                Add Financial Year
-              </Button>
+                label="Add Financial Year"
+              />
             </PermissionGuard>
           </Stack>
         </PadBox>

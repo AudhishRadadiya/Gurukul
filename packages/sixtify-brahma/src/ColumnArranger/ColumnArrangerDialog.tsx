@@ -1,10 +1,11 @@
-import { Stack } from "@mui/material";
 import type { ColDef } from "ag-grid-community";
 import _fromPairs from "lodash/fromPairs";
 import { Button } from "../Button";
 import { Dialog } from "../Dialog";
+import { ButtonContainer } from "../Layouts";
 import { ColumnArrangerForm } from "./ColumnArrangerForm";
 import { useRefinedColumns } from "./hooks/useRefinedColumns";
+import type { OnAction } from "../utils/types";
 
 export type SimpleColDef = Pick<
   ColDef,
@@ -20,7 +21,7 @@ export type SimpleColDef = Pick<
 export type ColumnArrangerDialogProps<T extends Record<string, boolean>> = {
   open: boolean;
   columns: SimpleColDef[];
-  onClose: () => void;
+  onClose: OnAction;
   title?: string;
   onSave: (args: T) => void;
 };
@@ -55,10 +56,11 @@ export function ColumnArrangerDialog<T extends Record<string, boolean>>({
           }}
           maxWidth="xs"
           actions={
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-              sx={{ width: "100%" }}
+            <ButtonContainer
+              sx={{
+                justifyContent: "space-between",
+                flex: 1,
+              }}
             >
               <Button variant="outlined" onClick={() => reset()}>
                 Reset
@@ -81,7 +83,7 @@ export function ColumnArrangerDialog<T extends Record<string, boolean>>({
               >
                 Save
               </Button>
-            </Stack>
+            </ButtonContainer>
           }
         >
           {columnList}

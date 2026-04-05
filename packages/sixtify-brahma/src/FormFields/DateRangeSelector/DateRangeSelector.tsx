@@ -19,10 +19,11 @@ import type {
 import { PadBox } from "../../PadBox";
 import { formatDate } from "../../utils";
 import { DateRangePicker } from "../DateRangePicker";
+import type { OnAction } from "../../utils/types";
 
 type DateRangeOption = {
   title: string;
-  onClick: () => void;
+  onClick: OnAction;
 };
 
 type DateRangeSelectorProps<T extends FieldValues> = {

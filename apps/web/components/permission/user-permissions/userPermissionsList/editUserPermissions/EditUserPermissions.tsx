@@ -59,6 +59,7 @@ export const EditUserPermissions = ({ userId }: EditUserPermissionsProps) => {
   const defaultValues: RolesPermissionsFormFieldValues = useMemo(() => {
     return {
       is_user_permission: true,
+      login_name: rolesDetails ? rolesDetails.login_name : null,
       modules: rolesDetails ? addSelectAllFlag(rolesDetails.modules) : [],
       role_id: null,
       role_name: null,

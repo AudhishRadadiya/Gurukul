@@ -87,4 +87,28 @@ export const activeButton = {
     borderColor: `${blue[400]}`,
     color: "white",
   },
+  fontSize: "13px",
+  minWidth: "34px",
+  padding: "2px",
+};
+
+export const styleAutocompleteSX = {
+  "& .MuiInputBase-input": {
+    fontSize: "13px",
+    padding: "4px 6px !important",
+  },
+  "& .MuiInputBase-root": {
+    height: "30px",
+    minHeight: "30px",
+    paddingRight: "4px",
+  },
+  width: "100%",
+};
+
+export const AutocompleteOptionStyle = {
+  alignItems: "center",
+  display: "flex",
+  fontSize: "13px",
+  minHeight: "26px",
+  padding: "2px 7px",
 };

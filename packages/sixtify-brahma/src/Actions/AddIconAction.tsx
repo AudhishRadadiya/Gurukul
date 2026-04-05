@@ -9,7 +9,7 @@ export const AddIconAction = (props: AddIconActionProps) => {
   return (
     <IconButton {...props}>
       <Tooltip toolTipLabel="Add">
-        <SvgAdd />
+        <SvgAdd disabled={props.disabled} />
       </Tooltip>
     </IconButton>
   );

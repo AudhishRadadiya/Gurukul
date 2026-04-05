@@ -10,9 +10,9 @@ export type UserPermissionList = {
   full_count: string;
   is_full_permission: boolean;
   is_have_permission: boolean;
-  role: string;
   user_full_name: string;
   user_id: string;
+  user_name: string;
 };
 
 export type GetUserPermissionSuccessResponse = ApiSuccessResponse<{

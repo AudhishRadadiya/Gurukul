@@ -1,6 +1,5 @@
 import type { DialogRenderer } from "@codezee/sixtify-brahma";
 import {
-  ActionButtons,
   Button,
   ColumnArrangerDialog,
   ColumnIconAction,
@@ -9,18 +8,19 @@ import {
   useDialogActions,
 } from "@codezee/sixtify-brahma";
 import { Add } from "@mui/icons-material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Stack } from "@mui/material";
-import type { FilterModel, IGetRowsParams } from "ag-grid-community";
+import type { FilterModel } from "ag-grid-community";
 import { t } from "i18next";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import type { FieldValues } from "react-hook-form";
 
 import {
   useGetAddress,
   type AddressBookDetails,
 } from "@web/components/Address/address-book/AddressBook/AddressBookList/hooks/useGetAddressBook";
 import { useGetAddressBookColumns } from "@web/components/Address/address-book/AddressBook/AddressBookList/hooks/useGetAddressBookColumns";
+import type { GetAddressBookExportApiSuccessResponse } from "@web/components/Address/address-book/AddressBook/AddressBookList/hooks/useGetAddressBookExport";
 import { useGetAddressBookExport } from "@web/components/Address/address-book/AddressBook/AddressBookList/hooks/useGetAddressBookExport";
 import type { GetAddressBookPdfApiSuccessResponse } from "@web/components/Address/address-book/AddressBook/AddressBookList/hooks/useGetAddressBookPdf";
 import { useGetAddressBookPdf } from "@web/components/Address/address-book/AddressBook/AddressBookList/hooks/useGetAddressBookPdf";
@@ -28,19 +28,34 @@ import { useGetAddressPdf } from "@web/components/Address/address-book/AddressBo
 import type { AddressBookColumnHideTypes } from "@web/components/Address/address-book/template/dialogs/hooks/templateTypes";
 import { AgGridV2 } from "@web/components/common/AgGridV2/AgGridV2";
 import { usePaginationParams } from "@web/components/common/AgGridV2/hooks/usePaginationParams";
+import { DataExport } from "@web/components/common/DataExport/DataExport";
+import {
+  ExportDialog,
+  useExportDialog,
+} from "@web/components/common/ExportDialog";
+import { ExportModule } from "@web/constants/export";
+import { useBranch } from "@web/context/BranchContext";
+import { useUserPermissions } from "@web/hooks/useUserPermissions/useUserPermissions";
+import { PermissionGuard } from "@web/provider/PermissionGuard";
 import type { FilType } from "@web/types/shared-types";
 import { onError } from "@web/utils/errors";
 
 type AddressBookListProps = {
   columnHide: AddressBookColumnHideTypes;
+  externalDateFilter?: FieldValues;
   setColumnHide: (col: AddressBookColumnHideTypes) => void;
 };
 
 export const AddressBookList = ({
   columnHide,
+  externalDateFilter,
   setColumnHide,
 }: AddressBookListProps) => {
   const router = useRouter();
+
+  const { branchIds } = useBranch();
+
+  const { allowPrintExport } = useUserPermissions();
 
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
@@ -61,11 +76,62 @@ export const AddressBookList = ({
 
   const { data, isFetching } = useGetAddress({
     endRow,
+    externalFilter: { ...externalDateFilter, branch_id: [branchIds] },
     filterModel: agGridFilterModel,
     startRow,
   });
 
   const { addressBookDetails, totalCount } = data || {};
+
+  const resetExportStateRef = useRef<(() => void) | null>(null);
+
+  const { isPending: isPendingExportAddressBook, mutate: exportAddressBook } =
+    useGetAddressBookExport({
+      options: {
+        onError: (error) => onError(error),
+        onSuccess: ({
+          data,
+          message,
+        }: GetAddressBookExportApiSuccessResponse) => {
+          resetExportStateRef.current?.();
+          onDialogClose();
+
+          window.open(data.pdfUrl, "_blank");
+
+          toasts.success({ title: message });
+        },
+      },
+    });
+
+  const {
+    handleExport,
+    handleMaskSelect,
+    handleOriginalSelect,
+    handleOtpSubmit,
+    isPendingSendExportOtp,
+    otpError,
+    resetExportState,
+    showOtpForm,
+  } = useExportDialog({
+    exportModule: ExportModule.ADDRESS_BOOK,
+    onExport: (data) => {
+      exportAddressBook(data);
+    },
+  });
+
+  resetExportStateRef.current = resetExportState;
+
+  const getExportBody = () => ({
+    endRow: 0,
+    externalFilter: { ...externalDateFilter, branch_id: [branchIds] },
+    filterModel: agGridFilterModel,
+    startRow: 0,
+  });
+
+  const onExport = (fileType: FilType) => {
+    handleExport(fileType, getExportBody());
+    onDialogOpen("exportOptions");
+  };
 
   const { isPending: isPendingGetAddressBook, mutate: printAddressBook } =
     useGetAddressBookPdf({
@@ -91,29 +157,6 @@ export const AddressBookList = ({
       },
     });
 
-  const getExportParams = (): Partial<IGetRowsParams> => ({
-    endRow: 1000,
-    filterModel: agGridFilterModel,
-    startRow: 0,
-  });
-
-  const { mutate: exportData } = useGetAddressBookExport({
-    options: {
-      onError: (error) => onError(error),
-      onSuccess: ({ data, message }) => {
-        toasts.success({ title: message });
-        window.open(data.pdfUrl, "_blank");
-      },
-    },
-  });
-
-  const handleExport = (fileType: FilType) => {
-    exportData({
-      body: getExportParams(),
-      fileType,
-    });
-  };
-
   const dialogRenderer: DialogRenderer = {
     columnChooser: (
       <ColumnArrangerDialog<AddressBookColumnHideTypes>
@@ -124,6 +167,19 @@ export const AddressBookList = ({
         onSave={(columns) => {
           setColumnHide(columns);
         }}
+      />
+    ),
+    exportOptions: (
+      <ExportDialog
+        error={otpError}
+        open
+        showOtpForm={showOtpForm}
+        onClose={onDialogClose}
+        onMaskSelect={handleMaskSelect}
+        onOriginalSelect={handleOriginalSelect}
+        onSubmit={handleOtpSubmit}
+        isLoading={isPendingExportAddressBook}
+        isPendingSendExportOtp={isPendingSendExportOtp}
       />
     ),
   };
@@ -137,62 +193,32 @@ export const AddressBookList = ({
           justifyContent="end"
           alignItems="center"
         >
-          <Button
-            loading={isPendingGetAddressBook}
-            variant="outlined"
-            onClick={() => {
-              printAddressBook();
-            }}
-            disabled={!selectedRows.length}
-          >
-            {t("address.book.btn.print.book")}
-          </Button>
+          <PermissionGuard canAccess={allowPrintExport}>
+            <Button
+              loading={isPendingGetAddressBook}
+              variant="outlined"
+              onClick={() => {
+                printAddressBook();
+              }}
+              disabled={!selectedRows.length}
+            >
+              {t("address.book.btn.print.book")}
+            </Button>
 
-          <Button
-            loading={isPendingPrintAddress}
-            variant="outlined"
-            onClick={() => {
-              printAddress();
-            }}
-            disabled={!selectedRows.length}
-          >
-            {t("address.book.btn.print.detail")}
-          </Button>
+            <Button
+              loading={isPendingPrintAddress}
+              variant="outlined"
+              onClick={() => {
+                printAddress();
+              }}
+              disabled={!selectedRows.length}
+            >
+              {t("address.book.btn.print.detail")}
+            </Button>
 
-          <ActionButtons
-            buttons={[
-              {
-                dataCy: "export",
-                dataPTag: "export",
-                endIcon: <ExpandMoreIcon />,
-                key: "right",
-                label: "Export",
-                menuItems: [
-                  {
-                    dataCy: "xls",
-                    dataPTag: "xls",
-                    key: "xls",
-                    label: "Download XLS",
-                    onClick: () => {
-                      handleExport("excel");
-                    },
-                  },
-                  {
-                    dataCy: "pfd",
-                    dataPTag: "pfd",
-                    key: "pfd",
-                    label: "Download PDF",
-                    onClick: () => {
-                      handleExport("pdf");
-                    },
-                  },
-                ],
-                menuPlacement: "left",
-                size: "small",
-                variant: "outlined",
-              },
-            ]}
-          />
+            <DataExport onExport={onExport} />
+          </PermissionGuard>
+
           <Button
             variant="outlined"
             startIcon={<Add />}
@@ -236,7 +262,7 @@ export const AddressBookList = ({
         ]}
         onRowsPerPageChange={onRowsPerPageChange}
         onFilterChange={setAgGridFilterModel}
-        height={270}
+        height={330}
       />
 
       {openedDialog && dialogRenderer[openedDialog]}

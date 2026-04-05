@@ -1,0 +1,20 @@
+import {
+  CREATE,
+  DELETE,
+  EDIT,
+  PERMISSIONS,
+  ROLL_ENTRY_AND_PERMISSION,
+  SUB_MODULES,
+  VIEW,
+} from "@web/constants/permission/permission";
+import { PERMISSION_PATH } from "@web/constants/permission/permissions/permissions";
+
+export const ROLL_ENTRY_AND_PERMISSION_PATH =
+  `${PERMISSION_PATH}.${SUB_MODULES}.${ROLL_ENTRY_AND_PERMISSION}` as const;
+
+export const ROLL_ENTRY_PERMISSION = {
+  CREATE: `${ROLL_ENTRY_AND_PERMISSION_PATH}.${PERMISSIONS}.${CREATE}`,
+  DELETE: `${ROLL_ENTRY_AND_PERMISSION_PATH}.${PERMISSIONS}.${DELETE}`,
+  EDIT: `${ROLL_ENTRY_AND_PERMISSION_PATH}.${PERMISSIONS}.${EDIT}`,
+  MENU: `${ROLL_ENTRY_AND_PERMISSION_PATH}.${PERMISSIONS}.${VIEW}`,
+} as const;

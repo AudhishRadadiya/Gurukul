@@ -54,3 +54,7 @@ export const TODAY = "Today";
 export const CUSTOM = "Custom";
 export const SEVEN_DAYS = "7 Days";
 export const ONE_MONTH = "1 Month";
+
+export const SINGLE = 0;
+export const MULTIPLE = 1;
+export const CUSTOM1 = 2;

@@ -4,23 +4,15 @@ import { ContentBox, DatePicker, PadBox } from "@codezee/sixtify-brahma";
 import { Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { DateTime } from "luxon";
-import { useForm } from "react-hook-form";
 
+import { DateFilterPeriodAutocomplete } from "@web/components/common/Autocomplete/DateFilterPeriodAutocomplete";
 import { UserLoginReportBreadcrumbs } from "@web/components/user/userLoginReport/UserLoginReportBreadcrumbs";
 import { UserLoginReportList } from "@web/components/user/userLoginReport/userLoginReportList/UserLoginReportList";
+import { useDateFilters } from "@web/hooks/useDateFilters";
 
 // eslint-disable-next-line import/no-default-export
 export default function Page() {
-  const { control, watch } = useForm({
-    defaultValues: {
-      from_date: DateTime.now().toISODate(),
-      to_date: DateTime.now().toISODate(),
-    },
-  });
-
-  const fromDate = watch("from_date");
-
-  const toDate = watch("to_date");
+  const { control, fromDate, toDate } = useDateFilters();
 
   return (
     <Stack gap="10px">
@@ -38,10 +30,18 @@ export default function Page() {
             </Typography>
 
             <Stack direction="row" alignItems="center" gap="10px">
+              <DateFilterPeriodAutocomplete
+                name="date_filter_period"
+                control={control}
+                clearIcon
+                sx={{ width: "160px" }}
+              />
+
               <DatePicker
                 control={control}
                 name="from_date"
                 clearable={false}
+                containerProps={{ width: "160px" }}
               />
 
               <DatePicker
@@ -49,12 +49,18 @@ export default function Page() {
                 name="to_date"
                 minDate={fromDate ? DateTime.fromISO(fromDate) : DateTime.now()}
                 clearable={false}
+                containerProps={{ width: "160px" }}
               />
             </Stack>
           </Stack>
         </PadBox>
 
-        <UserLoginReportList fromDate={fromDate} toDate={toDate} />
+        <UserLoginReportList
+          externalFilter={{
+            from_date: fromDate,
+            to_date: toDate,
+          }}
+        />
       </ContentBox>
     </Stack>
   );

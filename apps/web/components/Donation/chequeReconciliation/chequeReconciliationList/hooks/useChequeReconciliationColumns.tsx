@@ -6,6 +6,7 @@ import { chequeStatusTypes } from "@web/components/common/Autocomplete/hooks/use
 import type { ChequeReconciliation } from "@web/components/Donation/chequeReconciliation/chequeReconciliationList/hooks/useGetChequeReconciliation";
 import type { AgColumnsWithActions } from "@web/types/agGrid";
 import { dateFormat } from "@web/utils/date";
+import { formatToIndianNumber } from "@web/utils/helper";
 
 export const useChequeReconciliationColumns = () => {
   const column: AgColumnsWithActions<ChequeReconciliation> = [
@@ -52,6 +53,11 @@ export const useChequeReconciliationColumns = () => {
       sortable: true,
     },
     {
+      cellRenderer: ({ value }: CustomCellRendererProps) => {
+        return !value
+          ? AG_GRID_CELL_DEFAULT_VALUE
+          : formatToIndianNumber(value);
+      },
       field: "amount",
       filter: "agNumberColumnFilter",
       headerName: t("amount.label"),

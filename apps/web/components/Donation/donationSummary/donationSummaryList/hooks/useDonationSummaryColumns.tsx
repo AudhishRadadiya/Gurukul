@@ -1,27 +1,34 @@
+import type { CustomCellRendererProps } from "ag-grid-react";
 import { t } from "i18next";
 
+import { AG_GRID_CELL_DEFAULT_VALUE } from "@web/components/common/AgGridV2/AgGridV2";
 import type { DonationSummary } from "@web/components/Donation/donationSummary/donationSummaryList/hooks/useGetDonationSummary";
 import type { AgColumnsWithActions } from "@web/types/agGrid";
+import { formatToIndianNumber } from "@web/utils/helper";
 
-export const useDonationSummaryColumns = () => {
+type UseDonationSummaryColumnsProps = {
+  onlyContactNo: boolean;
+};
+
+export const useDonationSummaryColumns = ({
+  onlyContactNo,
+}: UseDonationSummaryColumnsProps) => {
   const column: AgColumnsWithActions<DonationSummary> = [
     {
       field: "contact_no",
       headerName: t("common.contact.label"),
     },
     {
-      field: "first_name",
-      headerName: t("common.first.name"),
+      field: "receipt_name",
+      headerName: t("common.receipt.name"),
+      hide: onlyContactNo,
     },
     {
-      field: "middle_name",
-      headerName: t("common.middle.name"),
-    },
-    {
-      field: "last_name",
-      headerName: t("common.last.name"),
-    },
-    {
+      cellRenderer: ({ value }: CustomCellRendererProps) => {
+        return !value
+          ? AG_GRID_CELL_DEFAULT_VALUE
+          : formatToIndianNumber(value);
+      },
       field: "amount",
       headerName: t("amount.label"),
     },
@@ -32,18 +39,22 @@ export const useDonationSummaryColumns = () => {
     {
       field: "address",
       headerName: t("address.menu.label"),
+      hide: onlyContactNo,
     },
     {
       field: "city",
       headerName: t("common.city"),
+      hide: onlyContactNo,
     },
     {
       field: "pan_no",
       headerName: t("common.pan.no"),
+      hide: onlyContactNo,
     },
     {
       field: "email_id",
       headerName: t("email.label"),
+      hide: onlyContactNo,
     },
   ];
 

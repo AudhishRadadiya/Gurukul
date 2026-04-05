@@ -1,11 +1,13 @@
 import type { TooltipProps as MuiTooltipProps } from "@mui/material";
 import { Box, Tooltip as MuiTooltip, Typography } from "@mui/material";
 import type { PropsWithChildren, ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type TooltipProps = PropsWithChildren<{
   toolTipLabel: ReactNode;
   placement?: MuiTooltipProps["placement"];
   hidden?: MuiTooltipProps["hidden"];
+  checkOverflow?: boolean;
 }>;
 
 export const Tooltip = ({
@@ -13,32 +15,49 @@ export const Tooltip = ({
   children,
   placement = "top-start",
   hidden = false,
+  checkOverflow = false,
   ...rest
 }: TooltipProps) => {
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+
+  const [isOverflowed, setIsOverflowed] = useState(false);
+
+  useEffect(() => {
+    if (checkOverflow && wrapperRef.current) {
+      const el = wrapperRef.current;
+
+      setIsOverflowed(
+        el.scrollWidth > el.clientWidth || el.scrollHeight > el.clientHeight
+      );
+    }
+  }, [children]);
+
   return (
     <MuiTooltip
       arrow
       placement={placement}
       title={toolTipLabel}
-      hidden={hidden}
+      disableHoverListener={checkOverflow ? !isOverflowed || hidden : hidden}
       {...rest}
     >
-      {typeof children === "string" ? (
-        <Typography
-          variant="body2"
-          fontWeight={500}
-          sx={{
-            maxWidth: "150px",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {children}
-        </Typography>
-      ) : (
-        <Box display="inline-flex">{children}</Box>
-      )}
+      <Box
+        ref={wrapperRef}
+        sx={{
+          maxWidth: "100%",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          display: "inline-flex",
+        }}
+      >
+        {typeof children === "string" ? (
+          <Typography variant="body2" fontWeight={500}>
+            {children}
+          </Typography>
+        ) : (
+          children
+        )}
+      </Box>
     </MuiTooltip>
   );
 };

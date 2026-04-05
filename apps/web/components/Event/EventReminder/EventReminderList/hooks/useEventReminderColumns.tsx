@@ -5,6 +5,7 @@ import { AG_GRID_CELL_DEFAULT_VALUE } from "@web/components/common/AgGridV2/AgGr
 import type { EventReminder } from "@web/components/Event/EventReminder/EventReminderList/hooks/useGetEventReminder";
 import type { AgColumnsWithActions } from "@web/types/agGrid";
 import { dateFormat } from "@web/utils/date";
+import { formatToIndianNumber } from "@web/utils/helper";
 
 export const useEventReminderColumns = () => {
   const column: AgColumnsWithActions<EventReminder> = [
@@ -69,6 +70,11 @@ export const useEventReminderColumns = () => {
       minWidth: 130,
     },
     {
+      cellRenderer: ({ value }: CustomCellRendererProps) => {
+        return !value
+          ? AG_GRID_CELL_DEFAULT_VALUE
+          : formatToIndianNumber(value);
+      },
       field: "amount",
       filter: "agNumberColumnFilter",
       headerName: t("amount.label"),

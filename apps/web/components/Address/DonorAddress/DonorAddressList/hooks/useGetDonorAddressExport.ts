@@ -1,7 +1,6 @@
 import type { UseMutationOptions } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
 
-import type { Status } from "@web/components/common/Autocomplete/hooks/useGetStatusOptions";
 import { DONATION_ADDRESS_LIST_ROUTES } from "@web/constants/routes/donation_address/routes";
 import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
 import { donorAddressKeys } from "@web/queryKeysFactories/donorAddress";
@@ -9,8 +8,7 @@ import type {
   ApiErrorResponse,
   ApiSuccessResponse,
 } from "@web/types/apiResponse";
-
-export type FilType = "excel" | "pdf";
+import type { FilType, GetListArgsAg2 } from "@web/types/shared-types";
 
 type GetDonorAddressExportPayload = {
   url: string;
@@ -19,32 +17,35 @@ type GetDonorAddressExportPayload = {
 export type GetDonorAddressPDFApiSuccessResponse =
   ApiSuccessResponse<GetDonorAddressExportPayload>;
 
+type ExportMutationVariables = {
+  body?: GetListArgsAg2;
+  fileType: FilType;
+};
+
 type UseAddDonorAddressExportArgs = {
-  options: UseMutationOptions<
+  options?: UseMutationOptions<
     GetDonorAddressPDFApiSuccessResponse,
     ApiErrorResponse<GetDonorAddressExportPayload>,
-    FilType
+    ExportMutationVariables
   >;
-  status: Status;
 };
 
 export function useGetDonorAddressExport({
   options = {},
-  status,
-}: UseAddDonorAddressExportArgs) {
+}: UseAddDonorAddressExportArgs = {}) {
   const { axiosPrivate } = useAxiosPrivate();
 
   return useMutation({
-    mutationFn: async (fileType: FilType) => {
+    mutationFn: async ({ body, fileType }: ExportMutationVariables) => {
       const { data } =
         await axiosPrivate.post<GetDonorAddressPDFApiSuccessResponse>(
-          DONATION_ADDRESS_LIST_ROUTES.post(status, fileType),
-          {}
+          DONATION_ADDRESS_LIST_ROUTES.post(fileType),
+          body
         );
 
       return data;
     },
-    mutationKey: donorAddressKeys.add(status),
+    mutationKey: donorAddressKeys.export(),
     ...options,
   });
 }

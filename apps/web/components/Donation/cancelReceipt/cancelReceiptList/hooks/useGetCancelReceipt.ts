@@ -1,5 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import type { IGetRowsParams } from "ag-grid-community";
+import _every from "lodash/every";
+import _get from "lodash/get";
+import type { FieldValues } from "react-hook-form";
 
 import { CANCEL_RECEIPT_ROUTES } from "@web/constants/routes/cancel_receipt/routes";
 import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
@@ -14,6 +17,7 @@ export type CancelReceipt = {
   entry_by: string;
   full_count: string;
   receipt_no: number;
+  receipt_sequence: string;
   trust_name: string;
   user: string;
 };
@@ -26,6 +30,7 @@ export type GetCancelReceiptSuccessResponse = ApiSuccessResponse<{
 type GetCancelReceiptListArgs = Partial<
   IGetRowsParams & {
     endRow: number;
+    externalFilter: FieldValues;
     is_active: boolean;
     responseFields: string[];
     startRow: number;
@@ -45,6 +50,7 @@ export function useGetCancelReceipt(body: GetCancelReceiptListArgs) {
   };
 
   return useQuery({
+    enabled: _every(_get(body, "externalFilter.branch_id"), Boolean),
     initialData: {
       cancelDonations: [],
       full_count: 0,

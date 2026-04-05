@@ -5,14 +5,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import z from "zod";
 
 import type { FormValuesTypes } from "@web/app/auth/reset-password/page";
 import { useChangePassword } from "@web/app/change-password/hook/useChangePassword";
 import { AuthUiCard } from "@web/components/auth/Layouts/AuthUiCard";
-import { AuthUiContainer } from "@web/components/auth/Layouts/AuthUiContainer";
 import { useDisabledButtonsCache } from "@web/context/DisabledButtonsCacheContext/DisabledButtonsCacheContext";
 import { useEnableDisableButton } from "@web/hooks/useEnableDisableButton";
 import { submitButtonId } from "@web/hooks/useEnableDisableButtonToggle";
@@ -82,12 +80,6 @@ export default function Page() {
 
   const router = useRouter();
 
-  const { data } = useSession();
-
-  const { user } = data || {};
-
-  const userId = user?.user_id ?? "";
-
   useEnableDisableButton<ChangePasswordFormFieldValues>({
     control,
     defaultValues,
@@ -104,7 +96,6 @@ export default function Page() {
         router.push("/");
       },
     },
-    userId,
   });
 
   const onSubmit = (formValues: FormValuesTypes) => {
@@ -117,7 +108,11 @@ export default function Page() {
   const { confirm_password, old_password, password } = errors;
 
   return (
-    <AuthUiContainer>
+    <Stack
+      height="calc(110vh - 223px)"
+      alignItems="center"
+      justifyContent="center"
+    >
       <AuthUiCard>
         <Stack gap="70px" width="100%">
           <Stack gap="32px">
@@ -128,6 +123,7 @@ export default function Page() {
             <PasswordField
               name="old_password"
               label={t("old.password.label")}
+              letterCase="mixed"
               control={control}
               error={!!old_password}
               helperText={errorMessages(old_password?.message)}
@@ -137,6 +133,7 @@ export default function Page() {
             <PasswordField
               name="password"
               label={t("new.password.label")}
+              letterCase="mixed"
               control={control}
               error={!!password}
               helperText={errorMessages(password?.message)}
@@ -147,6 +144,7 @@ export default function Page() {
               name="confirm_password"
               label={t("confirm.password.label")}
               control={control}
+              letterCase="mixed"
               error={!!confirm_password}
               helperText={errorMessages(confirm_password?.message)}
               required
@@ -164,6 +162,6 @@ export default function Page() {
           </Button>
         </Stack>
       </AuthUiCard>
-    </AuthUiContainer>
+    </Stack>
   );
 }

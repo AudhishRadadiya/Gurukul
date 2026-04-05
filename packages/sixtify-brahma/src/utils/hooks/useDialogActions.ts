@@ -1,4 +1,5 @@
 import { type ReactNode, useState } from "react";
+import type { OnAction } from "../types";
 
 export type DialogTypes =
   | "add"
@@ -8,11 +9,14 @@ export type DialogTypes =
   | "deleteTemplate"
   | "editTemplate"
   | "addTemplate"
+  | "addAuto"
   | "addDepartment"
+  | "addBusinessDetail"
   | "addWorkType"
   | "addSubDepartment"
   | "addDocument"
   | "addGrade"
+  | "bulkMail"
   | "addSkillType"
   | "addDesignation"
   | "cancel"
@@ -23,6 +27,7 @@ export type DialogTypes =
   | "updateShift"
   | "updateWeeklyOff"
   | "updateHoliday"
+  | "addFamilyMember"
   | "configureLeave"
   | "approve"
   | "reject"
@@ -55,21 +60,21 @@ export type DialogTypes =
   | "approveBulkLeave"
   | "rejectBulkLeave"
   | "approveBulkOvertime"
-  | "rejectBulkOvertime"
-  | "addFamilyMember"
-  | "columnChooser"
-  | "bulkMail"
   | "confirmation"
-  | "donarHistory"
+  | "columnChooser"
   | "hastakHistory"
+  | "donarHistory"
   | "receiptEntry"
-  | "addBusinessDetail";
+  | "rejectBulkOvertime"
+  | "exportOptions"
+  | "cancelDonationEntryConfirmation"
+  | "addEventDropdown";
 
 export type DialogRenderer = { [key in DialogTypes]?: ReactNode };
 
 export type UseDialogActionsFns = {
   onDialogOpen: (config: DialogTypes) => void;
-  onDialogClose: () => void;
+  onDialogClose: OnAction;
 };
 
 export function useDialogActions() {

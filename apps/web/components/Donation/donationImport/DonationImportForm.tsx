@@ -9,8 +9,7 @@ import { forwardRef, useImperativeHandle } from "react";
 import { FormProvider, useForm, type UseFormSetError } from "react-hook-form";
 import { z } from "zod";
 
-import { TrustAutocomplete } from "@web/components/common/Autocomplete/TrustAutocomplete";
-import { CheckboxWithLabel } from "@web/components/common/checkboxWithLabel/CheckboxWithLabel";
+import { TrustAutocompleteFromMultipleBranch } from "@web/components/common/Autocomplete/TrustAutocompleteFromMultipleBranch";
 import { ExcelImportProcess } from "@web/components/common/ExcelImport/ExcelImportProcess";
 import { useFileDownload } from "@web/components/common/useFileDownload";
 import {
@@ -18,6 +17,7 @@ import {
   SAMPLE_FILE,
 } from "@web/components/Donation/donationImport/hooks/constant";
 import type { DonationImportDetails } from "@web/components/Donation/donationImport/hooks/useDonationImport";
+import { useBranch } from "@web/context/BranchContext";
 import {
   errorMessages,
   filterNestedChangedFormFields,
@@ -25,7 +25,7 @@ import {
 
 const DonationImportFormSchema = z
   .object({
-    copy_to_address: z.boolean(),
+    branch_id: z.string().nullable(),
     excel_file: z.instanceof(File).nullable(),
     trust_id: z
       .string()
@@ -49,7 +49,7 @@ export type DonationImportFormFieldValues = z.infer<
 >;
 
 const formDefaultValues: DonationImportFormFieldValues = {
-  copy_to_address: false,
+  branch_id: null,
   excel_file: null,
   trust_id: null,
 };
@@ -99,19 +99,21 @@ export const DonationImportForm = forwardRef(
 
     const { downloadFile } = useFileDownload();
 
+    const { branchIds } = useBranch();
+
     useImperativeHandle(ref, () => ({
       setError,
 
       submitForm(onSubmit) {
         handleSubmit((formValues) => {
-          const { copy_to_address, trust_id } = formValues;
+          const { trust_id } = formValues;
 
           const filterFormValues = filterNestedChangedFormFields(
-            { copy_to_address, trust_id },
-            { ...dirtyFields, copy_to_address: true }
+            { trust_id },
+            dirtyFields
           );
 
-          onSubmit(filterFormValues);
+          onSubmit({ ...filterFormValues, branch_id: branchIds });
         })();
       },
     }));
@@ -124,8 +126,9 @@ export const DonationImportForm = forwardRef(
             justifyContent="space-between"
             alignItems="center"
           >
-            <TrustAutocomplete
+            <TrustAutocompleteFromMultipleBranch
               loading={loading}
+              branchIds={[branchIds]}
               name="trust_id"
               control={control}
               label={t("trust.label")}
@@ -150,12 +153,6 @@ export const DonationImportForm = forwardRef(
 
         <FormSection>
           <Stack gap="25px">
-            <CheckboxWithLabel
-              control={control}
-              name="copy_to_address"
-              label={t("copy.to.address.label")}
-            />
-
             <ExcelImportProcess<DonationImportDetails>
               name="excel_file"
               excelImportFieldLabels={donationFieldLabels}

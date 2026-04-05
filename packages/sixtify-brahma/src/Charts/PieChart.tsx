@@ -1,17 +1,22 @@
-import { styled } from "@mui/material/styles";
-import type { PieSeriesType, PieValueType } from "@mui/x-charts";
+import { styled, type Theme } from "@mui/material/styles";
+import type {
+  ChartsTooltipProps,
+  PieSeriesType,
+  PieValueType,
+} from "@mui/x-charts";
 import { useDrawingArea } from "@mui/x-charts/hooks";
-import type { MakeOptional } from "@mui/x-charts/internals";
 import type { PieChartProps as MuiPieChartProps } from "@mui/x-charts/PieChart";
 import { PieChart as MuiPieChart } from "@mui/x-charts/PieChart";
 import type { ReactNode } from "react";
 import { Skeleton } from "./Skeleton";
 
 type PieChartProps = Omit<MuiPieChartProps, "series"> & {
-  series: MakeOptional<PieSeriesType<MakeOptional<PieValueType, "id">>, "type">;
+  series: Partial<PieSeriesType<Partial<PieValueType>>>;
   label?: string;
   valueFormatter?: (item: { value: number }) => string;
   loading?: boolean;
+  tooltip?: ChartsTooltipProps["trigger"];
+  theme?: Theme;
 };
 
 type PieCenterLabelProps = {
@@ -22,8 +27,8 @@ export const PieChart = ({
   height = 235,
   skipAnimation = false,
   loading = false,
-  valueFormatter = (item: MakeOptional<PieValueType, "id">) => `${item.value}%`,
-  tooltip,
+  valueFormatter = (item: Partial<PieValueType>) => `${item.value}%`,
+  tooltip = "item",
   label,
   series,
   ...rest
@@ -60,19 +65,29 @@ export const PieChart = ({
     <MuiPieChart
       height={height}
       sx={{
-        transform: "translate(50px, 0px)",
+        transform: "translate(0px, 0px)",
         overflow: "visible",
+        "& .MuiPieArcLabel-root": {
+          display: "none",
+        },
       }}
       series={[
         {
+          type: "pie",
+          data: series.data as readonly PieValueType[],
           arcLabel: (params) => params.label ?? "",
           arcLabelMinAngle: 20,
           valueFormatter,
-          ...series,
+          innerRadius: series.innerRadius,
+          outerRadius: series.outerRadius,
         },
       ]}
+      slotProps={{
+        tooltip: {
+          trigger: tooltip,
+        },
+      }}
       {...rest}
-      tooltip={tooltip}
       skipAnimation={skipAnimation}
     >
       <PieCenterLabel>{label}</PieCenterLabel>

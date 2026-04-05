@@ -8,11 +8,12 @@ import {
 } from "@mui/material";
 import type { ReactNode } from "react";
 import { v4 as uuidv4 } from "uuid";
+import type { OnAction } from "../utils/types";
 
 type BreadcrumbItem = {
   icon?: ReactNode;
   text?: string;
-  onClick?: () => void;
+  onClick?: OnAction;
 };
 
 type BreadcrumbProps = {

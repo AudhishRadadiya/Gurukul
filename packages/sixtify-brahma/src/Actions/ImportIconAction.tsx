@@ -3,13 +3,15 @@ import { IconButton } from "@mui/material";
 import { SvgImport } from "../Svgs";
 import { Tooltip } from "../Tooltip";
 
-export type ImportIconActionProps = IconButtonProps;
+export type ImportIconActionProps = IconButtonProps & {
+  disabled?: boolean;
+};
 
 export const ImportIconAction = (props: ImportIconActionProps) => {
   return (
     <IconButton {...props} sx={{ padding: 0 }}>
       <Tooltip toolTipLabel="Import">
-        <SvgImport />
+        <SvgImport disabled={props.disabled} />
       </Tooltip>
     </IconButton>
   );

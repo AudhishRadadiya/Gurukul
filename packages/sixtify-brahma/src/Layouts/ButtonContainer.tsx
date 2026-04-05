@@ -1,17 +1,19 @@
-import { Stack } from "@mui/material";
-
+import { Stack, type SxProps } from "@mui/material";
 import type { PropsWithChildren } from "react";
 import { useGetDeviceType } from "../utils/hooks/useGetDeviceType";
 import { FormGridLayout } from "./FormGridLayout";
+
 type ButtonContainerProps = PropsWithChildren & {
   columns?: number;
   columnsOnMobile?: number;
+  sx?: SxProps;
 };
 
 export const ButtonContainer = ({
   columns = 2,
   columnsOnMobile = 2,
   children,
+  sx,
 }: ButtonContainerProps) => {
   const { layout } = useGetDeviceType();
 
@@ -20,7 +22,7 @@ export const ButtonContainer = ({
       {children}
     </FormGridLayout>
   ) : (
-    <Stack direction="row" gap="5px">
+    <Stack sx={sx} direction="row" gap="5px">
       {children}
     </Stack>
   );

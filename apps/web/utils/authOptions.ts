@@ -1,9 +1,9 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
+import type { SigninApiSuccessResponse } from "@web/components/auth/sign-in/hooks/usePostSignin";
 import { HttpStatus } from "@web/constants/httpStatus";
 import { AUTH_ROUTES } from "@web/constants/routes/auth/routes";
-import type { ApiSuccessResponse } from "@web/types/apiResponse";
 import { rawAxios } from "@web/utils/axios";
 
 export const authOptions: NextAuthOptions = {
@@ -38,39 +38,36 @@ export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       async authorize(credentials) {
-        if (credentials) {
-          try {
-            const { data, status } = await rawAxios.post<
-              ApiSuccessResponse<{
-                user: {
-                  access_token: string;
-                  enable_two_factor: boolean;
-                  expired_at: string;
-                  login_name: string;
-                  token: string;
-                  user_id: string;
-                };
-              }>
-            >(
-              AUTH_ROUTES.login,
-              {
-                login_name: credentials.login_name,
-                password: credentials.password,
-              },
-              {}
-            );
+        if (!credentials) {
+          return null;
+        }
 
-            if (status === HttpStatus.Ok) {
-              return {
-                ...data.data.user,
-              };
-            }
-          } catch (e) {
-            // eslint-disable-next-line no-console
-            console.log("error in signin -> ", e);
+        // Case 1: already have token (skip API call)
+        if (credentials?.token) {
+          return {
+            login_name: credentials?.login_name,
+            token: credentials?.token,
+            user_id: credentials?.user_id,
+            user_type: credentials?.user_type,
+          };
+        }
 
-            return null;
+        // Case 2: no token yet → login with API
+        try {
+          const { data, status } =
+            await rawAxios.post<SigninApiSuccessResponse>(AUTH_ROUTES.login, {
+              login_name: credentials.login_name,
+              password: credentials.password,
+            });
+
+          if (status === HttpStatus.Ok && data?.data?.user) {
+            return {
+              ...data.data.user,
+            };
           }
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error("Error in signin -> ", err);
         }
 
         return null;
@@ -78,6 +75,9 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         login_name: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
+        token: { label: "Token", type: "text" },
+        user_id: { label: "User Id", type: "text" },
+        user_type: { label: "User Type", type: "text" },
       },
       name: "Credentials",
     }),

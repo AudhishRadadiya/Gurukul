@@ -1,9 +1,10 @@
 import type { MouseEventHandler, ReactNode } from "react";
+import type { OnAction } from "../utils/types";
 
 export type SubMenuItem = {
   key: string;
   label: ReactNode;
-  onClick?: () => void;
+  onClick?: OnAction;
   icon?: ReactNode;
   dataPTag?: string;
   dataCy?: string;
@@ -13,7 +14,7 @@ export type SubMenuItem = {
 export type MenuItem = {
   key: string;
   label: ReactNode;
-  onClick?: () => void;
+  onClick?: OnAction;
   icon?: ReactNode;
   dataPTag?: string;
   dataCy?: string;

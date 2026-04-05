@@ -14,25 +14,21 @@ type UseChangePasswordArgs = {
     ApiErrorResponse<ChangePasswordFormFieldValues>,
     Partial<ChangePasswordFormFieldValues>
   >;
-  userId: string;
 };
 
-export function useChangePassword({
-  options = {},
-  userId,
-}: UseChangePasswordArgs) {
+export function useChangePassword({ options = {} }: UseChangePasswordArgs) {
   const { axiosPrivate } = useAxiosPrivate();
 
   return useMutation({
     mutationFn: async (formValues) => {
       const { data } = await axiosPrivate.post<EmptyApiSuccessResponse>(
-        RESET_PASSWORD_ROUTES.post(userId),
+        RESET_PASSWORD_ROUTES.post,
         formValues
       );
 
       return data;
     },
-    mutationKey: resetPasswordKeys.post(userId),
+    mutationKey: resetPasswordKeys.post(),
     ...options,
   });
 }

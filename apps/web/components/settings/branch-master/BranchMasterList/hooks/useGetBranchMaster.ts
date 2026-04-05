@@ -16,7 +16,9 @@ export type Branch = {
   contact_person_name: string;
   full_count: string;
   gst_no: string;
+  is_active: boolean;
   is_deleted: boolean;
+  is_online: boolean;
   logo: string;
 };
 

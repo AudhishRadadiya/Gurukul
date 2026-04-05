@@ -11,8 +11,15 @@ import type { HTMLAttributeAnchorTarget } from "react";
 
 import { useUserPermissions } from "@web/hooks/useUserPermissions/useUserPermissions";
 
-const drawerMenuItems = {
+export const drawerMenuItems = {
+  address: "Address",
+  donation: "Donation",
+  event: "Event",
   home: "Home",
+  permission: "Permission",
+  report: "Report",
+  settings: "Settings",
+  user: "User",
 };
 
 export type DrawerMenuItemsKeys = keyof typeof drawerMenuItems;
@@ -64,17 +71,17 @@ export const useDrawerMenuItems = () => {
     },
     {
       icon: <SvgProfile />,
-      isView: true,
+      isView: validateAccess(permissions.permissions),
       key: "permission",
       menuItems: [
         {
-          isView: true,
+          isView: validateAccess(permissions.rollEntryAndPermission),
           key: "role",
           onClick: (href, target) => onClick(href, target),
           title: t("role.menu.label"),
         },
         {
-          isView: true,
+          isView: validateAccess(permissions.userPermission),
           key: "user-permissions",
           onClick: (href, target) => onClick(href, target),
           title: t("user.permissions.menu.label"),
@@ -88,56 +95,16 @@ export const useDrawerMenuItems = () => {
       key: "donation",
       menuItems: [
         {
-          isView: true,
-          key: "suvichar-master",
-          onClick: (href, target) => onClick(href, target),
-          title: t("common.master.label", {
-            label: t("suvichar.menu.label"),
-          }),
-        },
-        {
-          isView: true,
-          key: "donation-master",
-          onClick: (href, target) => onClick(href, target),
-          title: t("common.master.label", {
-            label: t("donation.menu.label"),
-          }),
-        },
-        {
-          isView: true,
-          key: "donation-mode",
-          onClick: (href, target) => onClick(href, target),
-          title: t("common.mode.label", {
-            label: t("donation.menu.label"),
-          }),
-        },
-        {
-          isView: true,
-          key: "bank-master",
-          onClick: (href, target) => onClick(href, target),
-          title: t("common.master.label", {
-            label: t("bank.menu.label"),
-          }),
-        },
-        {
-          isView: validateAccess(permissions.chequeReconciliation),
-          key: "cheque-reconciliation",
-          onClick: (href, target) => onClick(href, target),
-          title: t("chequeReconciliation.label"),
-        },
-        {
           isView: validateAccess(permissions.cancelReceipt),
           key: "cancel-receipt",
           onClick: (href, target) => onClick(href, target),
           title: t("cancelReceipt.menu.label"),
         },
         {
-          isView: validateAccess(permissions.donationSummary),
-          key: "donation-summary",
+          isView: validateAccess(permissions.chequeReconciliation),
+          key: "cheque-reconciliation",
           onClick: (href, target) => onClick(href, target),
-          title: t("summary.label", {
-            label: t("donation.menu.label"),
-          }),
+          title: t("chequeReconciliation.label"),
         },
         {
           isView: validateAccess(permissions.donationEntry),
@@ -151,6 +118,14 @@ export const useDrawerMenuItems = () => {
           onClick: (href, target) => onClick(href, target),
           title: t("donation.import.label"),
         },
+        {
+          isView: validateAccess(permissions.donationSummary),
+          key: "donation-summary",
+          onClick: (href, target) => onClick(href, target),
+          title: t("summary.label", {
+            label: t("donation.menu.label"),
+          }),
+        },
       ],
       onClick: (href, target) => onClick(href, target),
       title: t("donation.menu.label"),
@@ -161,12 +136,10 @@ export const useDrawerMenuItems = () => {
       key: "event",
       menuItems: [
         {
-          isView: validateAccess(permissions.eventSummaryReport),
-          key: "event-summary",
+          isView: validateAccess(permissions.eventDonationEntry),
+          key: "event-donation-entry",
           onClick: (href, target) => onClick(href, target),
-          title: t("summary.label", {
-            label: t("common.event.label"),
-          }),
+          title: t("common.event.donationEntry"),
         },
         {
           isView: validateAccess(permissions.eventReminderList),
@@ -177,10 +150,24 @@ export const useDrawerMenuItems = () => {
           }),
         },
         {
-          isView: validateAccess(permissions.eventDonationEntry),
-          key: "event-donation-entry",
+          isView: validateAccess(permissions.eventSummaryReport),
+          key: "event-summary",
           onClick: (href, target) => onClick(href, target),
-          title: t("common.event.donationEntry"),
+          title: t("summary.label", {
+            label: t("common.event.label"),
+          }),
+        },
+        {
+          isView: validateAccess(permissions.eventItemSummary),
+          key: "event-item-summary",
+          onClick: (href, target) => onClick(href, target),
+          title: t("event.item.summary.label"),
+        },
+        {
+          isView: validateAccess(permissions.eventDropdownReport),
+          key: "event-dropdown-summary",
+          onClick: (href, target) => onClick(href, target),
+          title: t("event.dropdown.summary.label"),
         },
       ],
       onClick: (href, target) => onClick(href, target),
@@ -192,10 +179,16 @@ export const useDrawerMenuItems = () => {
       key: "address",
       menuItems: [
         {
-          isView: validateAccess(permissions.masterParameter),
-          key: "master-entry",
+          isView: validateAccess(permissions.addressBook),
+          key: "address-book",
           onClick: (href, target) => onClick(href, target),
-          title: t("address.master.entry.menu.label"),
+          title: t("address.book.menu.label"),
+        },
+        {
+          isView: validateAccess(permissions.addressImport),
+          key: "address-import",
+          onClick: (href, target) => onClick(href, target),
+          title: t("address.import.label"),
         },
         {
           isView: validateAccess(permissions.donorAddressList),
@@ -206,16 +199,12 @@ export const useDrawerMenuItems = () => {
           }),
         },
         {
-          isView: validateAccess(permissions.addressBook),
-          key: "address-book",
+          isView: validateAccess(permissions.updateDonarAddress),
+          key: "update-donor-address",
           onClick: (href, target) => onClick(href, target),
-          title: t("address.book.menu.label"),
-        },
-        {
-          isView: true,
-          key: "address-import",
-          onClick: (href, target) => onClick(href, target),
-          title: t("address.import.label"),
+          title: `${t("common.update.label")} ${t("common.donor.label", {
+            label: t("address.label"),
+          })}`,
         },
       ],
       onClick: (href, target) => onClick(href, target),
@@ -226,12 +215,6 @@ export const useDrawerMenuItems = () => {
       isView: validateAccess(permissions.report),
       key: "report",
       menuItems: [
-        {
-          isView: validateAccess(permissions.donationReport),
-          key: "donation-report",
-          onClick: (href, target) => onClick(href, target),
-          title: t("donation.report.menu.label"),
-        },
         {
           isView: validateAccess(permissions.dailyCollectionReport),
           key: "daily-collection-report",
@@ -244,6 +227,12 @@ export const useDrawerMenuItems = () => {
           onClick: (href, target) => onClick(href, target),
           title: t("donation.collection.report.menu.label"),
         },
+        {
+          isView: validateAccess(permissions.donationReport),
+          key: "donation-report",
+          onClick: (href, target) => onClick(href, target),
+          title: t("donation.report.menu.label"),
+        },
       ],
       onClick: (href, target) => onClick(href, target),
       title: t("common.report"),
@@ -254,10 +243,52 @@ export const useDrawerMenuItems = () => {
       key: "settings",
       menuItems: [
         {
+          isView: validateAccess(permissions.addressType),
+          key: "address-type-master",
+          onClick: (href, target) => onClick(href, target),
+          title: "Address Type Master",
+        },
+        {
+          isView: validateAccess(permissions.bankMaster),
+          key: "bank-master",
+          onClick: (href, target) => onClick(href, target),
+          title: t("common.master.label", {
+            label: t("bank.menu.label"),
+          }),
+        },
+        {
           isView: validateAccess(permissions.branchMaster),
           key: "branch-master",
           onClick: (href, target) => onClick(href, target),
           title: "Branch Master",
+        },
+        {
+          isView: validateAccess(permissions.donationMaster),
+          key: "donation-master",
+          onClick: (href, target) => onClick(href, target),
+          title: t("common.master.label", {
+            label: t("donation.menu.label"),
+          }),
+        },
+        {
+          isView: validateAccess(permissions.donationMode),
+          key: "donation-mode",
+          onClick: (href, target) => onClick(href, target),
+          title: t("common.mode.label", {
+            label: t("donation.menu.label"),
+          }),
+        },
+        {
+          isView: validateAccess(permissions.draftPayment),
+          key: "draft-payment",
+          onClick: (href, target) => onClick(href, target),
+          title: t("draft.payment.label"),
+        },
+        {
+          isView: validateAccess(permissions.eventMaster),
+          key: "event-master",
+          onClick: (href, target) => onClick(href, target),
+          title: t("common.event.master"),
         },
         {
           isView: validateAccess(permissions.acYearMaster),
@@ -266,16 +297,16 @@ export const useDrawerMenuItems = () => {
           title: "Financial Year Master",
         },
         {
-          isView: validateAccess(permissions.addressType),
-          key: "address-type-master",
+          isView: validateAccess(permissions.masterParameter),
+          key: "master-entry",
           onClick: (href, target) => onClick(href, target),
-          title: "Address Type Master",
+          title: t("address.master.entry.menu.label"),
         },
         {
-          isView: validateAccess(permissions.trustMaster),
-          key: "trust-master",
+          isView: validateAccess(permissions.emailSettings),
+          key: "mail-setting",
           onClick: (href, target) => onClick(href, target),
-          title: "Trust Master",
+          title: t("mailSetting.label"),
         },
         {
           isView: validateAccess(permissions.masterType),
@@ -284,24 +315,10 @@ export const useDrawerMenuItems = () => {
           title: t("master.type.menu.label"),
         },
         {
-          isView: validateAccess(permissions.eventMaster),
-          key: "event-master",
+          isView: validateAccess(permissions.paymentGateway),
+          key: "payment-gateway",
           onClick: (href, target) => onClick(href, target),
-          title: "Event Master",
-        },
-        {
-          isView: validateAccess(permissions.smsTemplate),
-          key: "sms-template",
-          onClick: (href, target) => onClick(href, target),
-          title: t("sms.template.menu.label"),
-        },
-        {
-          isView: validateAccess(permissions.smsMaster),
-          key: "sms-master",
-          onClick: (href, target) => onClick(href, target),
-          title: t("common.master.label", {
-            label: t("sms.label"),
-          }),
+          title: t("payment.gateway.menu.label"),
         },
         {
           isView: validateAccess(permissions.smsSettings),
@@ -310,10 +327,36 @@ export const useDrawerMenuItems = () => {
           title: t("sms.settings.menu.label"),
         },
         {
-          isView: validateAccess(permissions.emailSettings),
-          key: "mail-setting",
+          isView: validateAccess(permissions.smsTemplate),
+          key: "sms-template",
           onClick: (href, target) => onClick(href, target),
-          title: t("mailSetting.label"),
+          title: t("sms.template.menu.label"),
+        },
+        {
+          isView: validateAccess(permissions.suvicharMaster),
+          key: "suvichar-master",
+          onClick: (href, target) => onClick(href, target),
+          title: t("common.master.label", {
+            label: t("suvichar.menu.label"),
+          }),
+        },
+        {
+          isView: validateAccess(permissions.trustMaster),
+          key: "trust-master",
+          onClick: (href, target) => onClick(href, target),
+          title: "Trust Master",
+        },
+        {
+          isView: validateAccess(permissions.webBanner),
+          key: "web-banner",
+          onClick: (href, target) => onClick(href, target),
+          title: t("web.banner.label"),
+        },
+        {
+          isView: validateAccess(permissions.whatsappSettings),
+          key: "whatsapp-setting",
+          onClick: (href, target) => onClick(href, target),
+          title: t("whatsappSetting.label"),
         },
       ],
       onClick: (href, target) => onClick(href, target),

@@ -12,6 +12,7 @@ import { usePaginationParams } from "@web/components/common/AgGridV2/hooks/usePa
 import { useEventSummaryColumns } from "@web/components/Event/EventSummary/EventSummaryList/hooks/useEventSummaryColumns";
 import type { EventSummary } from "@web/components/Event/EventSummary/EventSummaryList/hooks/useGetEventSummary";
 import { useGetEventSummary } from "@web/components/Event/EventSummary/EventSummaryList/hooks/useGetEventSummary";
+import { useBranch } from "@web/context/BranchContext";
 
 export type EventSummaryListProps = {
   externalFilter: FieldValues;
@@ -27,6 +28,8 @@ export const EventSummaryList = forwardRef(
   ({ externalFilter }: EventSummaryListProps) => {
     const router = useRouter();
 
+    const { branchIds } = useBranch();
+
     const { onPageChange, onRowsPerPageChange, page, rowsPerPage } =
       usePaginationParams();
 
@@ -38,7 +41,7 @@ export const EventSummaryList = forwardRef(
 
     const { data, isFetching, isLoading } = useGetEventSummary({
       endRow,
-      externalFilter,
+      externalFilter: { ...externalFilter, branch_id: [branchIds] },
       filterModel: agGridFilterModel,
       startRow,
     });
@@ -63,19 +66,15 @@ export const EventSummaryList = forwardRef(
         height={260}
         actions={[
           {
-            onClick: () => {
-              const { event_type, ...restFilters } = externalFilter;
-
+            onClick: (data) => {
               const query: FieldValues = buildQuery({
-                ...restFilters,
-                event_type_id: event_type,
+                ...externalFilter,
+                event_type_id: data.event_type_id,
               });
 
               const params = new URLSearchParams(query).toString();
 
-              router.push(
-                `/donation/donation-entry?page=event-summary&${params}`
-              );
+              router.push(`/event/donation?page=event-summary&${params}`);
             },
             title: t("common.details.label"),
           },

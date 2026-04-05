@@ -36,7 +36,7 @@ export const AddUserMaster = () => {
     <>
       <UserMasterFrom ref={formRef} />
 
-      <PadBox padding={{ paddingRight: "20px" }}>
+      <PadBox padding={{ padding: "20px 20px 0 0" }}>
         <Stack direction="row" justifyContent="end" gap="10px">
           <Button
             variant="outlined"

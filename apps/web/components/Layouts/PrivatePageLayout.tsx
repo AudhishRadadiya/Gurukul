@@ -6,6 +6,7 @@ import { useState, type PropsWithChildren } from "react";
 
 import { Drawer } from "@web/components/Drawer/Drawer";
 import { Header } from "@web/components/Header";
+import { BranchProvider } from "@web/context/BranchContext";
 
 export function PrivatePageLayout({ children }: Readonly<PropsWithChildren>) {
   const { layout } = useGetDeviceType();
@@ -17,16 +18,21 @@ export function PrivatePageLayout({ children }: Readonly<PropsWithChildren>) {
   );
 
   return (
-    <Stack direction={isMobile ? "column" : "row"}>
-      <Drawer open={isDrawerOpen} />
+    <BranchProvider>
+      <Stack direction={isMobile ? "column" : "row"}>
+        <Drawer open={isDrawerOpen} />
 
-      <Stack spacing="64px" flexGrow={1} sx={{ overflow: "hidden" }}>
-        <Header isDrawerOpen={isDrawerOpen} setIsDrawerOpen={setIsDrawerOpen} />
+        <Stack spacing="64px" flexGrow={1} sx={{ overflow: "hidden" }}>
+          <Header
+            isDrawerOpen={isDrawerOpen}
+            setIsDrawerOpen={setIsDrawerOpen}
+          />
 
-        <Box component="main" sx={{ flexGrow: 1 }}>
-          <PadBox padding={{ padding: "15px 30px" }}>{children}</PadBox>
-        </Box>
+          <Box component="main" sx={{ flexGrow: 1 }}>
+            <PadBox padding={{ padding: "15px 30px" }}>{children}</PadBox>
+          </Box>
+        </Stack>
       </Stack>
-    </Stack>
+    </BranchProvider>
   );
 }

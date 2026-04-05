@@ -1,12 +1,12 @@
-import { BottomDialogBody, BottomDialogStyled } from "./BottomDialog.styled";
-
 import type { DialogProps } from ".";
 import { PadBox } from "../PadBox";
+import type { OnAction } from "../utils/types";
+import { BottomDialogBody, BottomDialogStyled } from "./BottomDialog.styled";
 
 export type BottomDialogProps = Omit<DialogProps, "title"> & {
   title?: string;
   open?: boolean;
-  onClose: () => void;
+  onClose: OnAction;
 };
 
 export function BottomDialog({

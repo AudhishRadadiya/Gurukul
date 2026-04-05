@@ -4,7 +4,7 @@ import { t } from "i18next";
 import { useMemo, useState } from "react";
 import type { FieldValues } from "react-hook-form";
 
-import { useGetEventOptions } from "@web/components/common/Autocomplete/hooks/useGetEventOptions";
+import { useGetFilterEventOptions } from "@web/components/common/Autocomplete/hooks/useGetFilterEventOptions";
 import { useGetTrustOptions } from "@web/components/common/Autocomplete/hooks/useGetTrustOptions";
 
 type EventSummaryFilterProps = {
@@ -18,9 +18,9 @@ export const EventSummaryFilter = ({
 }: EventSummaryFilterProps) => {
   const [currentFilter, setCurrentFilter] = useState<FieldValues>();
 
-  const { data: eventOptions } = useGetEventOptions();
+  const { data: filterEventOptions } = useGetFilterEventOptions();
 
-  const { data: trustOption } = useGetTrustOptions();
+  const { data: trustOption } = useGetTrustOptions({ useShortName: true });
 
   const fromDate = currentFilter?.from_date;
 
@@ -37,7 +37,7 @@ export const EventSummaryFilter = ({
       {
         key: "event_type",
         label: t("eventType.label"),
-        options: eventOptions,
+        options: filterEventOptions,
         type: "autoComplete",
         value: currentFilter?.event_type,
       },
@@ -56,7 +56,7 @@ export const EventSummaryFilter = ({
         value: currentFilter?.to_date ?? "",
       },
     ],
-    [eventOptions, currentFilter]
+    [filterEventOptions, trustOption, currentFilter]
   );
 
   const onChange = (data: FieldValues, isPopup: boolean) => {

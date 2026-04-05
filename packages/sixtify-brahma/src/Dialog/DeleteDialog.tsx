@@ -3,13 +3,14 @@ import { Stack, Typography } from "@mui/material";
 import { Button } from "../Button";
 import { ButtonContainer } from "../Layouts";
 import { Dialog } from "./Dialog";
+import type { OnAction } from "../utils/types";
 
 export type DeleteDialogProps = {
   title: string;
   open: boolean;
   isDeleteLoading: boolean;
-  onDelete: () => void;
-  onClose: () => void;
+  onDelete: OnAction;
+  onClose: OnAction;
 };
 
 export const DeleteDialog = ({
@@ -27,7 +28,11 @@ export const DeleteDialog = ({
       open={open}
       actions={
         <ButtonContainer>
-          <Button onClick={onClose} variant="outlined">
+          <Button
+            disabled={isDeleteLoading}
+            onClick={onClose}
+            variant="outlined"
+          >
             Cancel
           </Button>
 

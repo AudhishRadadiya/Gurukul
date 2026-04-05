@@ -17,6 +17,10 @@ export const useUserPermissions = () => {
       return false;
     }
 
+    if (userAccessControl.full_permission === true) {
+      return true;
+    }
+
     const pathParts = modules.split(".");
 
     // TODO: Bhavik fix this any type
@@ -37,5 +41,10 @@ export const useUserPermissions = () => {
     return currentLevel === true;
   };
 
-  return { loading: isFetching, permissions: MENU_PERMISSION, validateAccess };
+  return {
+    allowPrintExport: userAccessControl?.allow_print_export ?? false,
+    loading: isFetching,
+    permissions: MENU_PERMISSION,
+    validateAccess,
+  };
 };

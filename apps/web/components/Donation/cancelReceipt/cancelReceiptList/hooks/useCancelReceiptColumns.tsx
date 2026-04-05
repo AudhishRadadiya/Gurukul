@@ -5,6 +5,7 @@ import { AG_GRID_CELL_DEFAULT_VALUE } from "@web/components/common/AgGridV2/AgGr
 import type { CancelReceipt } from "@web/components/Donation/cancelReceipt/cancelReceiptList/hooks/useGetCancelReceipt";
 import type { AgColumnsWithActions } from "@web/types/agGrid";
 import { dateFormat } from "@web/utils/date";
+import { formatToIndianNumber } from "@web/utils/helper";
 
 export const useCancelReceiptColumns = () => {
   const column: AgColumnsWithActions<CancelReceipt> = [
@@ -24,10 +25,19 @@ export const useCancelReceiptColumns = () => {
       }),
     },
     {
+      field: "receipt_sequence",
+      headerName: t("common.sequence.label"),
+    },
+    {
       field: "trust_name",
       headerName: t("trust.label"),
     },
     {
+      cellRenderer: ({ value }: CustomCellRendererProps) => {
+        return !value
+          ? AG_GRID_CELL_DEFAULT_VALUE
+          : formatToIndianNumber(value);
+      },
       field: "amount",
       headerName: t("amount.label"),
       maxWidth: 200,

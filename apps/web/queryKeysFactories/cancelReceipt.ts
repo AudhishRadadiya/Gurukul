@@ -3,11 +3,11 @@ export const cancelReceiptKeys = {
 
   all: ["cancel-receipt"],
 
-  generateReceiptNumber: (donation_mode_id: string, trust_id: string) =>
+  generateReceiptNumber: (branch_id: string, trust_id: string) =>
     [
       ...cancelReceiptKeys.all,
       "generateReceiptNumber",
-      donation_mode_id,
+      branch_id,
       trust_id,
     ] as const,
 

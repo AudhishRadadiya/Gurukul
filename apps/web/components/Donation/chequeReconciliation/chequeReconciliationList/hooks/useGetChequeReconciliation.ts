@@ -7,6 +7,7 @@ import { CHEQUE_RECONCILIATION_ROUTES } from "@web/constants/routes/cheque_recon
 import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
 import { chequeReconciliationKeys } from "@web/queryKeysFactories/chequeReconciliation";
 import type { ApiSuccessResponse } from "@web/types/apiResponse";
+import { isBranchFilterEnabled } from "@web/utils/reactQuery";
 
 export type ChequeReconciliation = {
   amount: number;
@@ -60,6 +61,7 @@ export function useGetChequeReconciliation(
   };
 
   return useQuery({
+    enabled: isBranchFilterEnabled(body),
     initialData: {
       chequeReconciliationData: [],
       totalCount: 0,

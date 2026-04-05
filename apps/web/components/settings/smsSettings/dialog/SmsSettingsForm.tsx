@@ -12,21 +12,14 @@ import type { UseFormSetError } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { SmsMasterAutocomplete } from "@web/components/common/Autocomplete/SmsMasterAutocomplete";
 import { useEnableDisableButton } from "@web/hooks/useEnableDisableButton";
 import { errorMessages, filterChangedFormFields } from "@web/utils/helper";
 
 const SmsSettingsFormSchema = z.object({
   is_active: z.boolean(),
   sms_auth_key: z.string().max(255, "common.maxLength").nullable(),
-  sms_master_id: z
-    .string()
-    .max(255, "common.maxLength")
-    .nullable()
-    .refine((value) => !!value, {
-      message: "common.required",
-    }),
   sms_password: z.string().max(255, "common.maxLength").nullable(),
+  sms_provider_name: z.string().nullable(),
   sms_sender_id: z
     .string()
     .max(255, "common.maxLength")
@@ -35,7 +28,12 @@ const SmsSettingsFormSchema = z.object({
       message: "common.required",
     }),
   sms_url: z.string().max(255, "common.maxLength").nullable(),
-  sms_username: z.string().max(255, "common.maxLength").nullable(),
+  sms_username: z
+    .string()
+    .nullable()
+    .refine((value) => !!value, {
+      message: "common.required",
+    }),
 });
 
 export type SmsSettingsFormFieldValues = z.infer<typeof SmsSettingsFormSchema>;
@@ -55,8 +53,8 @@ export type FormRef = {
 const formDefaultValues: SmsSettingsFormFieldValues = {
   is_active: true,
   sms_auth_key: null,
-  sms_master_id: null,
   sms_password: null,
+  sms_provider_name: null,
   sms_sender_id: null,
   sms_url: null,
   sms_username: null,
@@ -97,8 +95,14 @@ export const SmsSettingsForm = forwardRef(
       },
     }));
 
-    const { sms_auth_key, sms_password, sms_sender_id, sms_url, sms_username } =
-      errors;
+    const {
+      sms_auth_key,
+      sms_password,
+      sms_provider_name,
+      sms_sender_id,
+      sms_url,
+      sms_username,
+    } = errors;
 
     return (
       <Stack gap="15px">
@@ -107,6 +111,7 @@ export const SmsSettingsForm = forwardRef(
             name="sms_username"
             control={control}
             loading={loading}
+            letterCase="mixed"
             label={t("common.sms.label", {
               label: t("common.username"),
             })}
@@ -118,6 +123,7 @@ export const SmsSettingsForm = forwardRef(
 
           <TextField
             name="sms_sender_id"
+            letterCase="mixed"
             control={control}
             loading={loading}
             label={t("common.sms.label", {
@@ -129,13 +135,25 @@ export const SmsSettingsForm = forwardRef(
             helperText={errorMessages(sms_sender_id?.message)}
           />
 
-          <SmsMasterAutocomplete name="sms_master_id" control={control} />
+          <TextField
+            name="sms_provider_name"
+            control={control}
+            letterCase="mixed"
+            loading={loading}
+            label={t("common.sms.label", {
+              label: t("common.provider"),
+            })}
+            required
+            error={!!sms_provider_name}
+            helperText={errorMessages(sms_provider_name?.message)}
+          />
         </FormGridLayout>
 
         <FormGridLayout columns={3}>
           <TextField
             name="sms_auth_key"
             control={control}
+            letterCase="mixed"
             loading={loading}
             label={t("common.sms.label", {
               label: t("common.auth"),
@@ -150,6 +168,7 @@ export const SmsSettingsForm = forwardRef(
             name="sms_password"
             control={control}
             loading={loading}
+            letterCase="mixed"
             label={t("common.sms.label", {
               label: t("common.password"),
             })}
@@ -162,6 +181,7 @@ export const SmsSettingsForm = forwardRef(
           <TextField
             name="sms_url"
             control={control}
+            letterCase="mixed"
             loading={loading}
             label={t("common.sms.label", {
               label: t("common.url"),

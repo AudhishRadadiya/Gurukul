@@ -16,6 +16,7 @@ export type DonationReceiptEntryDetail = {
   event_master_name: string;
   full_count: string;
   hastak_name: string;
+  new_amount: number;
   pending_amount: number;
   received_amount: number;
   remark: string;

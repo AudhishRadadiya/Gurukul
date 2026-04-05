@@ -7,8 +7,9 @@ import { t } from "i18next";
 import _isEmpty from "lodash/isEmpty";
 import type { ForwardedRef } from "react";
 import { forwardRef, useImperativeHandle, useMemo } from "react";
-import type { UseFormSetError } from "react-hook-form";
+import type { UseFormSetError, UseFormSetValue } from "react-hook-form";
 import { FormProvider, useForm } from "react-hook-form";
+import { useDebounceValue } from "usehooks-ts";
 import { z } from "zod";
 
 import { AddressBookFromFields } from "@web/components/Address/address-book/AddressBook/addAddressBook/AddressBookFromFields";
@@ -19,10 +20,12 @@ import { AddFamilyMemberDetailDialog } from "@web/components/Address/address-boo
 import { FamilyMemberFormSchema } from "@web/components/Address/address-book/AddressBook/addAddressBook/familyMemberDetail/Dialog/FamilyMemberForm";
 import { FamilyMemberDetailList } from "@web/components/Address/address-book/AddressBook/addAddressBook/familyMemberDetail/familyMemberDetailList/FamilyMemberDetailList";
 import { GeneralDetailsFromFields } from "@web/components/Address/address-book/AddressBook/addAddressBook/GeneralDetailsFromFields";
+import { useGetAutoGno } from "@web/components/Address/address-book/AddressBook/addAddressBook/hooks/useGetAutoGno";
 import { usePostUserData } from "@web/components/Address/address-book/AddressBook/addAddressBook/hooks/usePostUserData";
 import { PastStudentFromFields } from "@web/components/Address/address-book/AddressBook/addAddressBook/PastStudentFromFields";
 import { BloodGroupSchema } from "@web/components/common/Autocomplete/hooks/useGetBloodGroupOptions";
 import { GenderSchema } from "@web/components/common/Autocomplete/hooks/useGetGenderOptions";
+import { useBranch } from "@web/context/BranchContext";
 import {
   filterNestedChangedFormFields,
   removeNegationValues,
@@ -31,7 +34,7 @@ import {
   aadharCardRegex,
   emailRegex,
   licenseNumberRegex,
-  mobileNumberRegex,
+  mobileNoRegex,
   panCardRegex,
   pinCodeRegex,
   voterIdRegex,
@@ -52,12 +55,13 @@ export const AddressBookFromSchema = z.object({
     }),
   alternet_mobile_no: z
     .string()
-    .regex(mobileNumberRegex, "common.mobileNumber.invalid")
+    .regex(mobileNoRegex, "common.mobileNumber.invalid")
     .nullable(),
   anniversary_date: z.string().nullable(),
   b_note: z.string().nullable(),
   birth_date: z.string().nullable(),
   blood_group: BloodGroupSchema.nullable(),
+  branch_id: z.string().nullable().optional(),
   business_detail: z.array(BusinessDetailFormSchema).nullable().optional(),
   business_parameter_id: z.string().nullable(),
   category_1_parameters_id: z.string().nullable(),
@@ -66,6 +70,7 @@ export const AddressBookFromSchema = z.object({
   class_mate: z.string().nullable(),
   contact_no: z
     .string()
+    .regex(mobileNoRegex, "common.mobileNumber.invalid")
     .nullable()
     .refine((value) => !!value, {
       message: "common.required",
@@ -129,6 +134,7 @@ export const AddressBookFromSchema = z.object({
   saints_hastak_parameter_id: z.string().nullable(),
   ssc_gurukul: z.string().nullable(),
   ssc_year: z.number().nullable(),
+  state: z.string().nullable().optional(),
   surname: z
     .string()
     .nullable()
@@ -149,6 +155,7 @@ type AddressBookFormProps = {
 
 export type FormRef = {
   setError: UseFormSetError<AddressBookFormFieldValues>;
+  setValue: UseFormSetValue<AddressBookFormFieldValues>;
   submitForm: (
     onSubmit: (formValues: Partial<AddressBookFormFieldValues>) => void
   ) => void;
@@ -163,6 +170,7 @@ export const formDefaultValues: AddressBookFormFieldValues = {
   b_note: null,
   birth_date: null,
   blood_group: null,
+  branch_id: null,
   business_detail: [],
   business_parameter_id: null,
   category_1_parameters_id: null,
@@ -185,8 +193,8 @@ export const formDefaultValues: AddressBookFormFieldValues = {
   is_past_student: false,
   is_vip: false,
   landmark: null,
-  leave_in: null,
-  medium: null,
+  leave_in: 1,
+  medium: 1,
   middle_name: null,
   note: null,
   pan_no: null,
@@ -197,6 +205,7 @@ export const formDefaultValues: AddressBookFormFieldValues = {
   saints_hastak_parameter_id: null,
   ssc_gurukul: null,
   ssc_year: null,
+  state: null,
   surname: null,
   taluko: null,
   village: null,
@@ -220,7 +229,7 @@ export const AddressBookFrom = forwardRef(
     });
 
     const {
-      formState: { dirtyFields },
+      formState: { dirtyFields, errors },
       handleSubmit,
       reset,
       setError,
@@ -228,8 +237,21 @@ export const AddressBookFrom = forwardRef(
       watch,
     } = methods;
 
+    const { branchIds } = useBranch();
+
+    const { data: autoGno } = useGetAutoGno();
+
+    useMemo(() => {
+      if (autoGno?.g_no && !defaultValues.g_no) {
+        setValue("g_no", autoGno.g_no, {
+          shouldDirty: true,
+        });
+      }
+    }, [autoGno]);
+
     useImperativeHandle(ref, () => ({
       setError,
+      setValue,
       submitForm(onSubmit) {
         handleSubmit((formValues) => {
           const filterFormValues = filterNestedChangedFormFields(
@@ -237,10 +259,13 @@ export const AddressBookFrom = forwardRef(
             dirtyFields
           );
 
+          const payload = {
+            ...filterFormValues,
+            branch_id: branchIds,
+          };
+
           onSubmit(
-            dirtyFields.contact_no
-              ? removeNegationValues(filterFormValues)
-              : filterFormValues
+            dirtyFields.contact_no ? removeNegationValues(payload) : payload
           );
         })();
       },
@@ -250,7 +275,7 @@ export const AddressBookFrom = forwardRef(
 
     const businessDetailList = watch("business_detail") || [];
 
-    const contactNo = watch("contact_no") ?? "";
+    const [contactNoInput] = useDebounceValue(watch("contact_no"), 4000);
 
     const dialogRenderer: DialogRenderer = {
       addBusinessDetail: (
@@ -286,13 +311,9 @@ export const AddressBookFrom = forwardRef(
     };
 
     usePostUserData({
-      contactNo,
+      contactNo: !errors.contact_no && contactNoInput ? contactNoInput : "",
       onSuccess: setUserData,
     });
-
-    useMemo(() => {
-      setUserData({ ...formDefaultValues, contact_no: contactNo });
-    }, [contactNo]);
 
     return (
       <FormProvider {...methods}>

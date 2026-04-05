@@ -51,6 +51,7 @@ const subModuleSchema: z.ZodType<SubModule> = z.lazy(() =>
 const RolesPermissionsFormSchema = z
   .object({
     is_user_permission: z.boolean().optional(),
+    login_name: z.string().nullable().optional(),
     modules: z.array(subModuleSchema),
     role_id: z.string().nullable().optional(),
     role_name: z.string().max(50, "common.maxLength").nullable().optional(),
@@ -913,7 +914,17 @@ export const RolesPermissionsForm = forwardRef(
           <Stack gap="15px">
             <FormRow maxColumn={3}>
               {watch("is_user_permission") ? (
-                <RolesAutocomplete name="role_id" control={control} />
+                <>
+                  <RolesAutocomplete name="role_id" control={control} />
+
+                  <TextField
+                    name="login_name"
+                    control={control}
+                    loading={loading}
+                    label={t("common.user.name")}
+                    disabled
+                  />
+                </>
               ) : (
                 <TextField
                   loading={loading}

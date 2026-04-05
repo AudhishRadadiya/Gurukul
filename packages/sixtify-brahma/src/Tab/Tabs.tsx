@@ -39,23 +39,29 @@ export const Tabs = ({ tabs, value, loading }: TabsProps) => {
       <MuiTabs value={value}>
         {tabs
           .filter(({ isView }) => isView !== false)
-          .map(({ iconPosition = "end", toolTipLabel = "", icon, ...rest }) => (
-            <Tab
-              key={uuidv4()}
-              icon={
-                toolTipLabel ? (
-                  <Tooltip toolTipLabel={toolTipLabel} placement="bottom">
-                    {icon}
-                  </Tooltip>
-                ) : (
-                  icon
-                )
-              }
-              disabled={loading}
-              iconPosition={iconPosition}
-              {...rest}
-            />
-          ))}
+          .map(
+            (
+              { iconPosition = "end", toolTipLabel = "", icon, ...rest },
+              index
+            ) => (
+              <Tab
+                // eslint-disable-next-line sonarjs/no-array-index-key
+                key={index}
+                icon={
+                  toolTipLabel ? (
+                    <Tooltip toolTipLabel={toolTipLabel} placement="bottom">
+                      {icon}
+                    </Tooltip>
+                  ) : (
+                    icon
+                  )
+                }
+                disabled={loading}
+                iconPosition={iconPosition}
+                {...rest}
+              />
+            )
+          )}
       </MuiTabs>
     </Stack>
   );

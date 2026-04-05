@@ -4,6 +4,10 @@ import type { FilType } from "@web/types/shared-types";
 export const ADDRESS_BOOK_BASE_URL = `${API}/address_book` as const;
 
 export const ADDRESS_BOOK_ROUTES = {
+  autoGno: `${ADDRESS_BOOK_BASE_URL}/auto-gno` as const,
+
+  columnsDefault: `${ADDRESS_BOOK_BASE_URL}/columns/default` as const,
+
   export: (fileType: FilType) =>
     `${ADDRESS_BOOK_BASE_URL}/${LIST}/${fileType}` as const,
 

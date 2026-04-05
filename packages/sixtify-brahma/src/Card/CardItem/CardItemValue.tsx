@@ -1,5 +1,6 @@
 import type { AvatarOwnProps, SxProps, Theme } from "@mui/material";
 import { Avatar, Skeleton, Stack, Typography, useTheme } from "@mui/material";
+import { forwardRef } from "react";
 
 type CardItemValueProps = {
   title?: string;
@@ -10,89 +11,90 @@ type CardItemValueProps = {
   sx?: SxProps<Theme>;
   isHideTitle?: boolean;
   variant?: AvatarOwnProps["variant"];
+  containerSx?: SxProps;
 };
 
-export const CardItemValue = ({
-  title,
-  subTitle,
-  avatar,
-  loading = false,
-  showAvatar = false,
-  isHideTitle = false,
-  variant = "circular",
-  sx,
-}: CardItemValueProps) => {
-  const theme = useTheme();
+export const CardItemValue = forwardRef<HTMLSpanElement, CardItemValueProps>(
+  (
+    {
+      title,
+      subTitle,
+      avatar,
+      loading = false,
+      showAvatar = false,
+      isHideTitle = false,
+      variant = "circular",
+      sx,
+      containerSx,
+    },
+    ref
+  ) => {
+    const theme = useTheme();
 
-  const { slate, iron } = theme.palette.app.color;
+    const { slate, iron } = theme.palette.app.color;
 
-  if (loading) {
-    return (
-      <Stack gap="10px " flex="1">
-        <Stack direction="row" gap="10px" alignItems="center">
-          {avatar && (
+    if (loading) {
+      return (
+        <Stack gap="10px " flex="1">
+          <Stack direction="row" gap="10px" alignItems="center">
+            {avatar && (
+              <Skeleton
+                variant="circular"
+                height="30px"
+                animation="wave"
+                width="30px"
+              />
+            )}
             <Skeleton
-              variant="circular"
-              height="30px"
+              variant="rounded"
+              height={20}
               animation="wave"
-              width="30px"
+              width="150px"
+            />
+          </Stack>
+
+          {subTitle && (
+            <Skeleton
+              variant="rounded"
+              height={20}
+              animation="wave"
+              width="200px"
             />
           )}
-          <Skeleton
-            variant="rounded"
-            height={20}
-            animation="wave"
-            width="150px"
-          />
+        </Stack>
+      );
+    }
+
+    return (
+      <Stack width="50%" sx={containerSx} gap="10px" flex={1}>
+        <Stack gap="10px" direction="row" alignItems="center" flex={1}>
+          {showAvatar && <Avatar alt={title} src={avatar} variant={variant} />}
+
+          {!isHideTitle && (
+            <Typography
+              ref={ref}
+              variant="body1"
+              sx={{
+                width: "100%",
+                fontWeight: 400,
+                color: slate[900],
+                ...sx,
+              }}
+              noWrap
+            >
+              {title ? title : "-"}
+            </Typography>
+          )}
         </Stack>
 
         {subTitle && (
-          <Skeleton
-            variant="rounded"
-            height={20}
-            animation="wave"
-            width="200px"
-          />
+          <Typography variant="body1" sx={{ color: iron[500] }} noWrap>
+            {subTitle}
+          </Typography>
         )}
       </Stack>
     );
   }
+);
 
-  return (
-    <Stack gap="10px" flex="1">
-      <Stack gap="10px" direction="row" alignItems="center">
-        {showAvatar && <Avatar alt={title} src={avatar} variant={variant} />}
-
-        {!isHideTitle && (
-          <Typography
-            variant="body1"
-            sx={{
-              fontWeight: 400,
-              color: slate[900],
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              display: "-webkit-box",
-              WebkitLineClamp: 1,
-              WebkitBoxOrient: "vertical",
-              width: "min-contact",
-              ...sx,
-            }}
-          >
-            {title ? title : "-"}
-          </Typography>
-        )}
-      </Stack>
-
-      {subTitle && (
-        <Typography
-          variant="body1"
-          sx={{
-            color: iron[500],
-          }}
-        >
-          {subTitle}
-        </Typography>
-      )}
-    </Stack>
-  );
-};
+CardItemValue.displayName = "CardItemValue";

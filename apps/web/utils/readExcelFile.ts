@@ -1,4 +1,5 @@
 import { type CellValue, type Row, type Worksheet, Workbook } from "exceljs";
+import { DateTime } from "luxon";
 import type { FieldValues } from "react-hook-form";
 import * as XLSX from "xlsx";
 
@@ -107,7 +108,7 @@ export const readExcelFile = async <T extends FieldValues>(
 export const readExcel = async <T extends FieldValues>(file: File) => {
   const data = await file.arrayBuffer();
 
-  const workbook = XLSX.read(data, { type: "array" });
+  const workbook = XLSX.read(data, { cellDates: false, type: "array" });
 
   const sheetName = workbook.SheetNames[0];
 
@@ -121,9 +122,72 @@ export const readExcel = async <T extends FieldValues>(file: File) => {
     throw new Error(`Sheet "${sheetName}" not found.`);
   }
 
-  const rows: T[] = XLSX.utils.sheet_to_json<T>(worksheet);
+  const rows: T[] = XLSX.utils.sheet_to_json<T>(worksheet, { raw: true });
+
+  // Helper function to parse date from Excel serial number
+  const parseExcelSerialDate = (serial: number): DateTime => {
+    const excelEpoch = DateTime.fromObject({ day: 30, month: 12, year: 1899 });
+
+    return excelEpoch.plus({ days: serial });
+  };
+
+  // Helper function to parse string date with multiple formats
+  const parseStringDate = (dateStr: string): DateTime | null => {
+    const formats = [
+      "d/M/yyyy",
+      "dd/MM/yyyy",
+      "M/d/yyyy",
+      "MM/dd/yyyy",
+      "yyyy-MM-dd",
+    ];
+
+    for (const format of formats) {
+      const date = DateTime.fromFormat(dateStr, format);
+
+      if (date.isValid) {
+        return date;
+      }
+    }
+
+    const isoDate = DateTime.fromISO(dateStr);
+
+    return isoDate.isValid ? isoDate : null;
+  };
+
+  // Helper function to format date value
+  const formatDateValue = (value: string | number): string | undefined => {
+    if (typeof value === "number") {
+      return parseExcelSerialDate(value).toFormat("yyyy-MM-dd");
+    }
+
+    if (typeof value === "string") {
+      const parsedDate = parseStringDate(value);
+
+      if (parsedDate) {
+        return parsedDate.toFormat("yyyy-MM-dd");
+      }
+    }
+
+    return undefined;
+  };
+
+  const formattedRows = rows.map((row) => {
+    const formattedRow = { ...row };
+
+    Object.entries(formattedRow).forEach(([key, value]) => {
+      if (key.toLowerCase().includes("date")) {
+        const formattedDate = formatDateValue(value as string | number);
+
+        if (formattedDate) {
+          formattedRow[key as keyof T] = formattedDate as T[keyof T];
+        }
+      }
+    });
+
+    return formattedRow;
+  });
 
   const titles = Object.keys(rows[0] ?? {});
 
-  return { rows, titles };
+  return { rows: formattedRows, titles };
 };

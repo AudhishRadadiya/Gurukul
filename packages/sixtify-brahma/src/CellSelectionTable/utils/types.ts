@@ -16,6 +16,8 @@ export type Column = {
   maxWidth?: string | number;
   align?: TableCellProps["align"];
   disableSelection?: boolean;
+  lockSelection?: boolean;
+  sorting?: boolean;
   lockPinned?: boolean;
   colorKey?: string;
 };
@@ -27,6 +29,12 @@ export type OptionsType = {
 };
 
 export type CellCoord = { row: number; col: number };
+
+export type EmployeeCellCoord = {
+  employeeId: string;
+  col: number;
+  originalRow?: number;
+};
 
 export type SelectionRange = { start: CellCoord; end: CellCoord };
 

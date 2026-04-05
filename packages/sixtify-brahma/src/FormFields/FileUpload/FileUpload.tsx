@@ -58,7 +58,7 @@ export function FileUpload<P extends FieldValues>({
 }: FileUploadProps<P>) {
   const theme = useTheme();
 
-  const { red } = theme.palette.app.color;
+  const { red, iron } = theme.palette.app.color;
 
   const { t } = useTranslation();
 
@@ -122,12 +122,15 @@ export function FileUpload<P extends FieldValues>({
   }
 
   return (
-    <Stack gap="10px">
-      <InputLabel required={required}>{label}</InputLabel>
+    <Stack gap="5px">
+      <InputLabel disabled={isDisabled} required={required}>
+        {label}
+      </InputLabel>
 
       <FileUploadContainer
         onClick={() => inputRef.current?.click()}
         error={error}
+        disabled={isDisabled}
         {...restProps}
       >
         <PadBox padding={{ padding: "20px" }}>
@@ -141,11 +144,18 @@ export function FileUpload<P extends FieldValues>({
               multiple={multiple}
             />
 
-            <SvgDrop />
+            <SvgDrop disabled={isDisabled} />
 
-            <Typography>Drag & drop files or Browse</Typography>
+            <Typography color={isDisabled ? iron[800] : "revert-layer"}>
+              Drag & drop files or Browse
+            </Typography>
 
-            <Typography variant="caption">{acceptTitle}</Typography>
+            <Typography
+              variant="caption"
+              color={isDisabled ? iron[800] : "revert-layer"}
+            >
+              {acceptTitle}
+            </Typography>
           </Stack>
         </PadBox>
       </FileUploadContainer>

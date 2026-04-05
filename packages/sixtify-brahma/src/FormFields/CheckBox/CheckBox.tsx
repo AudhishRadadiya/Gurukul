@@ -15,6 +15,7 @@ export type CheckBoxProps<P extends FieldValues> = UseControllerProps<P> &
   Omit<Omit<MuiCheckboxProps, "checked">, keyof ControllerRenderProps<P>> & {
     loading?: boolean;
     onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
+    checked?: boolean;
   };
 
 export function CheckBox<P extends FieldValues>({

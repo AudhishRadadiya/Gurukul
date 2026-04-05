@@ -3,13 +3,15 @@ import { IconButton } from "@mui/material";
 import { SvgEdit } from "../Svgs/SvgEdit";
 import { Tooltip } from "../Tooltip";
 
-export type EditIconActionProps = IconButtonProps;
+export type EditIconActionProps = IconButtonProps & {
+  disabled?: boolean;
+};
 
 export const EditIconAction = (props: EditIconActionProps) => {
   return (
     <IconButton {...props}>
       <Tooltip toolTipLabel="Edit">
-        <SvgEdit />
+        <SvgEdit disabled={props.disabled} />
       </Tooltip>
     </IconButton>
   );

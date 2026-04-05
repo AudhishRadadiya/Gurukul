@@ -12,14 +12,19 @@ import type { UseFormSetError } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { BranchAutocomplete } from "@web/components/common/Autocomplete/BranchAutocomplete";
 import { DonationModeAutocomplete } from "@web/components/common/Autocomplete/DonationModeAutocomplete";
-import { TrustAutocomplete } from "@web/components/common/Autocomplete/TrustAutocomplete";
-import { UserAutocomplete } from "@web/components/common/Autocomplete/UserAutocomplete";
+import { ReportUserAutocomplete } from "@web/components/common/Autocomplete/ReportUserAutocomplete";
+import { TrustAutocompleteFromMultipleBranch } from "@web/components/common/Autocomplete/TrustAutocompleteFromMultipleBranch";
 import { CheckboxRow } from "@web/components/common/CheckboxRow/CheckboxRow";
-import { useEnableDisableButton } from "@web/hooks/useEnableDisableButton";
+import { getDateFromToday } from "@web/utils/date";
 import { errorMessages, filterChangedFormFields } from "@web/utils/helper";
 
 const DailyCollectionReportFromSchema = z.object({
+  branch_ids: z
+    .array(z.string())
+    .min(1, { message: "common.required" })
+    .default([]),
   donation_mode: z
     .array(z.string())
     .min(1, { message: "common.required" })
@@ -55,10 +60,11 @@ export type FormRef = {
 };
 
 const formDefaultValues: DailyCollectionReportFromFieldValues = {
+  branch_ids: [],
   donation_mode: [],
-  from_date: null,
+  from_date: getDateFromToday(0),
   show_all: false,
-  to_date: null,
+  to_date: getDateFromToday(1),
   trust: [],
   user: [],
 };
@@ -71,20 +77,17 @@ export const DailyCollectionReportFrom = forwardRef(
     }: DailyCollectionReportFromProps,
     ref: ForwardedRef<FormRef>
   ) => {
-    const methods = useForm<DailyCollectionReportFromFieldValues>({
-      mode: "all",
-      resolver: zodResolver(DailyCollectionReportFromSchema),
-      values: defaultValues,
-    });
-
     const {
       control,
       formState: { dirtyFields, errors },
       handleSubmit,
       setError,
-    } = methods;
-
-    useEnableDisableButton({ control, defaultValues, errors });
+      watch,
+    } = useForm<DailyCollectionReportFromFieldValues>({
+      mode: "all",
+      resolver: zodResolver(DailyCollectionReportFromSchema),
+      values: defaultValues,
+    });
 
     useImperativeHandle(ref, () => ({
       setError,
@@ -92,7 +95,9 @@ export const DailyCollectionReportFrom = forwardRef(
         handleSubmit((formValues) => {
           const filterFormValues = filterChangedFormFields(formValues, {
             ...dirtyFields,
+            from_date: true,
             show_all: true,
+            to_date: true,
           });
 
           onSubmit(filterFormValues);
@@ -105,20 +110,34 @@ export const DailyCollectionReportFrom = forwardRef(
       helperText: errorMessages(errors[name]?.message),
     });
 
+    const branchIds = watch("branch_ids") ?? [];
+
     return (
       <FormContainer>
         <FormGridLayout columns={3}>
-          <TrustAutocomplete
+          <BranchAutocomplete
+            isUserWise
+            multiple
+            required
+            loading={loading}
+            name="branch_ids"
+            control={control}
+            {...getError("branch_ids")}
+          />
+
+          <TrustAutocompleteFromMultipleBranch
             label={t("trust.label")}
             multiple
             required
             loading={loading}
+            disabled={!branchIds.length}
             name="trust"
             control={control}
+            branchIds={branchIds}
             {...getError("trust")}
           />
 
-          <UserAutocomplete
+          <ReportUserAutocomplete
             multiple
             loading={loading}
             name="user"
@@ -126,7 +145,9 @@ export const DailyCollectionReportFrom = forwardRef(
             control={control}
             {...getError("user")}
           />
+        </FormGridLayout>
 
+        <FormGridLayout columns={3}>
           <DonationModeAutocomplete
             loading={loading}
             multiple
@@ -135,9 +156,7 @@ export const DailyCollectionReportFrom = forwardRef(
             control={control}
             {...getError("donation_mode")}
           />
-        </FormGridLayout>
 
-        <FormGridLayout columns={3}>
           <DatePicker
             required
             control={control}

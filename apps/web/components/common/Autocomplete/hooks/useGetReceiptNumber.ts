@@ -14,36 +14,33 @@ export type GetReceiptNumberApiSuccessResponse =
   ApiSuccessResponse<GetReceiptNumberResponse>;
 
 type UseGetReceiptNumberArgs = {
-  donation_mode_id: string;
+  branch_id: string;
   trust_id: string;
 };
 
 export function useGetReceiptNumber({
-  donation_mode_id,
+  branch_id,
   trust_id,
 }: UseGetReceiptNumberArgs) {
   const { axiosPrivate } = useAxiosPrivate();
 
   const getReceiptNumber = async ({
-    donation_mode_id,
+    branch_id,
     trust_id,
   }: UseGetReceiptNumberArgs) => {
     const { data } =
       await axiosPrivate.post<GetReceiptNumberApiSuccessResponse>(
         CANCEL_RECEIPT_ROUTES.generateReceiptNumber,
-        { donation_mode_id, trust_id }
+        { branch_id, trust_id }
       );
 
     return data.data;
   };
 
   const queryResult = useQuery({
-    enabled: !!donation_mode_id && !!trust_id,
-    queryFn: () => getReceiptNumber({ donation_mode_id, trust_id }),
-    queryKey: cancelReceiptKeys.generateReceiptNumber(
-      donation_mode_id,
-      trust_id
-    ),
+    enabled: !!branch_id && !!trust_id,
+    queryFn: () => getReceiptNumber({ branch_id, trust_id }),
+    queryKey: cancelReceiptKeys.generateReceiptNumber(branch_id, trust_id),
   });
 
   return {

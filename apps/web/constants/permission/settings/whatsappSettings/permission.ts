@@ -1,0 +1,18 @@
+import {
+  CREATE,
+  EDIT,
+  PERMISSIONS,
+  SUB_MODULES,
+  VIEW,
+  WHATSAPP_SETTINGS,
+} from "@web/constants/permission/permission";
+import { SETTINGS_PATH } from "@web/constants/permission/settings/permission";
+
+export const WHATSAPP_SETTINGS_PERMISSION_PATH =
+  `${SETTINGS_PATH}.${SUB_MODULES}.${WHATSAPP_SETTINGS}` as const;
+
+export const WHATSAPP_SETTINGS_PERMISSION = {
+  CREATE: `${WHATSAPP_SETTINGS_PERMISSION_PATH}.${PERMISSIONS}.${CREATE}`,
+  EDIT: `${WHATSAPP_SETTINGS_PERMISSION_PATH}.${PERMISSIONS}.${EDIT}`,
+  MENU: `${WHATSAPP_SETTINGS_PERMISSION_PATH}.${PERMISSIONS}.${VIEW}`,
+} as const;

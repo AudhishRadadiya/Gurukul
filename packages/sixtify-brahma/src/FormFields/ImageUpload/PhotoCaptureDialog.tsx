@@ -5,11 +5,12 @@ import Webcam from "react-webcam";
 import { Button } from "../../Button";
 import { Dialog } from "../../Dialog";
 import { toasts } from "../../Toast";
+import type { OnAction } from "../../utils/types";
 
 type PhotoCaptureDialogProps = {
   open: boolean;
   isUploading: boolean;
-  onClose: () => void;
+  onClose: OnAction;
   onChange: (file: File[]) => void;
 };
 
@@ -66,7 +67,7 @@ export const PhotoCaptureDialog = ({
         mirrored
         ref={webcamRef}
         screenshotFormat="image/jpeg"
-        width="835"
+        width="100%"
         height="600"
       />
     </Dialog>

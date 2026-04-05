@@ -10,19 +10,23 @@ import { toasts } from "../../Toast";
 import {
   isFileSizeValid,
   isFileTypeValid,
+  useGetDeviceType,
   type SupportedFileType,
 } from "../../utils";
+import type { OnAction } from "../../utils/types";
 import { DarkBackgroundContainer } from "./ImageUpload.styled";
 import { PhotoCaptureDialog } from "./PhotoCaptureDialog";
 import { Skeleton } from "./Skeleton";
 
 export type ImageUploadProps = Readonly<{
-  onDelete: () => void;
+  onDelete: OnAction;
   onChange: (file: File[]) => void;
   variant?: "square" | "circle";
   isUploading?: boolean;
   label?: string;
   subTitle?: string;
+  error?: boolean;
+  helperText?: string;
   defaultValue?: string;
   isCapture?: boolean;
   loading?: boolean;
@@ -47,6 +51,8 @@ export function ImageUpload({
   loading = false,
   size = 5,
   subTitle = "PNG, JPEG under 5 MB",
+  error = false,
+  helperText,
 }: ImageUploadProps) {
   const { t } = useTranslation();
 
@@ -99,13 +105,20 @@ export function ImageUpload({
     }
   };
 
+  const { layout } = useGetDeviceType();
+
   if (loading) {
     return <Skeleton />;
   }
 
   return (
     <>
-      <Stack gap="20px" direction="row" alignItems="center">
+      <Stack
+        flexWrap={isCapture ? "wrap" : "nowrap"}
+        gap="20px"
+        direction="row"
+        alignItems="center"
+      >
         <Box
           onClick={() => !defaultValue && inputRef.current?.click()}
           onMouseEnter={() => setHover(true)}
@@ -185,19 +198,26 @@ export function ImageUpload({
         </Box>
 
         <Stack>
-          <Typography variant="subtitle1" fontWeight={500}>
+          <Typography noWrap variant="subtitle1" fontWeight={500}>
             {label}
           </Typography>
 
           <Typography variant="caption" color={iron[800]}>
             {subTitle}
           </Typography>
+
+          {error && helperText && (
+            <Typography variant="caption" color="error">
+              {helperText}
+            </Typography>
+          )}
         </Stack>
 
         {isCapture && (
           <Button
             onClick={() => setIsOpenCaptureModal(true)}
             variant="outlined"
+            fullWidth={layout === "mobile"}
           >
             <Stack gap="10px" direction="row">
               <CameraAltOutlinedIcon />

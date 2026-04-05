@@ -9,13 +9,16 @@ type BranchAutocompleteProps<P extends FieldValues> = Omit<
   "options"
 > & {
   contactNumber: string;
+  loading: boolean;
 };
 
 export const BusinessNameAutocomplete = <P extends FieldValues>({
   contactNumber,
+  loading,
   ...props
 }: BranchAutocompleteProps<P>) => {
-  const { data: branchOptions } = useGetBusinessNameOptions(contactNumber);
+  const { data: branchOptions, isFetching } =
+    useGetBusinessNameOptions(contactNumber);
 
   return (
     <Autocomplete
@@ -24,6 +27,7 @@ export const BusinessNameAutocomplete = <P extends FieldValues>({
       placeholder={t("common.select.label", {
         label: t("common.business.name"),
       })}
+      loading={loading || isFetching}
       {...props}
     />
   );

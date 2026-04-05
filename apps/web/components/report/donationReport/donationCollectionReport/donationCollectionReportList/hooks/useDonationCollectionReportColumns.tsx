@@ -5,6 +5,7 @@ import { AG_GRID_CELL_DEFAULT_VALUE } from "@web/components/common/AgGridV2/AgGr
 import type { DailyDonationReportData } from "@web/components/report/donationReport/donationCollectionReport/donationCollectionReportList/hooks/useGetDonationCollectionReport";
 import type { AgColumnsWithActions } from "@web/types/agGrid";
 import { dateFormat } from "@web/utils/date";
+import { formatToIndianNumber } from "@web/utils/helper";
 
 export const useDonationCollectionReportColumns = () => {
   const column: AgColumnsWithActions<DailyDonationReportData> = [
@@ -23,6 +24,11 @@ export const useDonationCollectionReportColumns = () => {
     },
 
     {
+      cellRenderer: ({ value }: CustomCellRendererProps) => {
+        return !value
+          ? AG_GRID_CELL_DEFAULT_VALUE
+          : formatToIndianNumber(value);
+      },
       field: "amount",
       filter: "agNumberColumnFilter",
       headerName: t("amount.label"),

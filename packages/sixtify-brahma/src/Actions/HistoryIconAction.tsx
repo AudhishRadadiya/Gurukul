@@ -3,13 +3,15 @@ import { IconButton } from "@mui/material";
 import { SvgHistory } from "../Svgs/SvgHistory";
 import { Tooltip } from "../Tooltip";
 
-export type HistoryIconActionProps = IconButtonProps;
+export type HistoryIconActionProps = IconButtonProps & {
+  disabled?: boolean;
+};
 
 export const HistoryIconAction = (props: HistoryIconActionProps) => {
   return (
     <IconButton {...props}>
       <Tooltip toolTipLabel="History">
-        <SvgHistory />
+        <SvgHistory disabled={props.disabled} />
       </Tooltip>
     </IconButton>
   );

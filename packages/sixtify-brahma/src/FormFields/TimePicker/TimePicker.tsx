@@ -1,3 +1,4 @@
+import type { StackProps } from "@mui/material";
 import { InputLabel, Stack, Tooltip, useTheme } from "@mui/material";
 import type { TimePickerProps as MuiTimePickerProps } from "@mui/x-date-pickers/TimePicker";
 import { TimePicker as MuiTimePicker } from "@mui/x-date-pickers/TimePicker";
@@ -11,6 +12,10 @@ import type {
   UseControllerProps,
 } from "react-hook-form";
 import { useController } from "react-hook-form";
+import {
+  getDefaultInputLabelProps,
+  getDefaultTextFieldSx,
+} from "../commonStyles";
 import { Skeleton } from "./Skeleton";
 
 export type TimePickerProps<P extends FieldValues> = UseControllerProps<P> &
@@ -29,6 +34,8 @@ export type TimePickerProps<P extends FieldValues> = UseControllerProps<P> &
     helperIcon?: ReactElement;
     toolTipText?: string;
     timeStepsMinutes?: number;
+    containerProps?: StackProps;
+    styling?: "custom" | "default";
   }>;
 
 export function TimePicker<P extends FieldValues>({
@@ -50,6 +57,8 @@ export function TimePicker<P extends FieldValues>({
   timeStepsMinutes = 1,
   helperIcon,
   toolTipText,
+  containerProps,
+  styling = "default",
   ...restProps
 }: TimePickerProps<P>) {
   const {
@@ -73,6 +82,10 @@ export function TimePicker<P extends FieldValues>({
       return null;
     }
 
+    if (typeof value !== "string") {
+      return null;
+    }
+
     if (ampm) {
       return DateTime.fromFormat(value, format);
     }
@@ -83,16 +96,21 @@ export function TimePicker<P extends FieldValues>({
   const pickerValue = parseTimeValue<P>(value);
 
   if (loading) {
-    return <Skeleton label={label} />;
+    return <Skeleton label={label} styling={styling} />;
   }
 
   return (
-    <Stack gap="10px">
-      {label && (
+    <Stack gap="5px" {...containerProps}>
+      {label && styling === "custom" && (
         <Stack alignItems="center" flexDirection="row" gap="5px">
-          <InputLabel required={required} disabled={disabled}>
+          <InputLabel
+            sx={{ fontSize: { xs: "14px", md: "16px" } }}
+            required={required}
+            disabled={disabled}
+          >
             {label}
           </InputLabel>
+
           {helperIcon && toolTipText && (
             <Tooltip title={toolTipText} placement="bottom">
               {helperIcon}
@@ -107,7 +125,7 @@ export function TimePicker<P extends FieldValues>({
         disabled={disabled}
         readOnly={readOnly}
         open={open}
-        ampm={ampm}
+        ampm={false}
         value={pickerValue}
         format={format}
         onOpen={() => setOpen(true)}
@@ -118,7 +136,11 @@ export function TimePicker<P extends FieldValues>({
             disabled,
             helperText,
             error,
+            label: styling === "default" ? label : undefined,
+            required: styling === "default" ? required : undefined,
+            InputLabelProps: getDefaultInputLabelProps(styling),
             sx: {
+              ...getDefaultTextFieldSx(styling),
               backgroundColor: "white",
               "& .Mui-selected": {
                 backgroundColor: butterflyBlue[900],

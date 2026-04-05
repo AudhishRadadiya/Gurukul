@@ -101,7 +101,7 @@ const TrustMasterFormSchema = z.object({
       message: "common.required",
     }),
   date_lock: z.boolean().nullable(),
-  default_branch_id: z.array(z.string()).default([]),
+  default_branch_id: z.array(z.string()).nullable().default([]),
   default_trust: z.boolean().nullable(),
   donation_collection_sms_no: z
     .string()
@@ -460,10 +460,12 @@ export const TrustMasterForm = forwardRef(
               loading={loading}
               name="branch_id"
               control={control}
+              isUserWise
               multiple
             />
 
             <BranchAutocomplete
+              isUserWise
               multiple
               loading={loading}
               label={t("branch.default.label")}
@@ -479,6 +481,8 @@ export const TrustMasterForm = forwardRef(
               required
               multiline
               rows={4}
+              letterCase="mixed"
+              characterType="any-character"
               error={!!errors.address}
               helperText={errorMessages(errors.address?.message)}
               placeholder="Enter Address"
@@ -494,12 +498,12 @@ export const TrustMasterForm = forwardRef(
               options={[
                 {
                   disabled: false,
-                  label: "Yes",
+                  label: t("common.yes"),
                   values: true,
                 },
                 {
                   disabled: false,
-                  label: "No",
+                  label: t("common.no"),
                   values: false,
                 },
               ]}
@@ -513,12 +517,12 @@ export const TrustMasterForm = forwardRef(
               options={[
                 {
                   disabled: false,
-                  label: "Yes",
+                  label: t("common.yes"),
                   values: true,
                 },
                 {
                   disabled: false,
-                  label: "No",
+                  label: t("common.no"),
                   values: false,
                 },
               ]}
@@ -528,16 +532,16 @@ export const TrustMasterForm = forwardRef(
               name="is_active"
               control={control}
               loading={loading}
-              label={t("common.current.active.year")}
+              label={t("isActive.label")}
               options={[
                 {
                   disabled: false,
-                  label: "Yes",
+                  label: t("common.yes"),
                   values: true,
                 },
                 {
                   disabled: false,
-                  label: "No",
+                  label: t("common.no"),
                   values: false,
                 },
               ]}
@@ -555,12 +559,12 @@ export const TrustMasterForm = forwardRef(
               options={[
                 {
                   disabled: false,
-                  label: "Yes",
+                  label: t("common.yes"),
                   values: true,
                 },
                 {
                   disabled: false,
-                  label: "No",
+                  label: t("common.no"),
                   values: false,
                 },
               ]}
@@ -576,12 +580,12 @@ export const TrustMasterForm = forwardRef(
               options={[
                 {
                   disabled: false,
-                  label: "Yes",
+                  label: t("common.yes"),
                   values: true,
                 },
                 {
                   disabled: false,
-                  label: "No",
+                  label: t("common.no"),
                   values: false,
                 },
               ]}
@@ -597,12 +601,12 @@ export const TrustMasterForm = forwardRef(
               options={[
                 {
                   disabled: false,
-                  label: "Yes",
+                  label: t("common.yes"),
                   values: true,
                 },
                 {
                   disabled: false,
-                  label: "No",
+                  label: t("common.no"),
                   values: false,
                 },
               ]}

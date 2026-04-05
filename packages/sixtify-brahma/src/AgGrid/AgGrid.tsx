@@ -1,9 +1,11 @@
 import { Box, Typography, useTheme } from "@mui/material";
+import type { ColDef } from "ag-grid-community";
 import type { AgGridReactProps } from "ag-grid-react";
 import { AgGridReact } from "ag-grid-react";
 import type { Ref } from "react";
 import { forwardRef } from "react";
 import { PadBox } from "../PadBox";
+import { useGetDeviceType } from "../utils";
 import { AgGridStyleProvider } from "./AgGridStyleProvider";
 
 export const defaultPageSize = 50;
@@ -17,6 +19,8 @@ export type AgGridProps<T = unknown> = AgGridReactProps<T> & {
   totalRecords?: number;
   overlayNoRowsTemplate?: string;
   selectedItems?: number;
+  enableSecondRowFilter?: boolean;
+  disableKeyBoardEvent?: boolean;
 };
 
 type AgGridType = React.ForwardRefExoticComponent<AgGridProps> &
@@ -24,29 +28,38 @@ type AgGridType = React.ForwardRefExoticComponent<AgGridProps> &
 
 export const AgGrid = forwardRef(
   <T,>(props: AgGridProps<T>, ref: Ref<AgGridReact<T>>) => {
+    const { layout } = useGetDeviceType();
+
     const {
       cacheBlockSize = props.paginationPageSize ?? defaultPageSize,
-      defaultColDef = {
-        flex: 1,
-        floatingFilter: false,
-        filterParams: {
-          buttons: ["apply", "reset"],
-          closeOnApply: true,
-          contains: false,
-        },
-        lockPosition: true,
-      },
       height = "597px",
       rowHeight = 50,
       rowModelType = "infinite",
+      defaultColDef,
       rowBuffer = 5,
       totalRecords,
       // eslint-disable-next-line quotes
       overlayNoRowsTemplate = '<span class="ag-overlay-no-rows-center">No Data Found</span>',
       infiniteInitialRowCount = props.paginationPageSize ?? defaultPageSize,
       pagination = false,
+      enableSecondRowFilter,
+      disableKeyBoardEvent,
       ...rest
     } = props;
+
+    const defaultColumnDef: ColDef<T> = {
+      flex: 1,
+      floatingFilter: false,
+      filterParams: {
+        closeOnApply: true,
+        contains: false,
+        debounceMs: 500,
+      },
+      lockPosition: true,
+      minWidth: layout === "desktop" ? undefined : 200,
+      wrapHeaderText: true,
+      ...defaultColDef,
+    };
 
     const {
       palette: {
@@ -81,7 +94,19 @@ export const AgGrid = forwardRef(
         <AgGridReact<T>
           ref={ref}
           cacheBlockSize={cacheBlockSize}
-          defaultColDef={defaultColDef}
+          defaultColDef={{
+            ...defaultColumnDef,
+            menuTabs: ["generalMenuTab", "filterMenuTab", "columnsMenuTab"],
+            floatingFilter: enableSecondRowFilter,
+            suppressFloatingFilterButton: enableSecondRowFilter,
+            filterParams: {
+              ...defaultColumnDef.filterParams,
+              buttons:
+                !enableSecondRowFilter || disableKeyBoardEvent
+                  ? ["apply", "reset"]
+                  : [],
+            },
+          }}
           rowHeight={rowHeight}
           rowModelType={rowModelType}
           rowBuffer={rowBuffer}

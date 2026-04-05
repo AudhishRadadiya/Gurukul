@@ -38,6 +38,10 @@ export function appTheme(theme: PaletteMode): ThemeOptions {
               color: palette.app.color.iron[800],
               opacity: 1,
             },
+            "&:disabled": {
+              background: palette.app.color.iron[50],
+              "-webkit-text-fill-color": palette.app.color.iron[100],
+            },
           },
         },
       },
@@ -180,7 +184,18 @@ export function appTheme(theme: PaletteMode): ThemeOptions {
             "& .MuiButtonBase-root": {
               minHeight: "48px",
             },
+            "& .MuiTabs-scrollButtons.Mui-disabled": {
+              display: "none",
+            },
+            "& .MuiSvgIcon-root": {
+              color: palette.app.color.butterflyBlue[900],
+            },
           },
+        },
+        defaultProps: {
+          variant: "scrollable",
+          scrollButtons: "auto",
+          allowScrollButtonsMobile: true,
         },
       },
       MuiTab: {
@@ -192,6 +207,12 @@ export function appTheme(theme: PaletteMode): ThemeOptions {
             color: "black",
             "&.Mui-selected": {
               color: "black",
+            },
+            "& .MuiTabs-scrollButtons.Mui-disabled": {
+              display: "none",
+            },
+            "& .MuiSvgIcon-root": {
+              color: palette.app.color.butterflyBlue[900],
             },
           },
         },

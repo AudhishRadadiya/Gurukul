@@ -17,7 +17,6 @@ import {
   useTheme,
 } from "@mui/material";
 import { ClearIcon } from "@mui/x-date-pickers/icons";
-import { isEmpty } from "lodash";
 import _isEmpty from "lodash/isEmpty";
 import _isEqual from "lodash/isEqual";
 import _isNil from "lodash/isNil";
@@ -32,10 +31,17 @@ import { Button } from "../Button";
 import { FilterPill } from "../Chips/FilterPill";
 import { dateFormats } from "../FormFields";
 import { SwitchField } from "../FormFields/SwitchField";
+import { ButtonContainer } from "../Layouts";
 import { PadBox } from "../PadBox";
 import { toasts } from "../Toast";
 import { Tooltip } from "../Tooltip";
-import { isoDateRegex, monthYearRegex } from "../utils";
+import {
+  isoDateRegex,
+  monthYearRegex,
+  useGetDeviceType,
+  useGlobalKeyboardShortcut,
+} from "../utils";
+import type { OnAction } from "../utils/types";
 import {
   FilterPopUpDateRangeWrapper,
   FilterPopupWrapper,
@@ -50,7 +56,7 @@ export type FilterListV2Props = {
   filterListData?: FieldValues;
   onApply: (data: FieldValues, isPopup?: boolean, key?: string) => void;
   onChange: (data: FieldValues, isPopup: boolean) => void;
-  onClear: () => void;
+  onClear: OnAction;
   resetFormBasedOnFields?: string;
 };
 
@@ -88,6 +94,12 @@ export const FilterListV2 = ({
 
   const { iron, slate } = theme.palette.app.color;
 
+  const { layout } = useGetDeviceType();
+
+  const isDesktop = layout === "desktop";
+
+  const isMobile = layout === "mobile";
+
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const filterPopupAnchorElm = useRef<HTMLDivElement | null>(null);
@@ -102,6 +114,8 @@ export const FilterListV2 = ({
     null
   );
 
+  const filterListV2AnchorRef = useRef<HTMLButtonElement | null>(null);
+
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
   const handleDateRange = (filter: FilterListType) => {
@@ -111,7 +125,13 @@ export const FilterListV2 = ({
 
   const defaultValues: FieldValues = useMemo(() => {
     return filterListItems.reduce<FieldValues>((acc, item) => {
-      if (item.multiSelect || item.type === "dateRange") {
+      if (
+        item.type === "autoComplete" &&
+        item.required &&
+        item.options?.length === 1
+      ) {
+        acc[item.key] = item.options[0]?.value;
+      } else if (item.multiSelect || item.type === "dateRange") {
         acc[item.key] = item.value || null;
       } else if (item.type === "switch") {
         acc[item.key] = item.value || false;
@@ -160,6 +180,7 @@ export const FilterListV2 = ({
     handleSubmit,
     setValue,
     reset,
+    getValues,
     formState: { errors, dirtyFields },
     watch,
   } = useForm({
@@ -167,6 +188,22 @@ export const FilterListV2 = ({
     resolver: zodResolver(validationSchema),
     mode: "all",
   });
+
+  useMemo(() => {
+    if (!filterListItems || filterListItems.length === 0) {
+      return;
+    }
+
+    filterListItems.forEach((item) => {
+      if (item.required && item.options?.length === 1) {
+        const currentValue = getValues(item.key);
+
+        if (!currentValue) {
+          setValue(item.key, item.options[0]?.value);
+        }
+      }
+    });
+  }, [filterListItems]);
 
   const company_id = watch("company_id");
 
@@ -198,8 +235,12 @@ export const FilterListV2 = ({
     handleClose();
   };
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
+  const handleClick = (
+    event: React.MouseEvent<HTMLButtonElement> | HTMLButtonElement
+  ) => {
+    const element = event instanceof HTMLElement ? event : event.currentTarget;
+
+    setAnchorEl(element);
   };
 
   const onSubmit = (data: FieldValues) => {
@@ -256,6 +297,10 @@ export const FilterListV2 = ({
     onChange(formData, openFilterPopup);
   }, [formData, onChange]);
 
+  useEffect(() => {
+    reset(defaultValues);
+  }, [defaultValues, reset]);
+
   useMemo(() => {
     if (company_id !== filterListData?.company_id && !openFilterPopup) {
       filterListItems.forEach((item) => {
@@ -292,8 +337,10 @@ export const FilterListV2 = ({
 
   const shouldFormSubmit = useMemo(() => {
     return (
-      isEmpty(dirtyFields) ||
-      Object.keys(formData).every((key) => !formData[key])
+      Object.keys(dirtyFields).length === 0 &&
+      Object.keys(formData).every(
+        (key) => _isNil(formData[key]) || _isEmpty(formData[key])
+      )
     );
   }, [formData, dirtyFields]);
 
@@ -367,50 +414,68 @@ export const FilterListV2 = ({
     });
   };
 
+  useGlobalKeyboardShortcut({
+    key: "f",
+    modifierKeys: ["ctrl", "shift"],
+    onTrigger: () => {
+      if (isDisabled) {
+        return;
+      }
+
+      const buttonElement =
+        filterListV2AnchorRef.current ?? document.createElement("button");
+
+      handleClick(buttonElement);
+    },
+  });
+
+  const firstNonSwitchIndex = filterListItems.findIndex(
+    ({ type }) => type !== "switch" && type !== "dateRange"
+  );
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <Stack
         direction="row"
+        justifyContent={{ xs: "end", md: "space-between" }}
         spacing={1}
-        alignItems="flex-start"
-        justifyContent="space-between"
       >
-        <Stack
-          direction="row"
-          alignItems="flex-start"
-          sx={{
-            maxWidth: {
-              xs: "40vw",
-              md: "45vw",
-              lg: "57vw",
-            },
-          }}
-        >
-          {filterListData &&
-            Object.values(filterListData).some((value) => value) && (
-              <>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    minWidth: "60px",
-                    marginTop: "8px",
-                  }}
-                >
-                  Filters:
-                </Typography>
+        {isDesktop && (
+          <Stack
+            direction="row"
+            alignItems="center"
+            sx={{
+              maxWidth: {
+                xs: "40vw",
+                md: "45vw",
+                lg: "57vw",
+              },
+            }}
+          >
+            {filterListData &&
+              Object.values(filterListData).some((value) => value) && (
+                <>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      minWidth: "50px",
+                    }}
+                  >
+                    Filters:
+                  </Typography>
 
-                <Stack
-                  direction="row"
-                  gap="5px"
-                  marginTop="3px"
-                  alignItems="center"
-                  sx={{ flexWrap: "wrap", maxWidth: "100%" }}
-                >
-                  {renderChips(filterListData)}
-                </Stack>
-              </>
-            )}
-        </Stack>
+                  <Stack
+                    direction="row"
+                    gap="5px"
+                    alignItems="center"
+                    sx={{ flexWrap: "wrap", maxWidth: "100%" }}
+                  >
+                    {renderChips(filterListData)}
+                  </Stack>
+                </>
+              )}
+          </Stack>
+        )}
 
         <Stack direction="row" alignItems="flex-start">
           {filterListData &&
@@ -418,13 +483,19 @@ export const FilterListV2 = ({
               <Button
                 onClick={() => handlerReset()}
                 variant="text"
-                sx={{ minWidth: "100px" }}
+                sx={{ minWidth: { xs: "60px", sm: "100px" } }}
               >
-                Clear Filter
+                {!isMobile ? "Clear Filter" : "Clear"}
               </Button>
             )}
 
-          {!isDisabled && <FilterIconAction onClick={handleClick} />}
+          {!isDisabled && (
+            <FilterIconAction
+              isFiltered={!_isEmpty(filterListData)}
+              onClick={handleClick}
+              ref={filterListV2AnchorRef}
+            />
+          )}
         </Stack>
       </Stack>
       <form
@@ -461,12 +532,12 @@ export const FilterListV2 = ({
           sx={{
             zIndex: theme.zIndex.drawer + 2,
             "& .MuiPaper-root": {
-              width: "350px",
+              width: "100%",
+              maxWidth: { xs: "270px", sm: "350px" },
             },
           }}
         >
           <Stack
-            alignItems="flex-end"
             sx={{
               background: iron[600],
             }}
@@ -495,7 +566,7 @@ export const FilterListV2 = ({
           </Stack>
 
           <Stack flexGrow={1} sx={{ overflowX: "hidden" }}>
-            {filterListItems.map((filter) =>
+            {filterListItems.map((filter, index) =>
               filter.type === "switch" ? (
                 <Stack
                   key={filter.key}
@@ -512,6 +583,7 @@ export const FilterListV2 = ({
               ) : (
                 <Accordion
                   defaultExpanded={
+                    index === firstNonSwitchIndex ||
                     !!filterListData?.[filter.key] ||
                     !!defaultValues?.[filter.key] ||
                     filter.required
@@ -519,8 +591,12 @@ export const FilterListV2 = ({
                   disabled={filter.isDisabled}
                   key={filter.key}
                   sx={{
+                    boxShadow: "none",
                     "&.MuiAccordion-root.Mui-expanded": {
                       margin: "0 !important",
+                    },
+                    "&.MuiAccordion-root.Mui-disabled": {
+                      backgroundColor: "transparent",
                     },
                   }}
                 >
@@ -560,6 +636,7 @@ export const FilterListV2 = ({
                       <Typography variant="body2">{filter.menuInfo}</Typography>
                     </Stack>
                   </AccordionSummary>
+
                   <AccordionDetails
                     sx={{
                       background: slate[600],
@@ -630,6 +707,7 @@ export const FilterListV2 = ({
                               control,
                               errors,
                               setIsPopupOpen,
+                              autoFocus: index === firstNonSwitchIndex,
                             })[filter.type]
                           }
                         </Box>
@@ -641,16 +719,11 @@ export const FilterListV2 = ({
             )}
           </Stack>
 
-          <Divider
-            sx={{ width: "100%", position: "absolute", bottom: "70px" }}
-          />
-          <Stack height="70px">
+          <Divider />
+
+          <Stack>
             <PadBox padding={{ padding: "10px" }}>
-              <Stack
-                direction="row"
-                gap="10px"
-                sx={{ position: "absolute", bottom: "15px" }}
-              >
+              <ButtonContainer>
                 <Button
                   type="submit"
                   disabled={shouldFormSubmit}
@@ -671,7 +744,7 @@ export const FilterListV2 = ({
                 >
                   Reset
                 </Button>
-              </Stack>
+              </ButtonContainer>
             </PadBox>
           </Stack>
         </Drawer>

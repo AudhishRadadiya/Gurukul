@@ -1,6 +1,6 @@
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { InputLabel, Stack, useTheme } from "@mui/material";
+import { InputLabel, Stack, type StackProps, useTheme } from "@mui/material";
 import type { DatePickerProps as MuiDatePickerProps } from "@mui/x-date-pickers/DatePicker";
 import { DatePicker as MuiDatePicker } from "@mui/x-date-pickers/DatePicker";
 import type { DateView, PickerValidDate } from "@mui/x-date-pickers/models";
@@ -14,6 +14,10 @@ import type {
 } from "react-hook-form";
 import { useController } from "react-hook-form";
 import { CalendarIconAction } from "../../Actions";
+import {
+  getDefaultInputLabelProps,
+  getDefaultTextFieldSx,
+} from "../commonStyles";
 import { Skeleton } from "./Skeleton";
 
 export type DatePickerProps<P extends FieldValues> = UseControllerProps<P> &
@@ -29,10 +33,13 @@ export type DatePickerProps<P extends FieldValues> = UseControllerProps<P> &
     clearable?: boolean;
     view?: DateView[];
     disableKeyboardInput?: boolean;
+    setOnFinalChange?: boolean;
     setError: (
       name: keyof P,
       error: FieldError | { type: string; message?: string }
     ) => void;
+    containerProps?: StackProps;
+    styling?: "custom" | "default";
   }>;
 
 export const dateFormats = {
@@ -87,8 +94,11 @@ export function DatePicker<P extends FieldValues>({
   clearable = required ? false : true,
   rules,
   disableKeyboardInput = false,
+  setOnFinalChange = false,
   views = ["year", "month", "day"],
   format = dateFormats.dateWithEuropean,
+  containerProps,
+  styling = "default",
   ...restProps
 }: DatePickerProps<P>) {
   const [localError, setLocalError] = useState<string>();
@@ -104,12 +114,12 @@ export function DatePicker<P extends FieldValues>({
   const { iron, butterflyBlue, mirage } = theme.palette.app.color;
 
   const finalValue = useMemo(() => {
-    if (disableKeyboardInput && open) {
+    if ((disableKeyboardInput || setOnFinalChange) && open) {
       return value ? DateTime.fromISO(value) : undefined;
     }
 
-    return value ? DateTime.fromISO(value) : undefined;
-  }, [value, disableKeyboardInput, open]);
+    return DateTime.fromISO(value);
+  }, [value, disableKeyboardInput, setOnFinalChange, open]);
 
   // eslint-disable-next-line sonarjs/rules-of-hooks
   useMemo(() => {
@@ -123,12 +133,20 @@ export function DatePicker<P extends FieldValues>({
   }, [error]);
 
   if (loading) {
-    return <Skeleton label={label} />;
+    return <Skeleton label={label} styling={styling} />;
   }
 
   return (
-    <Stack gap="10px">
-      {label && <InputLabel required={required}>{label}</InputLabel>}
+    <Stack gap="5px" {...containerProps}>
+      {label && styling === "custom" && (
+        <InputLabel
+          sx={{ fontSize: { xs: "14px", md: "16px" } }}
+          required={required}
+          disabled={disabled}
+        >
+          {label}
+        </InputLabel>
+      )}
 
       <MuiDatePicker<DateTime>
         {...restField}
@@ -148,17 +166,22 @@ export function DatePicker<P extends FieldValues>({
             readOnly: disableKeyboardInput,
           },
           clearButton: {
-            tabIndex: -1, // This will make the clear button skipped in the tab order
+            tabIndex: -1,
           },
           textField: {
             disabled,
             error: !!localError || error,
             helperText: localError ?? helperText,
+            label: styling === "default" ? label : undefined,
+            required: styling === "default" ? required : undefined,
+            sx: getDefaultTextFieldSx(styling),
+            InputLabelProps: getDefaultInputLabelProps(styling),
             InputProps: {
               endAdornment: (
                 <CalendarIconAction
                   disabled={disabled}
                   onClick={() => setOpen(true)}
+                  showTooltip={false}
                 />
               ),
               sx: {
@@ -168,12 +191,10 @@ export function DatePicker<P extends FieldValues>({
               },
             },
             onKeyDown: (event) => {
-              if (event.key === "Backspace") {
+              if (event.key === "Backspace" && clearable) {
                 onChange(null);
                 setLocalError(undefined);
-              }
-
-              if (!clearable && event.key === "Backspace") {
+              } else if (event.key === "Backspace" && !clearable) {
                 event.preventDefault();
               }
             },
@@ -238,12 +259,14 @@ export function DatePicker<P extends FieldValues>({
         }}
         dayOfWeekFormatter={(weekday) => `${weekday.toFormat("ccc")}`}
         onAccept={(value, details) => {
-          if (restProps?.onAccept) {
-            restProps.onAccept(value, details);
+          if (setOnFinalChange && value?.isValid) {
+            onChange(value.toISODate());
+            setLocalError(undefined);
           }
+          restProps?.onAccept?.(value, details);
         }}
         onChange={(value, details) => {
-          if (disableKeyboardInput && open) {
+          if ((disableKeyboardInput || setOnFinalChange) && open) {
             return;
           }
 

@@ -3,6 +3,7 @@ export * from "./SettingIcon";
 export * from "./SvgBankConfig";
 export * from "./SvgConfiguration";
 export * from "./SvgEmployees";
+export * from "./SvgLetteremplate";
 export * from "./SvgOrganization";
 export * from "./SvgPayroll";
 export * from "./SvgTransaction";

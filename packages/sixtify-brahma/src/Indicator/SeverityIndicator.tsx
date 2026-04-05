@@ -21,7 +21,7 @@ export const SeverityIndicator = ({
         borderRadius: "6px",
       }}
     >
-      <PadBox padding={{ padding: "5px", paddingX: "8px" }}>
+      <PadBox padding={{ padding: isBackground ? "5px 8px" : "0" }}>
         <Stack flexDirection="row" alignItems="center" gap="8px">
           <CircleIcon sx={{ color, fontSize: "12px" }} />
           <Typography variant="body2" sx={{ fontWeight: 500 }}>

@@ -5,6 +5,7 @@ import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
 import { donationSummaryKeys } from "@web/queryKeysFactories/donationSummary";
 import type { ApiSuccessResponse } from "@web/types/apiResponse";
 import type { GetListArgsAg2 } from "@web/types/shared-types";
+import { isBranchFilterEnabled } from "@web/utils/reactQuery";
 
 export type DonationSummary = {
   address: string;
@@ -13,11 +14,9 @@ export type DonationSummary = {
   contact_no: string;
   donation_id: string;
   email_id: string;
-  first_name: string;
   full_count: string;
-  last_name: string;
-  middle_name: string;
   pan_no: string;
+  receipt_name: string;
   receipts_count: number;
 };
 
@@ -39,6 +38,7 @@ export function useGetDonationSummary(body: GetListArgsAg2) {
   };
 
   return useQuery({
+    enabled: isBranchFilterEnabled(body),
     initialData: { donationSummary: [], totalCount: 0 },
     queryFn: () => getDonationSummary(body),
     queryKey: donationSummaryKeys.listing(body),

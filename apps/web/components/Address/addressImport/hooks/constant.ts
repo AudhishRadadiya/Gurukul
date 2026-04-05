@@ -2,7 +2,9 @@ import type { AddressImportDetails } from "@web/components/Address/addressImport
 
 export const SAMPLE_FILE =
   // eslint-disable-next-line sonarjs/no-clear-text-protocols
-  "http://15.206.89.254:5001/api/upload/excel/AddressUpload.xlsx";
+  "https://api.gurukul.work/api/upload/excel/AddressUpload.xlsx";
+
+//
 
 export const addressFieldLabels: Record<keyof AddressImportDetails, string> = {
   address: "Address",

@@ -16,6 +16,7 @@ export const AddressTypeAutocomplete = <P extends FieldValues>(
   return (
     <Autocomplete
       label="Address Type"
+      limitTags={1}
       options={financialYearOptions}
       placeholder="Select Address Type"
       {...props}

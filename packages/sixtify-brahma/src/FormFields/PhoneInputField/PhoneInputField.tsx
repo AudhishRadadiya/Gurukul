@@ -55,8 +55,16 @@ export function PhoneInputField<P extends FieldValues>({
 
   return (
     <Stack gap="4px">
-      <Stack gap="10px">
-        {label && <InputLabel required={required}>{label}</InputLabel>}
+      <Stack gap="5px">
+        {label && (
+          <InputLabel
+            sx={{ fontSize: { xs: "14px", md: "16px" } }}
+            required={required}
+            disabled={disabled}
+          >
+            {label}
+          </InputLabel>
+        )}
 
         <PhoneInput
           country="in"
@@ -82,6 +90,9 @@ export function PhoneInputField<P extends FieldValues>({
             paddingBottom: "19px",
             fontSize: "16px",
             border: "none",
+            opacity: 1,
+            color: disabled ? iron[100] : "revert-layer",
+            background: disabled ? iron[50] : "revert-layer",
           }}
           buttonStyle={{
             border: "none",

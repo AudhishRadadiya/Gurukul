@@ -1,3 +1,4 @@
+import { ActionCell } from "@codezee/sixtify-brahma";
 import {
   CancelOutlined,
   CheckCircleOutlineOutlined,
@@ -7,6 +8,7 @@ import { t } from "i18next";
 
 import type { DonorAddress } from "@web/components/Address/DonorAddress/DonorAddressList/hooks/useGetDonorAddress";
 import type { AgColumnsArgs, AgColumnsWithActions } from "@web/types/agGrid";
+import type { AgGridActionItems } from "@web/types/shared-types";
 
 type UseDonorAddressColumns = {
   onAction: (rowData: DonorAddress) => void;
@@ -52,37 +54,54 @@ export const useDonorAddressColumns = ({
       headerName: t("isActive.label"),
     },
     {
-      cellRenderer: ({ data }: CustomCellRendererProps) => {
+      cellRenderer: ({ data }: CustomCellRendererProps<DonorAddress>) => {
         if (!data) {
           return;
         }
 
         const { is_ignored } = data;
 
-        return is_ignored ? (
-          <CheckCircleOutlineOutlined
-            fontSize="medium"
-            color="success"
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              onAction(data);
-            }}
-          />
-        ) : (
-          <CancelOutlined
-            fontSize="medium"
-            color="error"
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              onAction(data);
-            }}
-          />
+        const items: AgGridActionItems[] = [
+          {
+            onClick: () => {
+              window.open(
+                `/address/address-book?page=add-address-book&donation_id=${data.donation_id}`,
+                "_blank"
+              );
+            },
+            title: `${t("common.create")} ${t("contact.label")}`,
+          },
+        ];
+
+        return (
+          <>
+            <ActionCell items={items} />
+            {is_ignored ? (
+              <CheckCircleOutlineOutlined
+                fontSize="medium"
+                color="success"
+                style={{ cursor: "pointer" }}
+                onClick={() => {
+                  onAction(data);
+                }}
+              />
+            ) : (
+              <CancelOutlined
+                fontSize="medium"
+                color="error"
+                style={{ cursor: "pointer" }}
+                onClick={() => {
+                  onAction(data);
+                }}
+              />
+            )}
+          </>
         );
       },
       field: "action",
       headerName: "",
       lockPinned: true,
-      maxWidth: 55,
+      maxWidth: 70,
       pinned: "right",
       sortable: false,
     },

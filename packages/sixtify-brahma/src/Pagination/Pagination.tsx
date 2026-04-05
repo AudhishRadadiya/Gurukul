@@ -3,6 +3,7 @@ import {
   type TablePaginationProps,
   useTheme,
 } from "@mui/material";
+import { useGetDeviceType } from "../utils";
 
 export const Pagination = ({
   count,
@@ -16,11 +17,18 @@ export const Pagination = ({
 
   const { grey } = theme.palette;
 
+  const { layout } = useGetDeviceType();
+
+  const isMobile = layout === "mobile";
+
   return (
     <TablePagination
       sx={{
         "& .MuiInputBase-root": {
-          paddingRight: "10px",
+          height: "30px",
+        },
+        "& .MuiToolbar-root": {
+          paddingLeft: 0,
         },
         "& .MuiTablePagination-select": {
           backgroundColor: "transparent !important",
@@ -28,6 +36,8 @@ export const Pagination = ({
         "& .MuiTablePagination-input": {
           border: `1.5px solid ${grey[400]}`,
           borderRadius: "5px",
+          fontSize: "14px",
+          padding: isMobile ? "2px 10px" : "4px 8px",
         },
       }}
       component="div"
@@ -36,6 +46,7 @@ export const Pagination = ({
       onPageChange={onPageChange}
       rowsPerPage={rowsPerPage}
       onRowsPerPageChange={onRowsPerPageChange}
+      labelRowsPerPage={!isMobile ? "Rows per page" : ""}
       {...rest}
     />
   );

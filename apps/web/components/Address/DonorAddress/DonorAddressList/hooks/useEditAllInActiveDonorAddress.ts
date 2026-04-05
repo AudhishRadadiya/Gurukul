@@ -9,7 +9,7 @@ import type { ApiErrorResponse } from "@web/types/apiResponse";
 import type { EmptyApiSuccessResponse } from "@web/types/shared-types";
 
 type EditAllInActiveDonorAddressPayload = {
-  address_book_ids: string[];
+  donation_ids: string[];
 };
 
 type UseEditAllInActiveDonorAddressArgs = {

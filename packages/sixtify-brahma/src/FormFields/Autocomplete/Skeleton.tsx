@@ -2,11 +2,12 @@ import { Skeleton as MuiSkeleton, Stack } from "@mui/material";
 
 type SkeletonProps = {
   label?: string;
+  styling: "custom" | "default";
 };
-export const Skeleton = ({ label }: SkeletonProps) => {
+export const Skeleton = ({ label, styling }: SkeletonProps) => {
   return (
     <Stack gap="10px">
-      {label && (
+      {label && styling === "custom" && (
         <MuiSkeleton
           width={120}
           height="23px"

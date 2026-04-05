@@ -1,17 +1,23 @@
 import {
   FormContainer,
-  FormGridLayout,
+  GridProvider,
   PhoneInputField,
+  RadioGroupField,
   TextField,
 } from "@codezee/sixtify-brahma";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { t } from "i18next";
 import type { ForwardedRef } from "react";
 import { forwardRef, useImperativeHandle } from "react";
 import type { UseFormSetError } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { MailSettingAutocomplete } from "@web/components/common/Autocomplete/MailSettingAutocomplete";
+import { SmsSettingAutocomplete } from "@web/components/common/Autocomplete/SmsSettingAutocomplete";
+import { WhatsappSettingAutocomplete } from "@web/components/common/Autocomplete/WhatsappSettingAutocomplete";
 import { ImageUploadField } from "@web/components/common/ImageUploadField";
+import { SlugTextField } from "@web/components/common/PanCardTextField/SlugTextField";
 import { useEnableDisableButton } from "@web/hooks/useEnableDisableButton";
 import { errorMessages, filterChangedFormFields } from "@web/utils/helper";
 import { isValidMobileNumber } from "@web/utils/mobileNumberValidate";
@@ -39,9 +45,10 @@ const BranchMasterFormSchema = z.object({
     .refine((value) => !!value, {
       message: "common.required",
     }),
+  branch_slug: z.string().nullable(),
   city: z
     .string()
-    .max(10, "common.maxLength")
+    .max(50, "common.maxLength")
     .nullable()
     .refine((value) => !!value, {
       message: "common.required",
@@ -62,8 +69,44 @@ const BranchMasterFormSchema = z.object({
     .refine((value) => !!value, {
       message: "common.required",
     }),
-  gst_no: z.string().regex(gstNoRegex, "common.gst_no.invalid").nullable(),
+  email_setting_id: z
+    .string()
+    .nullable()
+    .refine((value) => !!value, {
+      message: "common.required",
+    }),
+  gst_no: z
+    .string()
+    .trim()
+    .nullable()
+    .optional()
+    .refine(
+      (value) => {
+        if (!value || value === "") {
+          return true;
+        }
+
+        return gstNoRegex.test(value);
+      },
+      {
+        message: "common.gst_no.invalid",
+      }
+    ),
+  is_active: z.boolean().default(true),
+  is_online: z.boolean().default(true),
   logo: z.string().nullable(),
+  sms_setting_id: z
+    .string()
+    .nullable()
+    .refine((value) => !!value, {
+      message: "common.required",
+    }),
+  whatsapp_setting_id: z
+    .string()
+    .nullable()
+    .refine((value) => !!value, {
+      message: "common.required",
+    }),
 });
 
 export type BranchMasterFormFieldValues = z.infer<
@@ -86,11 +129,17 @@ const formDefaultValues: BranchMasterFormFieldValues = {
   address: null,
   branch_code: null,
   branch_name: null,
+  branch_slug: null,
   city: null,
   contact_no: null,
   contact_person_name: null,
+  email_setting_id: null,
   gst_no: null,
+  is_active: true,
+  is_online: true,
   logo: null,
+  sms_setting_id: null,
+  whatsapp_setting_id: null,
 };
 
 export const BranchMasterForm = forwardRef(
@@ -128,9 +177,22 @@ export const BranchMasterForm = forwardRef(
       },
     }));
 
+    const {
+      branch_code,
+      branch_name,
+      branch_slug,
+      city,
+      contact_no,
+      contact_person_name,
+      email_setting_id,
+      gst_no,
+      sms_setting_id,
+      whatsapp_setting_id,
+    } = errors;
+
     return (
       <FormContainer>
-        <FormGridLayout columns={3}>
+        <GridProvider gap="15px" columns={3}>
           <ImageUploadField
             control={control}
             name="logo"
@@ -144,8 +206,8 @@ export const BranchMasterForm = forwardRef(
             name="branch_name"
             loading={loading}
             required
-            error={!!errors.branch_name}
-            helperText={errorMessages(errors.branch_name?.message)}
+            error={!!branch_name}
+            helperText={errorMessages(branch_name?.message)}
           />
 
           <TextField
@@ -154,19 +216,27 @@ export const BranchMasterForm = forwardRef(
             loading={loading}
             label="Branch Code"
             required
-            error={!!errors.branch_code}
-            helperText={errorMessages(errors.branch_code?.message)}
+            error={!!branch_code}
+            helperText={errorMessages(branch_code?.message)}
+          />
+
+          <SlugTextField
+            control={control}
+            label="Branch Slug"
+            name="branch_slug"
+            loading={loading}
+            error={!!branch_slug}
+            helperText={errorMessages(branch_slug?.message)}
           />
 
           <TextField
             name="gst_no"
             loading={loading}
             control={control}
-            required
             isCapitalize
             label="GST No"
-            error={!!errors.gst_no}
-            helperText={errorMessages(errors.gst_no?.message)}
+            error={!!gst_no}
+            helperText={errorMessages(gst_no?.message)}
             maxLength={15}
           />
 
@@ -176,8 +246,8 @@ export const BranchMasterForm = forwardRef(
             name="contact_no"
             loading={loading}
             required
-            error={!!errors.contact_no}
-            helperText={errorMessages(errors.contact_no?.message)}
+            error={!!contact_no}
+            helperText={errorMessages(contact_no?.message)}
           />
 
           <TextField
@@ -186,8 +256,8 @@ export const BranchMasterForm = forwardRef(
             name="contact_person_name"
             loading={loading}
             required
-            error={!!errors.contact_person_name}
-            helperText={errorMessages(errors.contact_person_name?.message)}
+            error={!!contact_person_name}
+            helperText={errorMessages(contact_person_name?.message)}
           />
 
           <TextField
@@ -196,8 +266,35 @@ export const BranchMasterForm = forwardRef(
             name="city"
             loading={loading}
             required
-            error={!!errors.city}
-            helperText={errorMessages(errors.city?.message)}
+            error={!!city}
+            helperText={errorMessages(city?.message)}
+          />
+
+          <MailSettingAutocomplete
+            loading={loading}
+            name="email_setting_id"
+            control={control}
+            required
+            error={!!email_setting_id}
+            helperText={errorMessages(email_setting_id?.message)}
+          />
+
+          <SmsSettingAutocomplete
+            loading={loading}
+            name="sms_setting_id"
+            control={control}
+            required
+            error={!!sms_setting_id}
+            helperText={errorMessages(sms_setting_id?.message)}
+          />
+
+          <WhatsappSettingAutocomplete
+            loading={loading}
+            name="whatsapp_setting_id"
+            control={control}
+            required
+            error={!!whatsapp_setting_id}
+            helperText={errorMessages(whatsapp_setting_id?.message)}
           />
 
           <TextField
@@ -207,12 +304,51 @@ export const BranchMasterForm = forwardRef(
             label="Address"
             required
             multiline
+            letterCase="mixed"
             rows={4}
             error={!!errors.address}
             helperText={errorMessages(errors.address?.message)}
             placeholder="Enter Address"
           />
-        </FormGridLayout>
+
+          <RadioGroupField
+            name="is_active"
+            control={control}
+            label={t("isActive.label")}
+            options={[
+              {
+                disabled: false,
+                label: t("common.yes"),
+                values: true,
+              },
+              {
+                disabled: false,
+                label: t("common.no"),
+                values: false,
+              },
+            ]}
+            loading={loading}
+          />
+
+          <RadioGroupField
+            name="is_online"
+            control={control}
+            label={t("isOnline.label")}
+            options={[
+              {
+                disabled: false,
+                label: t("common.yes"),
+                values: true,
+              },
+              {
+                disabled: false,
+                label: t("common.no"),
+                values: false,
+              },
+            ]}
+            loading={loading}
+          />
+        </GridProvider>
       </FormContainer>
     );
   }

@@ -2,12 +2,10 @@
 
 import {
   Breadcrumbs,
-  Button,
   ContentBox,
   PadBox,
   SvgHome,
 } from "@codezee/sixtify-brahma";
-import { Add } from "@mui/icons-material";
 import { Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import _isEqual from "lodash/isEqual";
@@ -15,9 +13,13 @@ import { useRouter } from "next/navigation";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import type { ReactNode } from "react";
 
+import { ButtonLayoutProvider } from "@web/components/common/responsive/ButtonLayoutProvider";
 import { AddRoles } from "@web/components/permission/role/addRole/AddRole";
 import { EditRole } from "@web/components/permission/role/roleList/editRole/EditRole";
 import { RoleList } from "@web/components/permission/role/roleList/RoleList";
+import { ROLL_ENTRY_PERMISSION } from "@web/constants/permission/permissions/rollEntryAndPermission/permissions";
+import { useUserPermissions } from "@web/hooks/useUserPermissions/useUserPermissions";
+import { PermissionGuard } from "@web/provider/PermissionGuard";
 
 export const rolesPage = {
   "add-roles": "Add Roles",
@@ -42,6 +44,8 @@ type BreadcrumbsMap = Record<RolesPageType, BreadcrumbItem[]>;
 // eslint-disable-next-line import/no-default-export
 export default function Page() {
   const router = useRouter();
+
+  const { validateAccess } = useUserPermissions();
 
   const [queryPage] = useQueryState(
     "page",
@@ -114,15 +118,19 @@ export default function Page() {
               </Typography>
 
               {isListRoles && (
-                <Button
-                  variant="outlined"
-                  startIcon={<Add />}
-                  onClick={() => router.push("/permission/role?page=add-roles")}
+                <PermissionGuard
+                  canAccess={validateAccess(ROLL_ENTRY_PERMISSION.CREATE)}
                 >
-                  {t("common.button.add", {
-                    label: t("role.menu.label"),
-                  })}
-                </Button>
+                  <ButtonLayoutProvider
+                    variant="outlined"
+                    onClick={() =>
+                      router.push("/permission/role?page=add-roles")
+                    }
+                    label={t("common.button.add", {
+                      label: t("role.menu.label"),
+                    })}
+                  />
+                </PermissionGuard>
               )}
             </Stack>
 

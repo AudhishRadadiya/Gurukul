@@ -7,20 +7,15 @@ import type { UseFormSetError } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { DonationModeAutocomplete } from "@web/components/common/Autocomplete/DonationModeAutocomplete";
 import { useGetReceiptNumber } from "@web/components/common/Autocomplete/hooks/useGetReceiptNumber";
-import { TrustAutocomplete } from "@web/components/common/Autocomplete/TrustAutocomplete";
+import { TrustAutocompleteFromMultipleBranch } from "@web/components/common/Autocomplete/TrustAutocompleteFromMultipleBranch";
 import { UserAutocomplete } from "@web/components/common/Autocomplete/UserAutocomplete";
+import { useBranch } from "@web/context/BranchContext";
 import { useEnableDisableButton } from "@web/hooks/useEnableDisableButton";
 import { errorMessages, filterChangedFormFields } from "@web/utils/helper";
 
 const CancelReceiptFromSchema = z.object({
-  donation_mode_id: z
-    .string()
-    .nullable()
-    .refine((value) => !!value, {
-      message: "common.required",
-    }),
+  branch_id: z.string().nullable(),
   receipt_number: z
     .string()
     .nullable()
@@ -65,7 +60,7 @@ export type FormRef = {
 };
 
 const formDefaultValues: CancelReceiptFormFieldValues = {
-  donation_mode_id: null,
+  branch_id: null,
   receipt_number: null,
   total_receipt: null,
   trust_id: null,
@@ -94,9 +89,9 @@ export const CancelReceiptFrom = forwardRef(
       values: defaultValues,
     });
 
-    const trustId = watch("trust_id");
+    const { branchIds } = useBranch();
 
-    const donationModeId = watch("donation_mode_id");
+    const trustId = watch("trust_id");
 
     useEnableDisableButton({ control, defaultValues, errors });
 
@@ -109,13 +104,13 @@ export const CancelReceiptFrom = forwardRef(
             dirtyFields
           );
 
-          onSubmit(filterFormValues);
+          onSubmit({ ...filterFormValues, branch_id: branchIds });
         })();
       },
     }));
 
     const { data } = useGetReceiptNumber({
-      donation_mode_id: donationModeId ?? "",
+      branch_id: branchIds,
       trust_id: trustId ?? "",
     });
 
@@ -133,37 +128,25 @@ export const CancelReceiptFrom = forwardRef(
       }
     }, [data]);
 
-    const {
-      donation_mode_id,
-      receipt_number,
-      total_receipt,
-      trust_id,
-      user_id,
-    } = errors;
+    const { receipt_number, total_receipt, trust_id, user_id } = errors;
 
     return (
       <FormContainer>
         <FormRow maxColumn={2}>
-          <TrustAutocomplete
+          <TrustAutocompleteFromMultipleBranch
             loading={loading}
+            placeholder={t("common.select.label", {
+              label: t("trust.label"),
+            })}
+            label={t("trust.label")}
             name="trust_id"
             control={control}
             required
             error={!!trust_id}
+            branchIds={[branchIds]}
             helperText={errorMessages(trust_id?.message)}
           />
 
-          <DonationModeAutocomplete
-            loading={loading}
-            name="donation_mode_id"
-            control={control}
-            required
-            error={!!donation_mode_id}
-            helperText={errorMessages(donation_mode_id?.message)}
-          />
-        </FormRow>
-
-        <FormRow maxColumn={2}>
           <TextField
             control={control}
             loading={loading}
@@ -177,7 +160,9 @@ export const CancelReceiptFrom = forwardRef(
             error={!!receipt_number}
             helperText={errorMessages(receipt_number?.message)}
           />
+        </FormRow>
 
+        <FormRow maxColumn={2}>
           <TextField
             control={control}
             type="number"
@@ -188,9 +173,7 @@ export const CancelReceiptFrom = forwardRef(
             error={!!total_receipt}
             helperText={errorMessages(total_receipt?.message)}
           />
-        </FormRow>
 
-        <FormRow maxColumn={1}>
           <UserAutocomplete
             loading={loading}
             name="user_id"

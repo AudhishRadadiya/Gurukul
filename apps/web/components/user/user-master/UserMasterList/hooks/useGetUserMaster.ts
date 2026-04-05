@@ -7,7 +7,6 @@ import type { ApiSuccessResponse } from "@web/types/apiResponse";
 import type { GetListArgsAg2 } from "@web/types/shared-types";
 
 export type UserListType = {
-  allow_donation_login: boolean;
   branch_names: string;
   closed_time: string;
   days: number;

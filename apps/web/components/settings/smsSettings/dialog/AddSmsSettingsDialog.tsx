@@ -1,5 +1,9 @@
-import { Button, Dialog, toasts } from "@codezee/sixtify-brahma";
-import { Stack } from "@mui/material";
+import {
+  Button,
+  ButtonContainer,
+  Dialog,
+  toasts,
+} from "@codezee/sixtify-brahma";
 import { t } from "i18next";
 import { useRef } from "react";
 
@@ -56,7 +60,7 @@ export const AddSmsSettingsDialog = ({
         label: t("sms.settings.menu.label"),
       })}
       actions={
-        <Stack direction="row" gap="5px">
+        <ButtonContainer>
           <Button onClick={onClose} variant="outlined">
             {t("common.cancel.button")}
           </Button>
@@ -68,7 +72,7 @@ export const AddSmsSettingsDialog = ({
           >
             {t("common.save.button")}
           </Button>
-        </Stack>
+        </ButtonContainer>
       }
     >
       <SmsSettingsForm ref={formRef} />

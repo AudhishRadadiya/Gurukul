@@ -1,10 +1,18 @@
 import {
   defaultPageSize,
+  FacebookCircularProgress,
   getPaletteByTheme,
-  Pagination,
+  PadBox,
   Theme,
 } from "@codezee/sixtify-brahma";
-import { Box } from "@mui/material";
+import {
+  Box,
+  MenuItem,
+  Pagination,
+  Select,
+  Stack,
+  Typography,
+} from "@mui/material";
 import type {
   ColDef,
   FilterChangedEvent,
@@ -30,8 +38,6 @@ import { AgGridReact } from "ag-grid-react";
 import _isFunction from "lodash/isFunction";
 import { useMemo } from "react";
 
-import { Loader } from "@web/components/common/AgGridV2/Loader";
-
 import type { UseActionColumnArgs } from "./hooks/useActionColumn";
 import { useActionColumn } from "./hooks/useActionColumn";
 
@@ -56,6 +62,7 @@ ModuleRegistry.registerModules([
 type AgGridV2Props<T> = Omit<AgGridReactProps<T>, "onSelectionChanged"> & {
   actions?: UseActionColumnArgs<T>;
   count?: number; // Made optional for non-paginated use
+  footer?: JSX.Element;
   height: number;
   isLoading: boolean;
   onFilterChange?: (event: FilterModel) => void;
@@ -69,6 +76,8 @@ type AgGridV2Props<T> = Omit<AgGridReactProps<T>, "onSelectionChanged"> & {
 };
 
 export const AG_GRID_CELL_DEFAULT_VALUE = "-";
+
+const pageSizeOptions = [20, 50, 100, 200, 500];
 
 const internalDefaultColDef: ColDef = {
   filter: true,
@@ -90,21 +99,94 @@ export const AgGridV2 = <T,>({
   columnDefs,
   count = 0,
   defaultColDef = {},
+  footer,
   height,
   isLoading,
   onFilterChange,
   onPageChange,
   onRowsPerPageChange,
   onSelectionChanged,
-  page = 1,
+  page = 0,
   rowData,
   rowsPerPage = defaultPageSize,
   ...restProps
 }: AgGridV2Props<T>) => {
+  const { rowSelection, ...gridProps } = restProps;
+
   const visibleActions = useMemo(
     () => actions.filter(({ isView }) => isView !== false),
     [actions]
   );
+
+  const totalPages = useMemo(() => {
+    return Math.ceil(count / rowsPerPage);
+  }, [count, rowsPerPage]);
+
+  const RowsPerPageSelector = useMemo(() => {
+    return (
+      <Stack direction="row" spacing={5} alignItems="center">
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Typography variant="body2" fontSize={13} fontWeight={300}>
+            Go to page
+          </Typography>
+
+          <Select
+            size="medium"
+            sx={{ fontSize: 14, height: 30, width: 68 }}
+            value={page + 1}
+            onChange={(e) => {
+              onPageChange?.(Number(e.target.value) - 1);
+            }}
+            MenuProps={{
+              PaperProps: {
+                sx: {
+                  maxHeight: 200,
+                },
+              },
+            }}
+          >
+            {Array.from({ length: totalPages }, (_, i) => {
+              return (
+                <MenuItem key={i + 1} value={i + 1}>
+                  {i + 1}
+                </MenuItem>
+              );
+            })}
+          </Select>
+        </Stack>
+
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Typography variant="body2" fontSize={13} fontWeight={300}>
+            Rows per page
+          </Typography>
+
+          <Select
+            size="medium"
+            sx={{ fontSize: 14, height: 30, width: 68 }}
+            value={rowsPerPage}
+            onChange={(e) => {
+              const newSize = Number(e.target.value);
+
+              onRowsPerPageChange?.(newSize);
+              onPageChange?.(0);
+            }}
+          >
+            {pageSizeOptions.map((size) => (
+              <MenuItem key={size} value={size}>
+                {size}
+              </MenuItem>
+            ))}
+          </Select>
+        </Stack>
+      </Stack>
+    );
+  }, [
+    rowsPerPage,
+    pageSizeOptions,
+    onRowsPerPageChange,
+    onPageChange,
+    totalPages,
+  ]);
 
   const { actionColumn } = useActionColumn(visibleActions);
 
@@ -138,35 +220,27 @@ export const AgGridV2 = <T,>({
     }
   };
 
-  const columnsWithCheckbox = useMemo<AgGridReactProps["columnDefs"]>(() => {
-    if (restProps.rowSelection && columnDefs) {
-      return [
-        {
-          checkboxSelection: true,
-          field: "checkbox",
-          filter: false,
-          headerCheckboxSelection: restProps.rowSelection === "multiple",
-          headerName: "",
-          maxWidth: 35,
-          pinned: "left",
-          valueFormatter: () => {
-            return "";
-          },
-        },
-        ...columnDefs,
-      ];
+  const rowSelectionConfig = useMemo<
+    AgGridReactProps<T>["rowSelection"]
+  >(() => {
+    if (!rowSelection) {
+      return rowSelection;
     }
 
-    return columnDefs;
-  }, [restProps.rowSelection, columnDefs]);
+    return {
+      checkboxes: true,
+      enableClickSelection: false,
+      mode: rowSelection === "multiple" ? "multiRow" : "singleRow",
+    };
+  }, [rowSelection]);
 
   const newColDef = useMemo<AgGridReactProps["columnDefs"]>(() => {
     if (visibleActions.length) {
-      return [...(columnsWithCheckbox ?? []), actionColumn];
+      return [...(columnDefs ?? []), actionColumn];
     }
 
-    return columnsWithCheckbox;
-  }, [visibleActions.length, columnsWithCheckbox, actionColumn]);
+    return columnDefs;
+  }, [visibleActions.length, columnDefs, actionColumn]);
 
   const shouldShowPagination = count > defaultPageSize;
 
@@ -177,30 +251,49 @@ export const AgGridV2 = <T,>({
       >
         <AgGridReact
           columnDefs={newColDef}
+          selectionColumnDef={{ pinned: "left", width: 35 }}
           rowData={rowData}
           defaultColDef={mergedDefaultColDef}
           loading={isLoading}
           theme={myTheme}
-          loadingOverlayComponent={Loader}
+          loadingOverlayComponent={FacebookCircularProgress}
           onFilterChanged={onFilterChanged}
+          rowSelection={rowSelectionConfig}
           onSelectionChanged={onSelection}
-          {...restProps}
+          {...gridProps}
         />
       </Box>
 
-      {shouldShowPagination && onPageChange && onRowsPerPageChange && (
-        <Pagination
-          count={count}
-          page={page}
-          onPageChange={(_, page) => {
-            onPageChange(page);
-          }}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={(event) => {
-            onRowsPerPageChange(Number(event.target.value));
-          }}
-        />
-      )}
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
+          {footer}
+        </Box>
+
+        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          {shouldShowPagination && onPageChange && onRowsPerPageChange && (
+            <PadBox padding={{ padding: "8px 25px" }}>
+              <Stack direction="row" spacing={5} alignItems="center">
+                {RowsPerPageSelector}
+
+                <Pagination
+                  page={page + 1}
+                  count={totalPages}
+                  variant="outlined"
+                  shape="rounded"
+                  color="secondary"
+                  siblingCount={1}
+                  boundaryCount={1}
+                  showFirstButton
+                  showLastButton
+                  onChange={(_, newPage) => {
+                    onPageChange?.(newPage - 1);
+                  }}
+                />
+              </Stack>
+            </PadBox>
+          )}
+        </Box>
+      </Stack>
     </>
   );
 };

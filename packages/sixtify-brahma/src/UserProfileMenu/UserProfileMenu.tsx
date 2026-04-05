@@ -19,12 +19,12 @@ import {
   type ReactNode,
 } from "react";
 import { useGetDeviceType } from "../utils";
+import type { OnAction } from "../utils/types";
 import { IconButtonStyled } from "./UserProfileMenu.styled";
 
 export type UserProfileMenuProps = Omit<MenuProps, "open" | "closeMenu"> & {
   userDetails: {
     name: string;
-    email: string;
     avatar: string;
   };
   menuItems: {
@@ -33,7 +33,7 @@ export type UserProfileMenuProps = Omit<MenuProps, "open" | "closeMenu"> & {
     icon?: ReactNode;
     divider?: boolean;
     sx?: CSSProperties;
-    onClick?: () => void;
+    onClick?: OnAction;
   }[];
 };
 
@@ -61,6 +61,8 @@ export function UserProfileMenu({
     setAnchorEl(null);
   };
 
+  const { name } = userDetails;
+
   return (
     <Box position="relative">
       <Box sx={{ display: "flex", alignItems: "center", textAlign: "center" }}>
@@ -80,7 +82,7 @@ export function UserProfileMenu({
             {isDesktop && (
               <>
                 <Typography maxWidth={150} noWrap>
-                  {userDetails.name}
+                  {name}
                 </Typography>
 
                 {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}

@@ -11,6 +11,7 @@ import { EditDonationCollectionDialog } from "@web/components/report/donationRep
 import { useDonationCollectionReportColumns } from "@web/components/report/donationReport/donationCollectionReport/donationCollectionReportList/hooks/useDonationCollectionReportColumns";
 import type { DailyDonationReportData } from "@web/components/report/donationReport/donationCollectionReport/donationCollectionReportList/hooks/useGetDonationCollectionReport";
 import { useGetDonationCollectionReport } from "@web/components/report/donationReport/donationCollectionReport/donationCollectionReportList/hooks/useGetDonationCollectionReport";
+import { useBranch } from "@web/context/BranchContext";
 
 export type DonationCollectionReportListProps = {
   externalFilter: FieldValues;
@@ -20,6 +21,8 @@ export const DonationCollectionReportList = ({
   externalFilter,
 }: DonationCollectionReportListProps) => {
   const { onDialogClose, onDialogOpen, openedDialog } = useDialogActions();
+
+  const { branchIds } = useBranch();
 
   const [currentDonationCollectionData, setCurrentDonationCollectionData] =
     useState<DailyDonationReportData>();
@@ -33,7 +36,7 @@ export const DonationCollectionReportList = ({
 
   const { data, isFetching } = useGetDonationCollectionReport({
     endRow,
-    externalFilter,
+    externalFilter: { ...externalFilter, branch_id: [branchIds] },
     startRow,
   });
 

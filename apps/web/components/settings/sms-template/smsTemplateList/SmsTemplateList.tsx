@@ -81,20 +81,20 @@ export const SmsTemplateList = () => {
         height={200}
         actions={[
           {
-            isView: validateAccess(SMS_TEMPLATE_PERMISSION.DELETE),
-            onClick: (data) => {
-              onDialogOpen("delete");
-              setCurrentSmsTemplate(data);
-            },
-            title: t("common.delete"),
-          },
-          {
             isView: validateAccess(SMS_TEMPLATE_PERMISSION.EDIT),
             onClick: (data) => {
               onDialogOpen("edit");
               setCurrentSmsTemplate(data);
             },
             title: t("common.edit"),
+          },
+          {
+            isView: validateAccess(SMS_TEMPLATE_PERMISSION.DELETE),
+            onClick: (data) => {
+              onDialogOpen("delete");
+              setCurrentSmsTemplate(data);
+            },
+            title: t("common.delete"),
           },
         ]}
       />

@@ -7,21 +7,26 @@ import { useGetEventOptions } from "@web/components/common/Autocomplete/hooks/us
 type EventAutocompleteProps<P extends FieldValues> = Omit<
   AutocompleteProps<P>,
   "options"
->;
+> & {
+  isUserWise?: boolean;
+};
 
 export const EventAutocomplete = <P extends FieldValues>(
   props: EventAutocompleteProps<P>
 ) => {
-  const { data: eventOptions } = useGetEventOptions();
+  const { isUserWise = false, ...autocompleteProps } = props;
+
+  const { data: eventOptions } = useGetEventOptions({ isUserWise });
 
   return (
     <Autocomplete
       label={t("common.event.label")}
+      limitTags={1}
       options={eventOptions}
       placeholder={t("common.select.label", {
         label: t("common.event.label"),
       })}
-      {...props}
+      {...autocompleteProps}
     />
   );
 };

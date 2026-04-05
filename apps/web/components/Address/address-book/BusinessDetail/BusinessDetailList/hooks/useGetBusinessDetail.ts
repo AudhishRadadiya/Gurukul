@@ -5,6 +5,7 @@ import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
 import { businessDetailKeys } from "@web/queryKeysFactories/businessDetail";
 import type { ApiSuccessResponse } from "@web/types/apiResponse";
 import type { GetListArgsAg2 } from "@web/types/shared-types";
+import { isBranchFilterEnabled } from "@web/utils/reactQuery";
 
 export type BusinessDetail = {
   address: string;
@@ -37,6 +38,7 @@ export function useGetBusinessDetail(body: GetListArgsAg2) {
   };
 
   return useQuery({
+    enabled: isBranchFilterEnabled(body),
     initialData: { business_detail: [], totalCount: 0 },
     queryFn: () => getBusinessDetailData(body),
     queryKey: businessDetailKeys.listing(body),

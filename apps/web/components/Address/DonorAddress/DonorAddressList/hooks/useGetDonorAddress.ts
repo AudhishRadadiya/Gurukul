@@ -1,11 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
+import type { IGetRowsParams } from "ag-grid-community";
+import type { FieldValues } from "react-hook-form";
 
-import type { Status } from "@web/components/common/Autocomplete/hooks/useGetStatusOptions";
 import { DONATION_ADDRESS_LIST_ROUTES } from "@web/constants/routes/donation_address/routes";
 import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
 import { donorAddressKeys } from "@web/queryKeysFactories/donorAddress";
 import type { ApiSuccessResponse } from "@web/types/apiResponse";
-import type { GetListArgsAg2, SelectedRecords } from "@web/types/shared-types";
+import type { SelectedRecords } from "@web/types/shared-types";
+import { isBranchFilterEnabled } from "@web/utils/reactQuery";
 
 export type DonorAddress = {
   address: string;
@@ -30,18 +32,22 @@ export type GetDonorAddressSuccessResponse = ApiSuccessResponse<{
   totalCount: number;
 }>;
 
-type UseGetDonorAddressArgs = GetListArgsAg2 & {
-  status: Status;
-};
+type UseGetDonorAddressArgs = Partial<
+  IGetRowsParams & {
+    endRow: number;
+    externalFilter?: FieldValues;
+    is_active: boolean;
+    responseFields: string[];
+    startRow: number;
+  }
+>;
 
-export function useGetDonorAddress(args: UseGetDonorAddressArgs) {
+export function useGetDonorAddress(body: UseGetDonorAddressArgs) {
   const { axiosPrivate } = useAxiosPrivate();
-
-  const { status, ...body } = args;
 
   const getDonorAddress = async () => {
     const { data } = await axiosPrivate.post<GetDonorAddressSuccessResponse>(
-      DONATION_ADDRESS_LIST_ROUTES.listing(status),
+      DONATION_ADDRESS_LIST_ROUTES.listing,
       body
     );
 
@@ -49,6 +55,7 @@ export function useGetDonorAddress(args: UseGetDonorAddressArgs) {
   };
 
   return useQuery({
+    enabled: isBranchFilterEnabled(body),
     initialData: { donorAddressList: [], totalCount: 0 },
     queryFn: () => getDonorAddress(),
     queryKey: donorAddressKeys.listing(body),

@@ -11,5 +11,14 @@ export const AUTH_ROUTES = {
 
   login: `${AUTH_BASE_URL}/login` as const,
 
+  otpVerify: `${AUTH_BASE_URL}/otp/verify` as const,
+
   resetPassword: `${AUTH_BASE_URL}/reset-password` as const,
+
+  sendOtp: `${AUTH_BASE_URL}/otp/send` as const,
+
+  twoFactorEnable: (userId: string) =>
+    `${AUTH_BASE_URL}/two_factor/enable/${userId}` as const,
+
+  twoFactorVerify: `${AUTH_BASE_URL}/two_factor/verify` as const,
 };

@@ -1,5 +1,6 @@
 import { Menu, MenuItem } from "@mui/material";
 import type { TabModel } from "./Tab";
+import type { OnAction } from "../utils/types";
 
 export type MenuProps = {
   label: string;
@@ -11,8 +12,8 @@ export type TabsMenusProps = {
   tabs: TabModel[];
   menuAnchor: HTMLElement | null;
   activeTab: TabModel;
-  onClose: () => void;
-  onMenuItemClick: () => void;
+  onClose: OnAction;
+  onMenuItemClick: OnAction;
 };
 
 export function TabsMenus({

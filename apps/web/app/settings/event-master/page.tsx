@@ -1,84 +1,86 @@
 "use client";
 
-import { Button, ContentBox, PadBox } from "@codezee/sixtify-brahma";
-import { Add } from "@mui/icons-material";
+import { ContentBox, PadBox } from "@codezee/sixtify-brahma";
 import { Stack, Typography } from "@mui/material";
-import { useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
+import { useRouter } from "next/navigation";
+import { useQueryState } from "nuqs";
+import type { ReactNode } from "react";
 
-import { AddEventMasterDialog } from "@web/components/settings/event-master/Dialogs/AddEventMasterDialog";
+import { ADD_EVENT_MASTER } from "@web/app/settings/event-master/hooks/constant";
+import { ButtonLayoutProvider } from "@web/components/common/responsive/ButtonLayoutProvider";
+import { AddEventMaster } from "@web/components/settings/event-master/AddEventMaster/AddEventMaster";
 import { EventMasterBreadcrumbs } from "@web/components/settings/event-master/EventMasterBreadcrumbs";
 import { EventMasterList } from "@web/components/settings/event-master/EventMasterList/EventMasterList";
 import { EVENT_MASTER_PERMISSION } from "@web/constants/permission/settings/eventMaster/permission";
 import { useUserPermissions } from "@web/hooks/useUserPermissions/useUserPermissions";
 import { PermissionGuard } from "@web/provider/PermissionGuard";
-import { eventKeys } from "@web/queryKeysFactories/event";
-import type { DialogRenderer } from "@web/types/dialogs";
-import { useDialogActions } from "@web/types/useDialogActions";
+
+const eventMasterPage = {
+  [ADD_EVENT_MASTER]: "Add Event Master",
+};
+
+type EventMasterPageType = keyof typeof eventMasterPage;
+
+const eventMasterPageRenderer: Record<EventMasterPageType, ReactNode> = {
+  [ADD_EVENT_MASTER]: <AddEventMaster />,
+};
 
 // eslint-disable-next-line import/no-default-export
 export default function Page() {
-  const { onDialogClose, onDialogOpen, openedDialog } = useDialogActions();
+  const [page] = useQueryState("page");
 
-  const queryClient = useQueryClient();
+  const router = useRouter();
 
   const { validateAccess } = useUserPermissions();
 
-  const dialogRenderer: DialogRenderer = {
-    add: (
-      <AddEventMasterDialog
-        open
-        onClose={onDialogClose}
-        onAddSuccess={() => {
-          queryClient.invalidateQueries({
-            queryKey: eventKeys.listing(),
-          });
-        }}
-      />
-    ),
-  };
+  const queryPage = page === ADD_EVENT_MASTER ? ADD_EVENT_MASTER : null;
+
+  const selectedAddEventMasterPage = Object.keys(eventMasterPage).includes(
+    queryPage ?? ""
+  );
 
   return (
     <Stack gap="10px">
-      <EventMasterBreadcrumbs />
+      <EventMasterBreadcrumbs page={queryPage} />
 
       <ContentBox>
-        <PadBox padding={{ padding: "10px" }}>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Typography variant="subtitle1">
-              {t("common.master.label", {
-                label: t("common.event.label"),
-              })}
-            </Typography>
-
-            <PermissionGuard
-              canAccess={validateAccess(EVENT_MASTER_PERMISSION.CREATE)}
+        {!selectedAddEventMasterPage && (
+          <PadBox padding={{ padding: "10px" }}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
             >
-              <Stack direction="row" gap="5px">
-                <Button
+              <Typography variant="subtitle1">
+                {t("common.master.label", {
+                  label: t("common.event.label"),
+                })}
+              </Typography>
+
+              <PermissionGuard
+                canAccess={validateAccess(EVENT_MASTER_PERMISSION.CREATE)}
+              >
+                <ButtonLayoutProvider
                   variant="outlined"
-                  startIcon={<Add />}
                   onClick={() => {
-                    onDialogOpen("add");
+                    router.push("/settings/event-master?page=add-event-master");
                   }}
-                >
-                  {t("common.button.add", {
+                  label={t("common.button.add", {
                     label: t("common.event.label"),
                   })}
-                </Button>
-              </Stack>
-            </PermissionGuard>
-          </Stack>
-        </PadBox>
+                />
+              </PermissionGuard>
+            </Stack>
+          </PadBox>
+        )}
 
-        <EventMasterList />
+        {selectedAddEventMasterPage ? (
+          queryPage && eventMasterPageRenderer[queryPage]
+        ) : (
+          <EventMasterList />
+        )}
       </ContentBox>
-
-      {openedDialog && dialogRenderer[openedDialog]}
     </Stack>
   );
 }

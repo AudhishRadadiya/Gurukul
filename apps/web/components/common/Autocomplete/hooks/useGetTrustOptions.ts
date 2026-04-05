@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { TRUST_ROUTES } from "@web/constants/routes/trust/routes";
+import { getTrustOptionsRoute } from "@web/constants/routes/trust/routes";
 import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
 import { trustKeys } from "@web/queryKeysFactories/trust";
 import type { ApiSuccessResponse } from "@web/types/apiResponse";
@@ -14,13 +14,21 @@ type TrustOptionsData = {
   value: string;
 };
 
-export function useGetTrustOptions() {
+type UseGetTrustOptionsProps = {
+  useShortName?: boolean;
+  useUserWise?: boolean;
+};
+
+export function useGetTrustOptions(props?: UseGetTrustOptionsProps) {
   const { axiosPrivate } = useAxiosPrivate();
 
+  const { useShortName = false, useUserWise = false } = props || {};
+
   const fetchTrustOption = async () => {
-    const { data } = await axiosPrivate.get<
-      ApiSuccessResponse<TrustOptionsData[]>
-    >(TRUST_ROUTES.options);
+    const url = getTrustOptionsRoute(useShortName, useUserWise);
+
+    const { data } =
+      await axiosPrivate.get<ApiSuccessResponse<TrustOptionsData[]>>(url);
 
     return data.data;
   };
@@ -28,6 +36,6 @@ export function useGetTrustOptions() {
   return useQuery({
     initialData: [],
     queryFn: fetchTrustOption,
-    queryKey: trustKeys.options(),
+    queryKey: trustKeys.options(useShortName, useUserWise),
   });
 }

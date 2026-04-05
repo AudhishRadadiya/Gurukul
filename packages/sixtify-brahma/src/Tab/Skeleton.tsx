@@ -1,15 +1,15 @@
-import { Skeleton as MuiSkeleton, Stack } from "@mui/material";
+import { Box, Skeleton as MuiSkeleton } from "@mui/material";
 
 export const Skeleton = () => {
   return (
-    <Stack gap="10px">
+    <Box flex={1}>
       <MuiSkeleton
-        width={200}
         height="30px"
         sx={{
+          maxWidth: "200px",
           transform: "scale(1)",
         }}
       />
-    </Stack>
+    </Box>
   );
 };

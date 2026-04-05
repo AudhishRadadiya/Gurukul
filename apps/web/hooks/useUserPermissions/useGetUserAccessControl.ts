@@ -12,6 +12,11 @@ type SubModule = {
 };
 
 export type UserAccessData = {
+  allow_donation_day: boolean;
+  allow_print_export: boolean;
+  donation_day: number;
+  enable_two_factor: boolean;
+  full_permission: boolean;
   modules: Record<string, SubModule>;
 };
 

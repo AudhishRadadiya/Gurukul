@@ -1,7 +1,6 @@
 "use client";
 
-import { Button, ContentBox, PadBox } from "@codezee/sixtify-brahma";
-import { Add } from "@mui/icons-material";
+import { ContentBox, PadBox } from "@codezee/sixtify-brahma";
 import { Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/navigation";
@@ -9,6 +8,7 @@ import { useQueryState } from "nuqs";
 import type { ReactNode } from "react";
 
 import { ADD_TRUST_MASTER } from "@web/app/settings/trust-master/hooks/constant";
+import { ButtonLayoutProvider } from "@web/components/common/responsive/ButtonLayoutProvider";
 import { AddTrustMaster } from "@web/components/settings/trust-master/AddTrustMaster/AddTrustMaster";
 import { TrustMasterBreadcrumbs } from "@web/components/settings/trust-master/TrustMasterBreadcrumbs";
 import { TrustMasterList } from "@web/components/settings/trust-master/TrustMasterList/TrustMasterList";
@@ -61,17 +61,15 @@ export default function Page() {
               <PermissionGuard
                 canAccess={validateAccess(TRUST_MASTER_PERMISSION.CREATE)}
               >
-                <Button
+                <ButtonLayoutProvider
                   variant="outlined"
-                  startIcon={<Add />}
                   onClick={() => {
                     router.push("/settings/trust-master?page=add-trust-master");
                   }}
-                >
-                  {t("common.button.add", {
+                  label={t("common.button.add", {
                     label: t("trust.label"),
                   })}
-                </Button>
+                />
               </PermissionGuard>
             </Stack>
           </PadBox>

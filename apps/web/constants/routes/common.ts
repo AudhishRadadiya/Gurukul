@@ -11,3 +11,5 @@ export const DYNAMIC = "dynamic";
 export const CLONE = "clone";
 
 export const PDF = "pdf";
+
+export const ALL = "all";

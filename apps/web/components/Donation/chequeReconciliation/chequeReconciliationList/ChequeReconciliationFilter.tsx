@@ -19,7 +19,7 @@ export const ChequeReconciliationFilter = ({
 }: ChequeReconciliationFilterProps) => {
   const [currentFilter, setCurrentFilter] = useState<FieldValues>({});
 
-  const { data: trustOptions } = useGetTrustOptions();
+  const { data: trustOptions } = useGetTrustOptions({ useShortName: true });
 
   const { data: bankOptions } = useGetBankOptions();
 
@@ -32,7 +32,7 @@ export const ChequeReconciliationFilter = ({
         label: t("trust.label"),
         options: trustOptions,
         type: "autoComplete",
-        value: currentFilter.trust,
+        value: currentFilter.trust_id,
       },
       {
         key: "status",
@@ -46,10 +46,10 @@ export const ChequeReconciliationFilter = ({
         label: t("bank.name.label"),
         options: bankOptions,
         type: "autoComplete",
-        value: currentFilter.status,
+        value: currentFilter.bank_id,
       },
     ],
-    [trustOptions, currentFilter]
+    [trustOptions, bankOptions, chequeStatusOptions, currentFilter]
   );
 
   const onChange = (data: FieldValues, isPopup: boolean) => {
@@ -58,9 +58,14 @@ export const ChequeReconciliationFilter = ({
     }
   };
 
+  const onApply = (data: FieldValues) => {
+    setFilterListData(data);
+    setCurrentFilter(data);
+  };
+
   const onClear = () => {
-    setCurrentFilter({});
     setFilterListData({});
+    setCurrentFilter({});
   };
 
   return (
@@ -68,7 +73,7 @@ export const ChequeReconciliationFilter = ({
       filterListItems={filterListItems}
       filterListData={filterListData}
       onChange={onChange}
-      onApply={setFilterListData}
+      onApply={onApply}
       onClear={onClear}
     />
   );

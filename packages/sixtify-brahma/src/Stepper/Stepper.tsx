@@ -7,6 +7,7 @@ import {
   Stepper as MuiStepper,
   Step,
   StepLabel,
+  Tooltip,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -19,6 +20,8 @@ type StepperProps = MuiStepperProps & {
   showActiveStepIcon?: boolean;
   stepLabelProps?: StepLabelProps;
   onStepClick?: (stepIndex: number) => void;
+  showTooltips?: boolean;
+  showStepLabels?: boolean;
 };
 
 export const Stepper = ({
@@ -29,6 +32,8 @@ export const Stepper = ({
   stepUrls = [],
   errorSteps = [],
   onStepClick,
+  showTooltips = false,
+  showStepLabels = true,
   ...rest
 }: StepperProps) => {
   const theme = useTheme();
@@ -51,34 +56,46 @@ export const Stepper = ({
         {steps.map((label, index) => {
           const isError = errorSteps.includes(index);
 
+          const stepLabelContent = (
+            <StepLabel
+              {...stepLabelProps}
+              error={isError}
+              sx={{
+                cursor:
+                  (stepUrls[index] ?? onStepClick) ? "pointer" : "default",
+                ".Mui-active .MuiStepIcon-root": {
+                  color: `${butterflyBlue[900]} !important`,
+                },
+                ".Mui-completed .MuiStepIcon-root": {
+                  color: `${butterflyBlue[900]} !important`,
+                },
+                ...(isError && {
+                  ".MuiStepIcon-root": {
+                    color: `${red[900]} !important`,
+                  },
+                  ".MuiStepLabel-label": {
+                    color: `${red[900]} !important`,
+                  },
+                }),
+                ...stepLabelProps.sx,
+              }}
+              onClick={() => handleStepClick(index)}
+            >
+              {showStepLabels && (
+                <Typography variant="body2">{label}</Typography>
+              )}
+            </StepLabel>
+          );
+
           return (
             <Step key={label}>
-              <StepLabel
-                {...stepLabelProps}
-                error={isError}
-                sx={{
-                  cursor:
-                    (stepUrls[index] ?? onStepClick) ? "pointer" : "default",
-                  ".Mui-active .MuiStepIcon-root": {
-                    color: `${butterflyBlue[900]} !important`,
-                  },
-                  ".Mui-completed .MuiStepIcon-root": {
-                    color: `${butterflyBlue[900]} !important`,
-                  },
-                  ...(isError && {
-                    ".MuiStepIcon-root": {
-                      color: `${red[900]} !important`,
-                    },
-                    ".MuiStepLabel-label": {
-                      color: `${red[900]} !important`,
-                    },
-                  }),
-                  ...stepLabelProps.sx,
-                }}
-                onClick={() => handleStepClick(index)}
-              >
-                <Typography variant="body2">{label}</Typography>
-              </StepLabel>
+              {showTooltips ? (
+                <Tooltip title={label} placement="top">
+                  {stepLabelContent}
+                </Tooltip>
+              ) : (
+                stepLabelContent
+              )}
             </Step>
           );
         })}

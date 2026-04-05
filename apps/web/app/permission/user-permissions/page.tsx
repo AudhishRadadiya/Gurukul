@@ -40,8 +40,12 @@ export default function Page() {
 
   const [userId] = useQueryState("id", { defaultValue: "" });
 
+  const [userName] = useQueryState("user_name", { defaultValue: "" });
+
   const permissionsPageRenderer: Record<UserPermissionsType, ReactNode> = {
-    "add-user-permissions": <AddUserPermissions userId={userId} />,
+    "add-user-permissions": (
+      <AddUserPermissions userId={userId} userName={userName} />
+    ),
     "edit-user-permissions": <EditUserPermissions userId={userId} />,
     "list-user-permissions": <UserPermissionsList />,
   };

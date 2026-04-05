@@ -25,6 +25,7 @@ import {
   PAYMENT,
 } from "@web/components/common/Autocomplete/hooks/useGetTemplateParametersOptions";
 import { TemplateParametersAutocomplete } from "@web/components/common/Autocomplete/TemplateParametersAutocomplete";
+import { CheckboxWithLabel } from "@web/components/common/checkboxWithLabel/CheckboxWithLabel";
 import { useEnableDisableButton } from "@web/hooks/useEnableDisableButton";
 import {
   errorMessages,
@@ -34,6 +35,8 @@ import {
 
 const SmsTemplateFormSchema = z.object({
   is_active: z.boolean(),
+  is_sms: z.boolean(),
+  is_whatsapp: z.boolean(),
   temp_template_parameter: z.string().nullable(),
   template_name: z
     .string()
@@ -77,6 +80,8 @@ export type FormRef = {
 
 const formDefaultValues: SmsTemplateFormFieldValues = {
   is_active: true,
+  is_sms: false,
+  is_whatsapp: false,
   temp_template_parameter: null,
   template_name: null,
   template_parameter_text: null,
@@ -196,7 +201,7 @@ export const SmsTemplateForm = forwardRef(
     }, [tempTemplateParameter]);
 
     return (
-      <Stack gap="30px" direction="row">
+      <Stack gap="30px">
         <Stack gap="10px">
           <FormRow maxColumn={2}>
             <TextField
@@ -207,6 +212,62 @@ export const SmsTemplateForm = forwardRef(
               required
               error={!!template_name}
               helperText={errorMessages(template_name?.message)}
+            />
+
+            <RadioGroupField
+              name="template_type"
+              direction="row"
+              type="number"
+              control={control}
+              containerProps={{
+                sx: {
+                  flexWrap: "wrap",
+                },
+              }}
+              loading={loading}
+              label={t("common.template.type")}
+              options={[
+                {
+                  disabled: false,
+                  label: t("counter.base.label"),
+                  values: COUNTER_BASE,
+                },
+                {
+                  disabled: false,
+                  label: t("donation.menu.label"),
+                  values: DONATION,
+                },
+                {
+                  disabled: false,
+                  label: t("bill.entry.amount.label"),
+                  values: BILL_ENTRY,
+                },
+                {
+                  disabled: false,
+                  label: t("mail.label"),
+                  values: MAIL,
+                },
+                {
+                  disabled: false,
+                  label: t("payment.label"),
+                  values: PAYMENT,
+                },
+                {
+                  disabled: false,
+                  label: t("guest.booking.label"),
+                  values: GUEST_BOOKING,
+                },
+                {
+                  disabled: false,
+                  label: t("other.label"),
+                  values: OTHER,
+                },
+                {
+                  disabled: false,
+                  label: t("loginOtp.label"),
+                  values: LOGIN_OTP,
+                },
+              ]}
             />
 
             <Stack direction="row" gap="10px" alignItems="center">
@@ -223,9 +284,7 @@ export const SmsTemplateForm = forwardRef(
               </Box>
 
               <Box flex="0 0 10%">
-                <PadBox padding={{ paddingTop: "33px" }}>
-                  <AddIconAction onClick={handleInsertParam} />
-                </PadBox>
+                <AddIconAction onClick={handleInsertParam} />
               </Box>
             </Stack>
 
@@ -236,6 +295,8 @@ export const SmsTemplateForm = forwardRef(
               label={t("common.template.parameters")}
               required
               multiline
+              letterCase="mixed"
+              characterType="any-character"
               error={!!template_parameter_text}
               inputRef={(el) => {
                 textareaRef.current = el;
@@ -243,79 +304,52 @@ export const SmsTemplateForm = forwardRef(
               helperText={errorMessages(template_parameter_text?.message)}
             />
 
-            <RadioGroupField
-              name="is_active"
-              control={control}
-              loading={loading}
-              label={t("isActive.label")}
-              options={[
-                {
-                  disabled: false,
-                  label: t("common.yes"),
-                  values: true,
-                },
-                {
-                  disabled: false,
-                  label: t("common.no"),
-                  values: false,
-                },
-              ]}
-            />
+            <Stack direction="row" gap="80px" alignItems="center">
+              <RadioGroupField
+                name="is_active"
+                control={control}
+                loading={loading}
+                label={t("isActive.label")}
+                options={[
+                  {
+                    disabled: false,
+                    label: t("common.yes"),
+                    values: true,
+                  },
+                  {
+                    disabled: false,
+                    label: t("common.no"),
+                    values: false,
+                  },
+                ]}
+              />
+
+              <PadBox
+                padding={{
+                  paddingTop: "25px",
+                }}
+              >
+                <CheckboxWithLabel
+                  control={control}
+                  name="is_whatsapp"
+                  label={t("common.whatsApp.label")}
+                />
+              </PadBox>
+
+              <PadBox
+                padding={{
+                  paddingTop: "25px",
+                }}
+              >
+                <CheckboxWithLabel
+                  control={control}
+                  name="is_sms"
+                  label={t("sms.label")}
+                />
+              </PadBox>
+            </Stack>
           </FormRow>
         </Stack>
-
-        <FormRow maxColumn={2}>
-          <RadioGroupField
-            name="template_type"
-            direction="column"
-            type="number"
-            control={control}
-            loading={loading}
-            label={t("common.template.type")}
-            options={[
-              {
-                disabled: false,
-                label: t("counter.base.label"),
-                values: COUNTER_BASE,
-              },
-              {
-                disabled: false,
-                label: t("donation.menu.label"),
-                values: DONATION,
-              },
-              {
-                disabled: false,
-                label: t("bill.entry.amount.label"),
-                values: BILL_ENTRY,
-              },
-              {
-                disabled: false,
-                label: t("mail.label"),
-                values: MAIL,
-              },
-              {
-                disabled: false,
-                label: t("payment.label"),
-                values: PAYMENT,
-              },
-              {
-                disabled: false,
-                label: t("guest.booking.label"),
-                values: GUEST_BOOKING,
-              },
-              {
-                disabled: false,
-                label: t("other.label"),
-                values: OTHER,
-              },
-              {
-                disabled: false,
-                label: t("loginOtp.label"),
-                values: LOGIN_OTP,
-              },
-            ]}
-          />
-        </FormRow>
       </Stack>
     );
   }

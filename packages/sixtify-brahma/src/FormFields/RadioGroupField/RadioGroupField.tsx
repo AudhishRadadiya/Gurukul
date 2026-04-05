@@ -5,6 +5,7 @@ import {
   RadioGroup,
   Stack,
   type StackOwnProps,
+  type StackProps,
   type SxProps,
 } from "@mui/material";
 import Radio, { type RadioProps as MuiRadioProps } from "@mui/material/Radio";
@@ -33,7 +34,9 @@ export type RadioGroupFieldProps<P extends FieldValues> =
       required?: boolean;
       direction?: StackOwnProps["direction"];
       sx?: SxProps;
-      type?: string;
+      isHorizontal?: boolean;
+      containerProps?: StackProps;
+      type?: string | number;
     };
 
 export function RadioGroupField<P extends FieldValues>({
@@ -50,6 +53,8 @@ export function RadioGroupField<P extends FieldValues>({
   required = false,
   direction = "row",
   sx = {},
+  containerProps,
+  isHorizontal = false,
   ...restRadioButtonProps
 }: RadioGroupFieldProps<P>) {
   const {
@@ -61,8 +66,25 @@ export function RadioGroupField<P extends FieldValues>({
   }
 
   return (
-    <Stack gap="5px">
-      {label && <InputLabel required={required}>{label}</InputLabel>}
+    <Stack
+      direction={isHorizontal ? "row" : "column"}
+      alignItems={isHorizontal ? "center" : undefined}
+      gap={isHorizontal ? 1 : "5px"}
+    >
+      {label && (
+        <InputLabel
+          sx={{
+            whiteSpace: "normal",
+            overflow: "visible",
+            textOverflow: "unset",
+            fontSize: { xs: "14px", md: "16px" },
+          }}
+          required={required}
+          disabled={restRadioButtonProps.disabled}
+        >
+          {label}
+        </InputLabel>
+      )}
 
       <RadioGroup
         name={name}
@@ -80,13 +102,14 @@ export function RadioGroupField<P extends FieldValues>({
         }}
       >
         <Stack
-          gap={direction === "column" ? "5px" : "45px"}
+          gap={direction === "column" ? "5px" : "10px"}
           direction={direction}
+          {...containerProps}
         >
           {options?.map(({ label, values, disabled }, index) => {
             return (
               // eslint-disable-next-line sonarjs/no-array-index-key
-              <Box key={index} width="max-content">
+              <Box key={index}>
                 <FormControlLabel
                   value={values}
                   control={

@@ -6,6 +6,7 @@ import { EVENT_REMINDER_ROUTES } from "@web/constants/routes/event_reminder/rout
 import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
 import { eventReminderKeys } from "@web/queryKeysFactories/eventReminder";
 import type { ApiSuccessResponse } from "@web/types/apiResponse";
+import { isBranchFilterEnabled } from "@web/utils/reactQuery";
 
 export type EventReminder = {
   amount: number;
@@ -50,6 +51,7 @@ export function useGetEventReminder(body: GetEventReminderListArgs) {
   };
 
   return useQuery({
+    enabled: isBranchFilterEnabled(body),
     initialData: {
       eventReminderData: [],
       totalCount: 0,

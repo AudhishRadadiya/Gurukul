@@ -30,8 +30,9 @@ export const DailyCollectionReport = () => {
     options: {
       onSuccess: ({ data, message }: GetDonationReportApiSuccessResponse) => {
         toasts.success({ title: message });
+
         window.open(data.url, "_blank");
-        router.push("/donation/donation-entry");
+        router.push("/report/daily-collection-report");
       },
     },
   });
@@ -75,6 +76,7 @@ export const DailyCollectionReport = () => {
               key={reportMode}
               loading={isPending}
               onClick={() => onGenerateDonationReport(reportMode)}
+              sx={{ minWidth: "100px" }}
             >
               {label}
             </Button>
@@ -82,6 +84,7 @@ export const DailyCollectionReport = () => {
 
           <Button
             loading={isPending}
+            sx={{ minWidth: "150px" }}
             onClick={() => {
               onDialogOpen("add");
             }}

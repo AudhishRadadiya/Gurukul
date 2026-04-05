@@ -10,7 +10,6 @@ export type SmsSettingDetail = {
   full_count: string;
   is_active: boolean;
   sms_auth_key: string;
-  sms_password: string;
   sms_sender_id: string;
   sms_setting_id: string;
   sms_template: string;

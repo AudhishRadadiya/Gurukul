@@ -18,11 +18,20 @@ export const donationEntryKeys = {
   get: (donationId: string) =>
     [...donationEntryKeys.all, "get", donationId] as const,
 
+  latestReceiptNo: () => [...donationEntryKeys.all, "latestReceiptNo"] as const,
+
   listing: (body: object = {}) =>
     [...donationEntryKeys.all, "listing", body] as const,
 
   options: (body: object = {}) =>
     [...donationEntryKeys.all, "options", body] as const,
+
+  previousContactDetail: (donationId: string) =>
+    [
+      ...donationEntryKeys.all,
+      "previous-contact-detail-get",
+      donationId,
+    ] as const,
 
   previousDonationDetail: (body: object = {}) =>
     [...donationEntryKeys.all, "previousDonationDetail", body] as const,

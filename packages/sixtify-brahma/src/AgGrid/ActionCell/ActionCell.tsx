@@ -3,10 +3,11 @@ import { Box, IconButton, ListItemButton, Typography } from "@mui/material";
 import { type MouseEvent, useState } from "react";
 import { PadBox } from "../../PadBox";
 import { Popover } from "./Popover";
+import type { OnAction } from "../../utils/types";
 
 type AgGridActionColumn = {
   title: string;
-  onClick: () => void;
+  onClick: OnAction;
 };
 
 type ActionColumnProps = {

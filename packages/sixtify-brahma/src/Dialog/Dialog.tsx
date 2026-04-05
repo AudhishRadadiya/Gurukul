@@ -8,7 +8,7 @@ import {
   Typography,
   type DialogProps as MuiDialogProps,
 } from "@mui/material";
-import type { PropsWithChildren, ReactNode } from "react";
+import type { KeyboardEvent, PropsWithChildren, ReactNode } from "react";
 import { useGetDeviceType } from "../utils";
 import { StyledDialogActions } from "./DialogActions.Styled";
 import { StyledDialogContent } from "./DialogContent.Styled";
@@ -37,8 +37,14 @@ export const Dialog = ({
 }: DialogProps) => {
   const { layout } = useGetDeviceType();
 
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === "Escape" && onClose) {
+      onClose(event, "escapeKeyDown");
+    }
+  };
+
   return (
-    <MuiDialog fullWidth {...props}>
+    <MuiDialog fullWidth onKeyDown={handleKeyDown} {...props}>
       <DialogTitle
         padding={{
           xs: "10px",

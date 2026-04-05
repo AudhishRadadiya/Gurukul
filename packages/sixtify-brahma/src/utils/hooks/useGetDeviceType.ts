@@ -3,20 +3,31 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 
 export type Layout = "mobile" | "tablet" | "desktop";
 
-export function useGetDeviceType(): { layout: Layout } {
+export function useGetDeviceType(): {
+  layout: Layout;
+  isMobile: boolean;
+  isTablet: boolean;
+  isDesktop: boolean;
+} {
   const theme = useTheme();
 
   const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // <600px
 
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md")); // 600–900px
 
-  if (isMobile) {
-    return { layout: "mobile" };
-  }
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md")); // >900px
 
-  if (isTablet) {
-    return { layout: "tablet" };
-  }
+  const getLayout = (): Layout => {
+    if (isMobile) {
+      return "mobile";
+    }
 
-  return { layout: "desktop" };
+    if (isTablet) {
+      return "tablet";
+    }
+
+    return "desktop";
+  };
+
+  return { layout: getLayout(), isMobile, isTablet, isDesktop };
 }

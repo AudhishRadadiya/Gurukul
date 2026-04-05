@@ -1,12 +1,18 @@
 import type { SvgIconProps } from "@mui/material";
 import { useTheme } from "@mui/material";
 
-export const SvgDrop = (props: SvgIconProps) => {
+export const SvgDrop = (
+  props: SvgIconProps & {
+    disabled?: boolean;
+  }
+) => {
   const theme = useTheme();
 
-  const { butterflyBlue } = theme.palette.app.color;
+  const { butterflyBlue, iron } = theme.palette.app.color;
 
-  const fill = props.fill ?? butterflyBlue[900];
+  const disabledColor = props.disabled ? iron[800] : butterflyBlue[900];
+
+  const fill = props.fill ?? disabledColor;
 
   return (
     <svg

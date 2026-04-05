@@ -74,9 +74,10 @@ export const ChequeReconciliationForm = forwardRef(
       setError,
       submitForm(onSubmit) {
         handleSubmit((formValues) => {
-          const filterFormValues = filterChangedFormFields(formValues, {
-            ...dirtyFields,
-          });
+          const filterFormValues = filterChangedFormFields(
+            formValues,
+            dirtyFields
+          );
 
           onSubmit(filterFormValues);
         })();

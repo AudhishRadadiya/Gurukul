@@ -15,7 +15,19 @@ export const useBusinessDetailListColumns = () => {
     },
     {
       field: "email",
-      headerName: t("remark.label"),
+      headerName: t("email.label"),
+    },
+    {
+      field: "pincode",
+      headerName: t("pincode.label"),
+    },
+    {
+      field: "city",
+      headerName: t("common.city"),
+    },
+    {
+      field: "state",
+      headerName: t("state.label"),
     },
     {
       field: "address",

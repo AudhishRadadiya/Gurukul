@@ -18,7 +18,6 @@ export const AttendanceCard = ({
   return (
     <Box
       sx={{
-        width: "223px",
         height: "93px",
         borderRadius: "8px",
         border: `1px solid ${getColorByVariant(variant)}`,
@@ -28,7 +27,8 @@ export const AttendanceCard = ({
     >
       <PadBox padding={{ padding: "15px" }}>
         <Stack gap="15px">
-          <Typography>{label}</Typography>
+          <Typography noWrap>{label}</Typography>
+
           {isLoading ? (
             <Skeleton
               width={80}
@@ -39,7 +39,9 @@ export const AttendanceCard = ({
               }}
             />
           ) : (
-            <Typography variant="h6">{value}</Typography>
+            <Typography noWrap variant="h6">
+              {value}
+            </Typography>
           )}
         </Stack>
         <Box sx={{ position: "absolute", top: "0px", right: "5px" }}>

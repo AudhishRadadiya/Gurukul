@@ -12,6 +12,7 @@ import type { ChequeReconciliation } from "@web/components/Donation/chequeReconc
 import { useGetChequeReconciliation } from "@web/components/Donation/chequeReconciliation/chequeReconciliationList/hooks/useGetChequeReconciliation";
 import { EditChequeReconciliationDialog } from "@web/components/Donation/chequeReconciliation/dialogs/EditChequeReconciliationDialog";
 import { CHEQUE_RECONCILIATION_PERMISSION } from "@web/constants/permission/donation/chequeReconciliation/permission";
+import { useBranch } from "@web/context/BranchContext";
 import { useUserPermissions } from "@web/hooks/useUserPermissions/useUserPermissions";
 
 export type ChequeReconciliationListProps = {
@@ -30,13 +31,15 @@ export const ChequeReconciliationList = ({
   const { onPageChange, onRowsPerPageChange, page, rowsPerPage } =
     usePaginationParams();
 
+  const { branchIds } = useBranch();
+
   const startRow = page * rowsPerPage;
 
   const endRow = startRow + rowsPerPage;
 
   const { data, isFetching, refetch } = useGetChequeReconciliation({
     endRow,
-    externalFilter,
+    externalFilter: { ...externalFilter, branch_id: [branchIds] },
     startRow,
   });
 
@@ -82,7 +85,7 @@ export const ChequeReconciliationList = ({
         onPageChange={onPageChange}
         count={totalCount}
         onRowsPerPageChange={onRowsPerPageChange}
-        height={250}
+        height={300}
         actions={[
           {
             isView: validateAccess(CHEQUE_RECONCILIATION_PERMISSION.EDIT),

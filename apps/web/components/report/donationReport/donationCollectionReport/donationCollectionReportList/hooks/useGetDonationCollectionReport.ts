@@ -5,6 +5,7 @@ import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
 import { donationCollectionKeys } from "@web/queryKeysFactories/donationCollectionKeys";
 import type { ApiSuccessResponse } from "@web/types/apiResponse";
 import type { GetListArgsAg2 } from "@web/types/shared-types";
+import { isBranchFilterEnabled } from "@web/utils/reactQuery";
 
 export type DailyDonationReportData = {
   amount: string;
@@ -33,6 +34,7 @@ export function useGetDonationCollectionReport(body: GetListArgsAg2) {
   };
 
   return useQuery({
+    enabled: isBranchFilterEnabled(body),
     initialData: {
       dailyDonationReportList: [],
       totalCount: 0,

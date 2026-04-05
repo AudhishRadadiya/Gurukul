@@ -40,11 +40,32 @@ export function ProfileCardBody({
           />
           <CardItem
             label={<SvgEmail />}
-            value={<CardItemValue title={email} loading={loading} />}
+            value={
+              <CardItemValue
+                containerSx={{ width: "80%" }}
+                title={email}
+                loading={loading}
+              />
+            }
+            sx={{
+              justifyContent: "start",
+              gap: "10px",
+            }}
           />
+
           <CardItem
             label={<SvgPhone />}
-            value={<CardItemValue title={phone} loading={loading} />}
+            value={
+              <CardItemValue
+                containerSx={{ width: "80%" }}
+                title={phone}
+                loading={loading}
+              />
+            }
+            sx={{
+              justifyContent: "start",
+              gap: "10px",
+            }}
           />
         </Stack>
       </PadBox>
