@@ -5,7 +5,10 @@ import { SwitchField } from "../FormFields";
 import { PadBox } from "../PadBox";
 import { DateRangePickerPopUp } from "./DateRangePickerPopUp";
 import { FilterPopup } from "./FilterPopup";
-import type { FilterListType } from "./FilterTypeWrapper";
+import type {
+  FilterCurrentValue,
+  FilterListType,
+} from "./FilterTypeWrapper";
 import { getFilterPopupComponent } from "./GetFilterPopupComponent";
 import type { OnAction } from "../utils/types";
 
@@ -13,7 +16,7 @@ type FilterPopupWrapperProp = PropsWithChildren<PopoverProps> & {
   filterItem: FilterListType;
   control: Control<FieldValues>;
   errors: FieldErrors<FieldValues>;
-  currentFilterValue?: string | string[] | null;
+  currentFilterValue?: FilterCurrentValue;
   onApply: OnAction;
   reset?: OnAction;
 };
@@ -26,13 +29,14 @@ type FilterDateRangePickerWrapperProp = PropsWithChildren<PopoverProps> & {
 };
 
 export type FilterPopupComponentType = {
+  amountFilter?: JSX.Element;
   autoComplete?: JSX.Element;
-  text: JSX.Element;
-  date: JSX.Element;
   checkbox?: JSX.Element;
+  date: JSX.Element;
   dateRange?: JSX.Element;
-  switch?: JSX.Element;
   radio?: JSX.Element;
+  switch?: JSX.Element;
+  text: JSX.Element;
 };
 
 export const FilterPopupWrapper = ({

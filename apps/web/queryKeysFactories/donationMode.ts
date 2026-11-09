@@ -15,5 +15,6 @@ export const donationModeKeys = {
   modeOfReceiptOptions: () =>
     [...donationModeKeys.all, "receipt-options"] as const,
 
-  options: () => [...donationModeKeys.all, "options"] as const,
+  userWiseOptions: (isUserWiseAll?: boolean) =>
+    [...donationModeKeys.all, "user-wise-options", { isUserWiseAll }] as const,
 } as const;

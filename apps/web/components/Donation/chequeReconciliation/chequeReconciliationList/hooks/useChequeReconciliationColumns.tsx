@@ -2,7 +2,6 @@ import type { CustomCellRendererProps } from "ag-grid-react";
 import { t } from "i18next";
 
 import { AG_GRID_CELL_DEFAULT_VALUE } from "@web/components/common/AgGridV2/AgGridV2";
-import { chequeStatusTypes } from "@web/components/common/Autocomplete/hooks/useGetChequeStatusOptions";
 import type { ChequeReconciliation } from "@web/components/Donation/chequeReconciliation/chequeReconciliationList/hooks/useGetChequeReconciliation";
 import type { AgColumnsWithActions } from "@web/types/agGrid";
 import { dateFormat } from "@web/utils/date";
@@ -47,7 +46,6 @@ export const useChequeReconciliationColumns = () => {
     },
     {
       field: "event",
-      filter: "agNumberColumnFilter",
       headerName: t("common.event.label"),
       minWidth: 170,
       sortable: true,
@@ -65,16 +63,7 @@ export const useChequeReconciliationColumns = () => {
       sortable: true,
     },
     {
-      cellRenderer: ({
-        data,
-      }: CustomCellRendererProps<ChequeReconciliation>) => {
-        return !data
-          ? AG_GRID_CELL_DEFAULT_VALUE
-          : (chequeStatusTypes[data.cheque_status] ??
-              AG_GRID_CELL_DEFAULT_VALUE);
-      },
       field: "cheque_status",
-      filter: "agNumberColumnFilter",
       headerName: t("cheque.label", {
         label: t("status.label"),
       }),
@@ -93,7 +82,6 @@ export const useChequeReconciliationColumns = () => {
     },
     {
       field: "cheque_no",
-      filter: "agNumberColumnFilter",
       headerName: t("cheque.label", {
         label: t("common.no"),
       }),

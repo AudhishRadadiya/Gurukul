@@ -10,8 +10,13 @@ import type {
   ApiSuccessResponse,
 } from "@web/types/apiResponse";
 
+export type EventMasterApiSuccessResponse = {
+  event_master_id: string;
+  links: string[];
+};
+
 type AddEventMasterApiSuccessResponse =
-  ApiSuccessResponse<EventMasterFormFieldValues>;
+  ApiSuccessResponse<EventMasterApiSuccessResponse>;
 
 type UseAddEventMasterArgs = {
   options: UseMutationOptions<

@@ -1,9 +1,13 @@
 import { t } from "i18next";
 
+import { useGetTrueFalseOptions } from "@web/components/common/Autocomplete/hooks/useGetTrueFalseOptions";
 import type { PaymentGatewayDetail } from "@web/components/settings/paymentGateway/paymentGatewayList/hooks/useGetPaymentGateway";
 import type { AgColumnsWithActions } from "@web/types/agGrid";
+import { CustomEnumFilter } from "@web/utils/ag-grid-custom-filter";
 
 export const usePaymentGatewayColumns = () => {
+  const { trueFalseOptions } = useGetTrueFalseOptions();
+
   const column: AgColumnsWithActions<PaymentGatewayDetail> = [
     {
       field: "gateway_name",
@@ -13,6 +17,11 @@ export const usePaymentGatewayColumns = () => {
     },
     {
       field: "is_test_mode",
+      filter: CustomEnumFilter,
+      filterParams: {
+        filterOptions: trueFalseOptions,
+        source: "server",
+      },
       headerName: t("is.test.mode.label"),
     },
     {

@@ -6,6 +6,7 @@ import {
   DateRangePicker,
   TextField,
 } from "../FormFields";
+import { AmountFilterField } from "./AmountFilterField";
 import type { FilterPopupComponentType } from "./FilterPopupWrapper";
 import type { FilterListType } from "./FilterTypeWrapper";
 
@@ -105,6 +106,13 @@ export function getFilterPopupComponent({
         disabled={selectedFilter.isDisabled}
         error={!!errorSelectedKey}
         helperText={errorSelectedKey?.message as string}
+      />
+    ),
+    amountFilter: (
+      <AmountFilterField
+        control={control}
+        errors={errors}
+        filter={selectedFilter}
       />
     ),
   };

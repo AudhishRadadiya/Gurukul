@@ -7,6 +7,8 @@ export const DONATION_ADDRESS_LIST_BASE_URL =
 const ADDRESS_BOOK_BASE_URL = `${API}/donation` as const;
 
 export const DONATION_ADDRESS_LIST_ROUTES = {
+  convert: () => `${DONATION_ADDRESS_LIST_BASE_URL}/convert` as const,
+
   listing: `${DONATION_ADDRESS_LIST_BASE_URL}` as const,
 
   multiIgnored: () => `${ADDRESS_BOOK_BASE_URL}/multi-ignored` as const,

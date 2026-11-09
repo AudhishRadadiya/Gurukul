@@ -17,6 +17,7 @@ import { errorMessages, filterChangedFormFields } from "@web/utils/helper";
 
 const SmsSettingsFormSchema = z.object({
   is_active: z.boolean(),
+  left_sms_url: z.string().max(255, "common.maxLength").nullable(),
   sms_auth_key: z.string().max(255, "common.maxLength").nullable(),
   sms_password: z.string().max(255, "common.maxLength").nullable(),
   sms_provider_name: z.string().nullable(),
@@ -52,6 +53,7 @@ export type FormRef = {
 
 const formDefaultValues: SmsSettingsFormFieldValues = {
   is_active: true,
+  left_sms_url: null,
   sms_auth_key: null,
   sms_password: null,
   sms_provider_name: null,
@@ -96,6 +98,7 @@ export const SmsSettingsForm = forwardRef(
     }));
 
     const {
+      left_sms_url,
       sms_auth_key,
       sms_password,
       sms_provider_name,
@@ -194,9 +197,22 @@ export const SmsSettingsForm = forwardRef(
         </FormGridLayout>
 
         <FormGridLayout columns={3}>
+          <TextField
+            name="left_sms_url"
+            control={control}
+            letterCase="mixed"
+            loading={loading}
+            label={t("left.msg.url.label")}
+            required
+            setError={setError}
+            error={!!left_sms_url}
+            helperText={errorMessages(left_sms_url?.message)}
+          />
+
           <RadioGroupField
             name="is_active"
             control={control}
+            isHorizontal
             loading={loading}
             label={t("isActive.label")}
             options={[

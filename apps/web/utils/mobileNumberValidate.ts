@@ -1,5 +1,6 @@
-import { mobileNoRegex } from "@web/utils/regex";
 import { PhoneNumberUtil } from "google-libphonenumber";
+
+import { mobileNoRegex } from "@web/utils/regex";
 
 const mobileUtil = PhoneNumberUtil.getInstance();
 

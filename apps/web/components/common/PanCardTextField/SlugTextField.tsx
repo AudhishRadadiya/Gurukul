@@ -79,7 +79,7 @@ export function SlugTextField<P extends FieldValues>({
       defaultValue={defaultValue}
       rules={rules}
       {...textFieldProps}
-      characterType="string-hyphens"
+      characterType="string-number-hyphens"
       letterCase="lowercase"
       isTrimStartDisabled
       onKeyDown={handleKeyDown}

@@ -9,3 +9,7 @@ export type StringValueOptionsType = {
   label: string;
   value: string;
 };
+
+export type BooleanOptionsType = Omit<OptionsType, "value"> & {
+  value: string | boolean;
+};

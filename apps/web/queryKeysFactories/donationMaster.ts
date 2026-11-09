@@ -15,5 +15,10 @@ export const donationMasterKeys = {
   listing: (body: object = {}) =>
     [...donationMasterKeys.all, "listing", body] as const,
 
-  options: () => [...donationMasterKeys.all, "options"] as const,
+  userWiseOptions: (isUserWiseAll?: boolean) =>
+    [
+      ...donationMasterKeys.all,
+      "user-wise-options",
+      { isUserWiseAll },
+    ] as const,
 } as const;

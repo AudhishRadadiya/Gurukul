@@ -1,13 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import type { IGetRowsParams } from "ag-grid-community";
 import _every from "lodash/every";
 import _get from "lodash/get";
-import type { FieldValues } from "react-hook-form";
 
 import { CANCEL_RECEIPT_ROUTES } from "@web/constants/routes/cancel_receipt/routes";
 import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
 import { cancelReceiptKeys } from "@web/queryKeysFactories/cancelReceipt";
 import type { ApiSuccessResponse } from "@web/types/apiResponse";
+import type { GetListArgsAg2 } from "@web/types/shared-types";
 
 export type CancelReceipt = {
   amount: number;
@@ -27,20 +26,10 @@ export type GetCancelReceiptSuccessResponse = ApiSuccessResponse<{
   full_count: number;
 }>;
 
-type GetCancelReceiptListArgs = Partial<
-  IGetRowsParams & {
-    endRow: number;
-    externalFilter: FieldValues;
-    is_active: boolean;
-    responseFields: string[];
-    startRow: number;
-  }
->;
-
-export function useGetCancelReceipt(body: GetCancelReceiptListArgs) {
+export function useGetCancelReceipt(body: GetListArgsAg2) {
   const { axiosPrivate } = useAxiosPrivate();
 
-  const getCancelReceipt = async (body: GetCancelReceiptListArgs) => {
+  const getCancelReceipt = async (body: GetListArgsAg2) => {
     const { data } = await axiosPrivate.post<GetCancelReceiptSuccessResponse>(
       CANCEL_RECEIPT_ROUTES.listing,
       body

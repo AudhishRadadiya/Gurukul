@@ -1,8 +1,7 @@
 import type { DialogRenderer } from "@codezee/sixtify-brahma";
-import { Button, FormSection, useDialogActions } from "@codezee/sixtify-brahma";
+import { useDialogActions } from "@codezee/sixtify-brahma";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Add } from "@mui/icons-material";
-import { Stack } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import _isEmpty from "lodash/isEmpty";
 import type { ForwardedRef } from "react";
@@ -25,34 +24,46 @@ import { usePostUserData } from "@web/components/Address/address-book/AddressBoo
 import { PastStudentFromFields } from "@web/components/Address/address-book/AddressBook/addAddressBook/PastStudentFromFields";
 import { BloodGroupSchema } from "@web/components/common/Autocomplete/hooks/useGetBloodGroupOptions";
 import { GenderSchema } from "@web/components/common/Autocomplete/hooks/useGetGenderOptions";
+import { ButtonLayoutProvider } from "@web/components/common/responsive/ButtonLayoutProvider";
 import { useBranch } from "@web/context/BranchContext";
 import {
   filterNestedChangedFormFields,
   removeNegationValues,
 } from "@web/utils/helper";
 import {
-  aadharCardRegex,
   emailRegex,
-  licenseNumberRegex,
   mobileNoRegex,
   panCardRegex,
   pinCodeRegex,
-  voterIdRegex,
 } from "@web/utils/regex";
 
-export const AddressBookFromSchema = z.object({
-  aadhar_no: z
-    .string()
-    .regex(aadharCardRegex, "common.aadhar_no.invalid")
-    .optional()
-    .nullable(),
-  address: z.string().nullable(),
+const PastStudentDetailsSchema = z.object({
   address_type_id: z
     .string()
     .nullable()
     .refine((value) => !!value, {
       message: "common.required",
     }),
+  category_1_parameters_id: z.string().nullable(),
+  category_2_parameters_id: z.string().nullable(),
+  class_mate: z.string().nullable(),
+  gurukul_parameters_id: z.string().nullable(),
+  is_past_student: z.boolean(),
+  is_vip: z.boolean(),
+  leave_in: z.number().nullable(),
+  medium: z.number().nullable(),
+  patrika: z.boolean(),
+  ssc_gurukul: z.string().nullable(),
+  ssc_year: z.number().nullable(),
+});
+
+export const AddressBookFromSchema = z.object({
+  // aadhar_no: z
+  //   .string()
+  //   .regex(aadharCardRegex, "common.aadhar_no.invalid")
+  //   .optional()
+  //   .nullable(),
+  address: z.string().nullable(),
   alternet_mobile_no: z
     .string()
     .regex(mobileNoRegex, "common.mobileNumber.invalid")
@@ -64,10 +75,7 @@ export const AddressBookFromSchema = z.object({
   branch_id: z.string().nullable().optional(),
   business_detail: z.array(BusinessDetailFormSchema).nullable().optional(),
   business_parameter_id: z.string().nullable(),
-  category_1_parameters_id: z.string().nullable(),
-  category_2_parameters_id: z.string().nullable(),
   city: z.string().nullable(),
-  class_mate: z.string().nullable(),
   contact_no: z
     .string()
     .regex(mobileNoRegex, "common.mobileNumber.invalid")
@@ -76,17 +84,17 @@ export const AddressBookFromSchema = z.object({
       message: "common.required",
     }),
   district: z.string().nullable(),
-  driving_licence_no: z
-    .string()
-    .regex(licenseNumberRegex, "common.license_no.invalid")
-    .optional()
-    .nullable(),
+  // driving_licence_no: z
+  //   .string()
+  //   .regex(licenseNumberRegex, "common.license_no.invalid")
+  //   .optional()
+  //   .nullable(),
   education_parameter_id: z.string().nullable(),
-  elector_number: z
-    .string()
-    .regex(voterIdRegex, "common.voter.id.invalid")
-    .optional()
-    .nullable(),
+  // elector_number: z
+  //   .string()
+  //   .regex(voterIdRegex, "common.voter.id.invalid")
+  //   .optional()
+  //   .nullable(),
   email_id: z
     .string()
     .regex(emailRegex, "common.email.invalid")
@@ -106,14 +114,10 @@ export const AddressBookFromSchema = z.object({
       message: "common.required",
     }),
   gender: GenderSchema.nullable().optional(),
-  gurukul_parameters_id: z.string().nullable(),
   hastak_1_parameter_id: z.string().nullable(),
   hastak_2_parameter_id: z.string().nullable(),
-  is_past_student: z.boolean().optional(),
-  is_vip: z.boolean().optional(),
-  landmark: z.string().nullable(),
-  leave_in: z.number().nullable(),
-  medium: z.number().nullable(),
+  // landmark: z.string().nullable(),
+  logo: z.string().nullable(),
   middle_name: z.string().nullable(),
   note: z.string().nullable(),
   pan_no: z
@@ -122,8 +126,8 @@ export const AddressBookFromSchema = z.object({
     .optional()
     .nullable(),
   parent_contact_no: z.string().nullable(),
-  passport_no: z.string().nullable(),
-  patrika: z.boolean().optional(),
+  // passport_no: z.string().nullable(),
+  past_student_details: z.array(PastStudentDetailsSchema).nullable().optional(),
   pincode: z
     .string()
     .regex(pinCodeRegex, "common.pin_code.invalid")
@@ -132,8 +136,6 @@ export const AddressBookFromSchema = z.object({
       message: "common.required",
     }),
   saints_hastak_parameter_id: z.string().nullable(),
-  ssc_gurukul: z.string().nullable(),
-  ssc_year: z.number().nullable(),
   state: z.string().nullable().optional(),
   surname: z
     .string()
@@ -147,6 +149,21 @@ export const AddressBookFromSchema = z.object({
 });
 
 export type AddressBookFormFieldValues = z.infer<typeof AddressBookFromSchema>;
+
+export const pastStudentDetailsDefaultValues = {
+  address_type_id: null,
+  category_1_parameters_id: null,
+  category_2_parameters_id: null,
+  class_mate: null,
+  gurukul_parameters_id: null,
+  is_past_student: false,
+  is_vip: false,
+  leave_in: 1,
+  medium: 1,
+  patrika: false,
+  ssc_gurukul: null,
+  ssc_year: null,
+};
 
 type AddressBookFormProps = {
   defaultValues?: AddressBookFormFieldValues;
@@ -162,9 +179,7 @@ export type FormRef = {
 };
 
 export const formDefaultValues: AddressBookFormFieldValues = {
-  aadhar_no: null,
   address: null,
-  address_type_id: null,
   alternet_mobile_no: null,
   anniversary_date: null,
   b_note: null,
@@ -173,38 +188,26 @@ export const formDefaultValues: AddressBookFormFieldValues = {
   branch_id: null,
   business_detail: [],
   business_parameter_id: null,
-  category_1_parameters_id: null,
-  category_2_parameters_id: null,
   city: null,
-  class_mate: null,
   contact_no: null,
   district: null,
-  driving_licence_no: null,
   education_parameter_id: null,
-  elector_number: null,
   email_id: null,
   family_detail: [],
   first_name: null,
   g_no: null,
   gender: null,
-  gurukul_parameters_id: null,
   hastak_1_parameter_id: null,
   hastak_2_parameter_id: null,
-  is_past_student: false,
-  is_vip: false,
-  landmark: null,
-  leave_in: 1,
-  medium: 1,
+  // landmark: null,
+  logo: null,
   middle_name: null,
   note: null,
   pan_no: null,
   parent_contact_no: null,
-  passport_no: null,
-  patrika: false,
+  past_student_details: [pastStudentDetailsDefaultValues],
   pincode: null,
   saints_hastak_parameter_id: null,
-  ssc_gurukul: null,
-  ssc_year: null,
   state: null,
   surname: null,
   taluko: null,
@@ -254,10 +257,11 @@ export const AddressBookFrom = forwardRef(
       setValue,
       submitForm(onSubmit) {
         handleSubmit((formValues) => {
-          const filterFormValues = filterNestedChangedFormFields(
-            formValues,
-            dirtyFields
-          );
+          const filterFormValues = filterNestedChangedFormFields(formValues, {
+            ...dirtyFields,
+            business_detail: true,
+            past_student_details: true,
+          });
 
           const payload = {
             ...filterFormValues,
@@ -323,55 +327,81 @@ export const AddressBookFrom = forwardRef(
 
         <PastStudentFromFields loading={loading} />
 
-        <Stack direction="row" justifyContent="space-between">
-          <FormSection title={t("common.family.member")}></FormSection>
-
-          <Button
-            variant="outlined"
-            sx={{ height: "50%" }}
-            disabled={loading}
-            startIcon={<Add />}
-            onClick={() => {
-              onDialogOpen("addFamilyMember");
-            }}
+        <Stack gap={2} sx={{ mt: { md: 2, xs: 2.5 } }}>
+          <Stack
+            direction="row"
+            gap={1}
+            justifyContent="space-between"
+            alignItems="center"
+            width="100%"
           >
-            {t("common.button.add", {
-              label: t(t("common.family.member")),
-            })}
-          </Button>
+            <Typography fontWeight={700} variant="h5" sx={{ flexShrink: 0 }}>
+              {t("common.family.member")}
+            </Typography>
+
+            <ButtonLayoutProvider
+              disabled={loading}
+              onClick={() => {
+                onDialogOpen("addFamilyMember");
+              }}
+              label={t("common.button.add", {
+                label: t(t("common.family.member")),
+              })}
+              sx={{
+                flexShrink: 0,
+                whiteSpace: "nowrap",
+                width: "auto",
+              }}
+            />
+          </Stack>
+
+          {!_isEmpty(familyDetailList) && (
+            <Box sx={{ overflow: "hidden", width: "100%" }}>
+              <FamilyMemberDetailList
+                familyMemberFormValues={familyDetailList}
+                setValue={setValue}
+              />
+            </Box>
+          )}
         </Stack>
 
-        {!_isEmpty(familyDetailList) && (
-          <FamilyMemberDetailList
-            familyMemberFormValues={familyDetailList}
-            setValue={setValue}
-          />
-        )}
-
-        <Stack direction="row" justifyContent="space-between">
-          <FormSection title={t("address.businessDetail.label")}></FormSection>
-
-          <Button
-            variant="outlined"
-            sx={{ height: "50%" }}
-            disabled={loading}
-            startIcon={<Add />}
-            onClick={() => {
-              onDialogOpen("addBusinessDetail");
-            }}
+        <Stack gap={2} sx={{ mb: { md: 0, xs: 2.5 }, mt: { md: 2, xs: 2.5 } }}>
+          <Stack
+            direction="row"
+            gap={1}
+            justifyContent="space-between"
+            alignItems="center"
+            width="100%"
           >
-            {t("common.button.add", {
-              label: t(t("address.businessDetail.label")),
-            })}
-          </Button>
-        </Stack>
+            <Typography fontWeight={700} variant="h5" sx={{ flexShrink: 0 }}>
+              {t("address.businessDetail.label")}
+            </Typography>
 
-        {!_isEmpty(businessDetailList) && (
-          <BusinessDetailList
-            businessDetailFormValues={businessDetailList}
-            setValue={setValue}
-          />
-        )}
+            <ButtonLayoutProvider
+              disabled={loading}
+              onClick={() => {
+                onDialogOpen("addBusinessDetail");
+              }}
+              label={t("common.button.add", {
+                label: t(t("address.businessDetail.label")),
+              })}
+              sx={{
+                flexShrink: 0,
+                whiteSpace: "nowrap",
+                width: "auto",
+              }}
+            />
+          </Stack>
+
+          {!_isEmpty(businessDetailList) && (
+            <Box sx={{ overflow: "hidden", width: "100%" }}>
+              <BusinessDetailList
+                businessDetailFormValues={businessDetailList}
+                setValue={setValue}
+              />
+            </Box>
+          )}
+        </Stack>
 
         {openedDialog && dialogRenderer[openedDialog]}
       </FormProvider>

@@ -10,7 +10,7 @@ export const useEventDropdownSummaryColumns = () => {
   const column: AgColumnsWithActions<EventDropdownReport> = [
     {
       field: "dropdown_name",
-      headerName: t("common.event.dropdown"),
+      headerName: t("common.form.options.label"),
       minWidth: 200,
     },
     {
@@ -20,11 +20,13 @@ export const useEventDropdownSummaryColumns = () => {
           : formatToIndianNumber(value);
       },
       field: "total_amount",
+      filter: "agNumberColumnFilter",
       headerName: t("amount.label"),
       minWidth: 170,
     },
     {
       field: "total_receipt",
+      filter: "agNumberColumnFilter",
       headerName: t("common.receipt.label", {
         label: t("common.number.label"),
       }),

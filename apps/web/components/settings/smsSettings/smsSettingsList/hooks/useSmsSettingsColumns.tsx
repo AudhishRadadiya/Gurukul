@@ -10,28 +10,26 @@ export const useSmsSettingsColumns = () => {
       headerName: t("common.sms.label", {
         label: t("common.username"),
       }),
-      minWidth: 130,
+      maxWidth: 250,
     },
     {
       field: "sms_sender_id",
       headerName: t("common.sms.label", {
         label: t("common.sender"),
       }),
-      minWidth: 160,
+      maxWidth: 250,
     },
     {
       field: "sms_url",
       headerName: t("common.sms.label", {
         label: t("common.url"),
       }),
-      minWidth: 200,
+      minWidth: 300,
     },
     {
-      field: "sms_template",
-      headerName: t("common.sms.label", {
-        label: t("common.Template"),
-      }),
-      minWidth: 160,
+      field: "left_sms_count",
+      headerName: t("leftSMSCount.label"),
+      maxWidth: 200,
     },
   ];
 

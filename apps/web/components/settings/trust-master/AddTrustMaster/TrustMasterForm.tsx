@@ -1,5 +1,4 @@
 import {
-  Button,
   FormGridLayout,
   FormSection,
   PhoneInputField,
@@ -7,8 +6,7 @@ import {
   TextField,
 } from "@codezee/sixtify-brahma";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Add } from "@mui/icons-material";
-import { Stack } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { isEmpty } from "lodash";
 import type { ForwardedRef } from "react";
@@ -18,6 +16,7 @@ import { z } from "zod";
 
 import { BranchAutocomplete } from "@web/components/common/Autocomplete/BranchAutocomplete";
 import { ImageUploadField } from "@web/components/common/ImageUploadField";
+import { ButtonLayoutProvider } from "@web/components/common/responsive/ButtonLayoutProvider";
 import { BankDetailList } from "@web/components/settings/trust-master/AddTrustMaster/BankDetail/BankDetailList/BankDetailList";
 import { AddBankDetailDialog } from "@web/components/settings/trust-master/AddTrustMaster/BankDetail/Dialog/AddBankDetailDialog";
 import type { DialogRenderer } from "@web/types/dialogs";
@@ -135,13 +134,6 @@ const TrustMasterFormSchema = z.object({
       message: "common.required",
     }),
   sms_limit: z.number().nullable().optional(),
-  tax_adj_number: z
-    .string()
-    .trim()
-    .nullable()
-    .refine((value) => !!value, {
-      message: "common.required",
-    }),
   trust_code: z
     .string()
     .trim()
@@ -188,7 +180,6 @@ const formDefaultValues: TrustMasterFormFieldValues = {
   registration_no: null,
   short_name: null,
   sms_limit: null,
-  tax_adj_number: null,
   trust_code: null,
   trust_name: null,
   trust_print_code: null,
@@ -245,7 +236,19 @@ export const TrustMasterForm = forwardRef(
             is_active: true,
           });
 
-          onSubmit(filterFormValues);
+          const updatedFormValues = {
+            ...filterFormValues,
+            registration_no: filterFormValues.registration_no?.toUpperCase(),
+            short_name: filterFormValues.short_name?.toUpperCase(),
+            trust_code: filterFormValues.trust_code?.toUpperCase(),
+            trust_name: filterFormValues.trust_name?.toUpperCase(),
+            ...(filterFormValues.trust_print_code && {
+              trust_print_code:
+                filterFormValues.trust_print_code?.toUpperCase(),
+            }),
+          };
+
+          onSubmit(updatedFormValues);
         })();
       },
     }));
@@ -276,7 +279,6 @@ export const TrustMasterForm = forwardRef(
       registration_no,
       short_name,
       sms_limit,
-      tax_adj_number,
       trust_code,
       trust_name,
       trust_print_code,
@@ -320,6 +322,8 @@ export const TrustMasterForm = forwardRef(
               label={t("common.name.label", {
                 label: t("trust.label"),
               })}
+              letterCase="mixed"
+              characterType="any-character"
               required
               setError={setError}
               error={!!trust_name}
@@ -332,6 +336,8 @@ export const TrustMasterForm = forwardRef(
               loading={loading}
               label={t("shortName.label")}
               required
+              letterCase="mixed"
+              characterType="any-character"
               setError={setError}
               error={!!short_name}
               helperText={errorMessages(short_name?.message)}
@@ -343,6 +349,8 @@ export const TrustMasterForm = forwardRef(
               loading={loading}
               label={t("registrationNo.label")}
               required
+              letterCase="mixed"
+              characterType="any-character"
               setError={setError}
               error={!!registration_no}
               helperText={errorMessages(registration_no?.message)}
@@ -354,20 +362,11 @@ export const TrustMasterForm = forwardRef(
               loading={loading}
               label={t("common.trust.code")}
               required
+              letterCase="mixed"
+              characterType="any-character"
               setError={setError}
               error={!!trust_code}
               helperText={errorMessages(trust_code?.message)}
-            />
-
-            <TextField
-              name="tax_adj_number"
-              control={control}
-              loading={loading}
-              label={t("common.tax.adjust.no")}
-              required
-              setError={setError}
-              error={!!tax_adj_number}
-              helperText={errorMessages(tax_adj_number?.message)}
             />
 
             <TextField
@@ -451,6 +450,8 @@ export const TrustMasterForm = forwardRef(
               loading={loading}
               label={t("common.trust.print.code")}
               name="trust_print_code"
+              letterCase="mixed"
+              characterType="any-character"
               setError={setError}
               error={!!trust_print_code}
               helperText={errorMessages(trust_print_code?.message)}
@@ -614,30 +615,42 @@ export const TrustMasterForm = forwardRef(
           </FormGridLayout>
         </FormSection>
 
-        <Stack direction="row" justifyContent="space-between">
-          <FormSection title="Bank Detail"></FormSection>
-
-          <Button
-            variant="outlined"
-            sx={{ height: "50%" }}
-            disabled={loading}
-            startIcon={<Add />}
-            onClick={() => {
-              onDialogOpen("add");
-            }}
+        <Stack
+          gap={1}
+          marginTop={{ md: "16px", xs: "12px" }}
+          paddingBottom={{ md: "16px", xs: "12px" }}
+        >
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            gap={1}
           >
-            {t("common.button.add", {
-              label: t("common.bank.detail.label"),
-            })}
-          </Button>
-        </Stack>
+            <Typography variant="subtitle1" fontWeight={600}>
+              {t("common.bank.detail.label")}
+            </Typography>
 
-        {!isEmpty(bankDetailList) && (
-          <BankDetailList
-            setValue={setValue}
-            bankDetailFormValues={bankDetailList}
-          />
-        )}
+            <ButtonLayoutProvider
+              variant="outlined"
+              disabled={loading}
+              onClick={() => {
+                onDialogOpen("add");
+              }}
+              label={t("common.button.add", {
+                label: t("common.bank.detail.label"),
+              })}
+            />
+          </Stack>
+
+          {!isEmpty(bankDetailList) && (
+            <Box sx={{ overflow: "hidden", width: "100%" }}>
+              <BankDetailList
+                setValue={setValue}
+                bankDetailFormValues={bankDetailList}
+              />
+            </Box>
+          )}
+        </Stack>
 
         {openedDialog && dialogRenderer[openedDialog]}
       </FormProvider>

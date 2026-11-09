@@ -1,3 +1,4 @@
+import type { OnAction } from "@codezee/sixtify-brahma";
 import type { IGetRowsParams } from "ag-grid-community";
 import type { FieldValues } from "react-hook-form";
 
@@ -5,6 +6,13 @@ import type { QuickFilter } from "@web/types/agGrid";
 import type { ApiSuccessResponse } from "@web/types/apiResponse";
 
 export type SetStateAction<T> = (value: T | ((prevState: T) => T)) => void;
+
+export type SmartGridActionItems = {
+  href?: string;
+  isView?: boolean;
+  onClick?: OnAction;
+  title: string;
+};
 
 export type AgGridActionItems = {
   onClick: () => void;
@@ -23,6 +31,7 @@ export type GetListArgsAg2 = Partial<
       branch_id?: string[];
     };
     is_active: boolean;
+    quickFilter?: FieldValues;
     responseFields: string[];
     startRow: number;
   }

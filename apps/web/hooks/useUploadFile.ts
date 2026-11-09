@@ -13,6 +13,7 @@ import type {
 type UploadFileApiResponse = ApiSuccessResponse<{ files: string[] }>;
 
 type UseUploadFileArgs = {
+  isUploadForCertificate?: boolean;
   options: UseMutationOptions<
     UploadFileApiResponse,
     ApiErrorResponse<Record<string, string>>,
@@ -21,7 +22,10 @@ type UseUploadFileArgs = {
   uploadFor: string;
 };
 
-export function useUploadFile({ options = {} }: UseUploadFileArgs) {
+export function useUploadFile({
+  isUploadForCertificate = false,
+  options = {},
+}: UseUploadFileArgs) {
   const { axiosPrivate } = useAxiosPrivate();
 
   return useMutation({
@@ -39,6 +43,9 @@ export function useUploadFile({ options = {} }: UseUploadFileArgs) {
           headers: {
             "Content-Type": "multipart/form-data",
           },
+          ...(isUploadForCertificate && {
+            baseURL: process.env.NEXT_PUBLIC_CERTIFICATE_UPLOAD_API_SERVER,
+          }),
         }
       );
 

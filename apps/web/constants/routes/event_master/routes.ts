@@ -4,6 +4,8 @@ import type { FilType } from "@web/types/shared-types";
 export const EVENT_MASTER_ROUTES_BASE_URL = `${API}/event_master` as const;
 
 export const EVENT_MASTER_ROUTES = {
+  activeListing: `${EVENT_MASTER_ROUTES_BASE_URL}/${LIST}/active` as const,
+
   clone: (eventMasterId: string) =>
     `${EVENT_MASTER_ROUTES_BASE_URL}/${CLONE}/${eventMasterId}` as const,
 
@@ -22,6 +24,8 @@ export const EVENT_MASTER_ROUTES = {
   get: (eventMasterId: string) =>
     `${EVENT_MASTER_ROUTES_BASE_URL}/${eventMasterId}` as const,
 
+  inActiveListing: `${EVENT_MASTER_ROUTES_BASE_URL}/${LIST}/inactive` as const,
+
   listing: `${EVENT_MASTER_ROUTES_BASE_URL}/${LIST}` as const,
 
   multipleFilterOptions:
@@ -30,7 +34,7 @@ export const EVENT_MASTER_ROUTES = {
   multipleOptions:
     `${EVENT_MASTER_ROUTES_BASE_URL}/${LIST}/${OPTION}/branch-wise` as const,
 
-  options: `${EVENT_MASTER_ROUTES_BASE_URL}/${LIST}/${OPTION}` as const,
+  options: `${EVENT_MASTER_ROUTES_BASE_URL}/${LIST}/${OPTION}/${ALL}` as const,
 
   optionsUserWise:
     `${EVENT_MASTER_ROUTES_BASE_URL}/${LIST}/${OPTION}/user-wise` as const,

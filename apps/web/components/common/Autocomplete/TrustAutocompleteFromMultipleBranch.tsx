@@ -1,4 +1,5 @@
 import { Autocomplete, type AutocompleteProps } from "@codezee/sixtify-brahma";
+import { t } from "i18next";
 import type { FieldValues } from "react-hook-form";
 
 import { useGetTrustOptionsFromMultipleBranch } from "@web/components/common/Autocomplete/hooks/useGetTrustOptionsFromMultipleBranch";
@@ -21,7 +22,9 @@ export const TrustAutocompleteFromMultipleBranch = <P extends FieldValues>({
 
   return (
     <Autocomplete
-      placeholder="Select Trust"
+      placeholder={t("common.select.label", {
+        label: t("trust.label"),
+      })}
       loading={loading}
       options={businessUnitOptions}
       {...props}

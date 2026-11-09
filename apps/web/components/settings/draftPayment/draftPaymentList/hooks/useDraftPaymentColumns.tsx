@@ -18,6 +18,7 @@ export const useDraftPaymentColumns = () => {
         return !value ? AG_GRID_CELL_DEFAULT_VALUE : dateFormat(value, true);
       },
       field: "date",
+      filter: "agDateColumnFilter",
       headerName: t("date.label"),
     },
     {

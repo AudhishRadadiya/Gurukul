@@ -86,9 +86,27 @@ export const FilterList = ({ filterListItems }: FilterListProps) => {
     return filterListItems.find((item) => item.key === key);
   };
 
-  const currentFilterValue = currentFilter?.key
-    ? watch(currentFilter.key)
-    : null;
+  const getCurrentFilterValue = (filter: FilterListType | null) => {
+    if (!filter?.key) {
+      return null;
+    }
+
+    if (filter.type === "amountFilter" && filter.amountFilterKeys) {
+      const { key, amountFilterKeys } = filter;
+
+      const { operatorKey, fromAmountKey, toAmountKey } = amountFilterKeys;
+
+      return {
+        operator: watch(`${key}.${operatorKey}`) ?? null,
+        fromAmount: watch(`${key}.${fromAmountKey}`) ?? null,
+        toAmount: watch(`${key}.${toAmountKey}`) ?? null,
+      };
+    }
+
+    return watch(filter.key);
+  };
+
+  const currentFilterValue = getCurrentFilterValue(currentFilter);
 
   const open = Boolean(anchorEl);
 

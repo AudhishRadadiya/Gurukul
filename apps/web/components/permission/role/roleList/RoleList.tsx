@@ -1,6 +1,6 @@
 import type { DialogRenderer } from "@codezee/sixtify-brahma";
-import { useDialogActions } from "@codezee/sixtify-brahma";
-import type { FilterModel } from "ag-grid-community";
+import { useDialogActions, useGetDeviceType } from "@codezee/sixtify-brahma";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import { t } from "i18next";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -15,6 +15,10 @@ import { ROLL_ENTRY_PERMISSION } from "@web/constants/permission/permissions/rol
 import { useUserPermissions } from "@web/hooks/useUserPermissions/useUserPermissions";
 
 export const RoleList = () => {
+  const { layout } = useGetDeviceType();
+
+  const isMobile = layout === "mobile";
+
   const router = useRouter();
 
   const { validateAccess } = useUserPermissions();
@@ -26,7 +30,10 @@ export const RoleList = () => {
   const { onPageChange, onRowsPerPageChange, page, rowsPerPage } =
     usePaginationParams();
 
-  const [agGridFilterModel, setAgGridFilterModel] = useState<FilterModel>({});
+  const [agGridState, setAgGridState] = useState<{
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }>({ filterModel: {}, sortModel: [] });
 
   const startRow = page * rowsPerPage;
 
@@ -34,7 +41,8 @@ export const RoleList = () => {
 
   const { data, isFetching, refetch } = useGetRole({
     endRow,
-    filterModel: agGridFilterModel,
+    filterModel: agGridState.filterModel,
+    sortModel: agGridState.sortModel,
     startRow,
   });
 
@@ -85,8 +93,8 @@ export const RoleList = () => {
         onPageChange={onPageChange}
         count={totalCount}
         onRowsPerPageChange={onRowsPerPageChange}
-        onFilterChange={setAgGridFilterModel}
-        height={255}
+        onGridStateChange={setAgGridState}
+        height={isMobile ? 195 : 220}
       />
 
       {openedDialog && dialogRenderer[openedDialog]}

@@ -11,7 +11,6 @@ export const useDonationCollectionReportColumns = () => {
   const column: AgColumnsWithActions<DailyDonationReportData> = [
     {
       field: "user_name",
-      filter: "agNumberColumnFilter",
       headerName: t("common.user.name"),
     },
     {

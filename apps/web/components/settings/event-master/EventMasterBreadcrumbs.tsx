@@ -1,15 +1,21 @@
 import { Breadcrumbs, SvgHome } from "@codezee/sixtify-brahma";
 import { t } from "i18next";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export type EventMasterBreadcrumbsProps = {
-  page: "add-event-master" | "edit-event-master" | null;
-};
+import {
+  ADD_EVENT_MASTER,
+  EDIT_EVENT_MASTER,
+} from "@web/app/settings/event-master/hooks/constant";
 
-export const EventMasterBreadcrumbs = ({
-  page,
-}: EventMasterBreadcrumbsProps) => {
+export const EventMasterBreadcrumbs = () => {
   const router = useRouter();
+
+  const searchParams = useSearchParams();
+
+  const page = searchParams.get("page");
+
+  const eventMasterPage =
+    page === ADD_EVENT_MASTER || page === EDIT_EVENT_MASTER ? page : null;
 
   const breadcrumbsItems = [
     {
@@ -20,7 +26,7 @@ export const EventMasterBreadcrumbs = ({
       text: t("setting.menu.label"),
     },
     {
-      ...(page && {
+      ...(eventMasterPage && {
         onClick: () => {
           router.push("/settings/event-master");
         },
@@ -34,11 +40,11 @@ export const EventMasterBreadcrumbs = ({
   return (
     <Breadcrumbs
       items={
-        page
+        eventMasterPage
           ? [
               ...breadcrumbsItems,
               {
-                text: `${page === "add-event-master" ? "Add" : "Edit"} Event Master`,
+                text: `${eventMasterPage === ADD_EVENT_MASTER ? "Add" : "Edit"} Event Master`,
               },
             ]
           : breadcrumbsItems

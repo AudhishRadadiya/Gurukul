@@ -11,10 +11,11 @@ export const DONATION_MODE_ROUTES = {
   modeOfReceiptOptions:
     `${DONATION_MODE_BASE_URL}/${LIST}/${OPTION}/receipt` as const,
 
-  options: `${DONATION_MODE_BASE_URL}/${LIST}/${OPTION}` as const,
-
   patch: (donationModeId: string) =>
     `${DONATION_MODE_BASE_URL}/${donationModeId}` as const,
 
   post: `${DONATION_MODE_BASE_URL}` as const,
+
+  userWiseOptions: (isUserWiseAll?: boolean) =>
+    `${DONATION_MODE_BASE_URL}/${LIST}/${OPTION}/user-wise${isUserWiseAll ? "/all" : ""}` as const,
 } as const;

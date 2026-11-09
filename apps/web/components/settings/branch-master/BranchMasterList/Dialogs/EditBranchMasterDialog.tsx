@@ -14,8 +14,6 @@ import {
   BranchMasterForm,
   type FormRef,
 } from "@web/components/settings/branch-master/Dialogs/BranchMasterForm";
-import { useDisabledButtonsCache } from "@web/context/DisabledButtonsCacheContext/DisabledButtonsCacheContext";
-import { submitButtonId } from "@web/hooks/useEnableDisableButtonToggle";
 import { onError } from "@web/utils/errors";
 
 type EditBranchMasterDialogProps = {
@@ -32,8 +30,6 @@ export const EditBranchMasterDialog = ({
   open,
 }: EditBranchMasterDialogProps) => {
   const formRef = useRef<FormRef>(null);
-
-  const { isDisabled } = useDisabledButtonsCache(submitButtonId);
 
   const { data: branchMasterData, isPending: isPendingBranchMasterData } =
     useGetBranchMasterDetails({
@@ -70,11 +66,7 @@ export const EditBranchMasterDialog = ({
             {t("common.cancel.button")}
           </Button>
 
-          <EditAction
-            onClick={onEditBranchMaster}
-            loading={isPending}
-            disabled={isDisabled()}
-          />
+          <EditAction onClick={onEditBranchMaster} loading={isPending} />
         </ButtonContainer>
       }
     >

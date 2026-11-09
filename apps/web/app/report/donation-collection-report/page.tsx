@@ -2,20 +2,20 @@
 
 import {
   ContentBox,
-  DatePicker,
+  DateRangePickerField,
   PadBox,
   toasts,
+  useGetDeviceType,
 } from "@codezee/sixtify-brahma";
 import { Box, Stack, Typography, useTheme } from "@mui/material";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import { t } from "i18next";
 import { DateTime } from "luxon";
 import { useState } from "react";
 import type { FieldValues } from "react-hook-form";
 
-import { DateFilterPeriodAutocomplete } from "@web/components/common/Autocomplete/DateFilterPeriodAutocomplete";
 import { DataExport } from "@web/components/common/DataExport/DataExport";
 import type { GetEventSummaryExportApiSuccessResponse } from "@web/components/Event/EventSummary/EventSummaryList/hooks/useGetEventSummaryExport";
-import { DonationCollectionReportBreadcrumbs } from "@web/components/report/donationReport/donationCollectionReport/DonationCollectionReportBreadcrumbs";
 import { DonationCollectionReportFilter } from "@web/components/report/donationReport/donationCollectionReport/donationCollectionReportList/DonationCollectionReportFilter";
 import { DonationCollectionReportList } from "@web/components/report/donationReport/donationCollectionReport/donationCollectionReportList/DonationCollectionReportList";
 import { useGetDonationCollectionReportExport } from "@web/components/report/donationReport/donationCollectionReport/donationCollectionReportList/hooks/useGetDonationCollectionReportExport";
@@ -28,6 +28,8 @@ import { onError } from "@web/utils/errors";
 
 // eslint-disable-next-line import/no-default-export
 export default function Page() {
+  const { isMobile } = useGetDeviceType();
+
   const theme = useTheme();
 
   const { branchIds } = useBranch();
@@ -42,12 +44,17 @@ export default function Page() {
 
   const endOfWeek = startOfWeek.plus({ days: 6 });
 
+  const [agGridState, setAgGridState] = useState<{
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }>({ filterModel: {}, sortModel: [] });
+
   const [filterListData, setFilterListData] = useState<FieldValues>({
     from_date: startOfWeek.toFormat("yyyy-MM-dd"),
     to_date: endOfWeek.toFormat("yyyy-MM-dd"),
   });
 
-  const { control, fromDate, toDate } = useDateFilters();
+  const { control, dateRange } = useDateFilters();
 
   const { mutate: getDonationCollectionReport } =
     useGetDonationCollectionReportExport({
@@ -71,9 +78,11 @@ export default function Page() {
         externalFilter: {
           ...filterListData,
           branch_id: [branchIds],
-          from_date: fromDate,
-          to_date: toDate,
+          from_date: dateRange[0],
+          to_date: dateRange[1],
         },
+        filterModel: agGridState.filterModel,
+        sortModel: agGridState.sortModel,
         startRow: 0,
       },
       fileType,
@@ -81,45 +90,38 @@ export default function Page() {
   };
 
   return (
-    <Stack gap="10px">
-      <DonationCollectionReportBreadcrumbs />
-
+    <Stack gap={{ md: "10px", xs: "8px" }}>
       <ContentBox>
-        <PadBox padding={{ padding: "10px" }}>
-          <Stack direction="row" gap="10px" justifyContent="space-between">
-            <Typography variant="subtitle1">
+        <PadBox padding={{ padding: { md: "10px", xs: "8px 10px" } }}>
+          <Stack
+            direction={{ md: "row", xs: "column" }}
+            gap={3}
+            justifyContent="space-between"
+            alignItems={{ md: "center", xs: "stretch" }}
+          >
+            <Typography
+              variant="subtitle1"
+              fontSize={isMobile ? "16px" : "18px"}
+              whiteSpace="nowrap"
+            >
               {t("donation.collection.report.menu.label")}
             </Typography>
 
-            <Stack direction="row" gap="10px" alignItems="center">
-              <DateFilterPeriodAutocomplete
-                name="date_filter_period"
+            <Box width={{ md: "auto", xs: "100%" }}>
+              <DateRangePickerField
+                name="date_range"
                 control={control}
-                clearIcon
-                sx={{ width: "160px" }}
+                showPresets
+                size={isMobile ? "small" : "large"}
+                placeholder="Select Date Range"
               />
-
-              <DatePicker
-                control={control}
-                name="from_date"
-                clearable={false}
-                containerProps={{ width: "160px" }}
-              />
-
-              <DatePicker
-                control={control}
-                name="to_date"
-                minDate={fromDate ? DateTime.fromISO(fromDate) : DateTime.now()}
-                clearable={false}
-                containerProps={{ width: "160px" }}
-              />
-            </Stack>
+            </Box>
           </Stack>
         </PadBox>
       </ContentBox>
 
       <ContentBox>
-        <PadBox padding={{ padding: "10px" }}>
+        <PadBox padding={{ padding: { md: "10px", xs: "8px 10px" } }}>
           <Stack direction="row" gap="10px">
             <DonationCollectionReportFilter
               filterListData={filterListData}
@@ -133,7 +135,7 @@ export default function Page() {
         </PadBox>
 
         {!filterListData.to_date ? (
-          <PadBox padding={{ padding: "10px" }}>
+          <PadBox padding={{ padding: { md: "10px", xs: "8px 10px" } }}>
             <Box
               sx={{
                 backgroundColor: slate[700],
@@ -141,20 +143,24 @@ export default function Page() {
                 textAlign: "center",
               }}
             >
-              <PadBox padding={{ padding: "10px" }}>
+              <PadBox padding={{ padding: { md: "10px", xs: "8px" } }}>
                 To view and take action on the data, please select the From Date
                 and To Date from the filters on the right, then click Apply.
               </PadBox>
             </Box>
           </PadBox>
         ) : (
-          <DonationCollectionReportList
-            externalFilter={{
-              ...filterListData,
-              from_date: fromDate,
-              to_date: toDate,
-            }}
-          />
+          <Box sx={{ overflow: "hidden", width: "100%" }}>
+            <DonationCollectionReportList
+              externalFilter={{
+                ...filterListData,
+                from_date: dateRange[0],
+                to_date: dateRange[1],
+              }}
+              agGridState={agGridState}
+              setAgGridState={setAgGridState}
+            />
+          </Box>
         )}
       </ContentBox>
     </Stack>

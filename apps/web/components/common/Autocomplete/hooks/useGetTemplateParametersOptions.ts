@@ -50,6 +50,7 @@ const templateParametersMap: Record<
   [DONATION]: [
     // Donation
     { label: "Donation Amount", value: "[DAMT]" },
+    { label: "Donation Type", value: "[DTYPE]" },
     { label: "Suvichar", value: "[SVICHAR]" },
     { label: "Event Name", value: "[EVNT]" },
   ],

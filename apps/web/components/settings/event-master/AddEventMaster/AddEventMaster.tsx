@@ -1,6 +1,7 @@
-import { Button, PadBox, toasts } from "@codezee/sixtify-brahma";
+import { Button, ContentBox, PadBox, toasts } from "@codezee/sixtify-brahma";
 import { Stack } from "@mui/material";
 import { t } from "i18next";
+import _isEmpty from "lodash/isEmpty";
 import { useRouter } from "next/navigation";
 import { useRef } from "react";
 
@@ -16,10 +17,25 @@ export const AddEventMaster = () => {
 
   const { isPending, mutate } = useAddEventMaster({
     options: {
-      onError: (error) => onError(error, formRef.current?.setError),
+      onError: (error) => {
+        onError(error, formRef.current?.setError);
 
-      onSuccess: (data) => {
-        toasts.success({ title: data.message });
+        toasts.error({
+          title: error.response
+            ? error.response.data.message
+            : t("common.error.default"),
+        });
+      },
+
+      onSuccess: ({ data, message }) => {
+        toasts.success({ title: message });
+
+        if (!_isEmpty(data?.links)) {
+          data.links.forEach((link) => {
+            window.open(link, "_blank");
+          });
+        }
+
         router.push("/settings/event-master");
       },
     },
@@ -32,27 +48,29 @@ export const AddEventMaster = () => {
   };
 
   return (
-    <PadBox padding={{ padding: "20px" }}>
-      <Stack gap="10px">
-        <EventMasterForm ref={formRef} />
+    <ContentBox>
+      <PadBox padding={{ padding: "20px" }}>
+        <Stack gap="10px">
+          <EventMasterForm ref={formRef} />
 
-        <PadBox padding={{ paddingRight: "20px" }}>
-          <Stack direction="row" justifyContent="end" gap="10px">
-            <Button
-              variant="outlined"
-              onClick={() => {
-                router.push("/settings/event-master");
-              }}
-            >
-              {t("common.cancel.button")}
-            </Button>
+          <PadBox padding={{ paddingRight: "20px" }}>
+            <Stack direction="row" justifyContent="end" gap="10px">
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  router.push("/settings/event-master");
+                }}
+              >
+                {t("common.cancel.button")}
+              </Button>
 
-            <Button loading={isPending} onClick={onAddEventMaster}>
-              {t("common.save.button")}
-            </Button>
-          </Stack>
-        </PadBox>
-      </Stack>
-    </PadBox>
+              <Button loading={isPending} onClick={onAddEventMaster}>
+                {t("common.save.button")}
+              </Button>
+            </Stack>
+          </PadBox>
+        </Stack>
+      </PadBox>
+    </ContentBox>
   );
 };

@@ -1,4 +1,9 @@
-import { useDialogActions, type DialogRenderer } from "@codezee/sixtify-brahma";
+import {
+  useDialogActions,
+  useGetDeviceType,
+  type DialogRenderer,
+} from "@codezee/sixtify-brahma";
+import { Box } from "@mui/material";
 import { t } from "i18next";
 import { useState } from "react";
 import type { UseFormSetValue } from "react-hook-form";
@@ -21,6 +26,8 @@ export const FamilyMemberDetailList = ({
   isFetching = false,
   setValue,
 }: FamilyMemberDetailListProps) => {
+  const { isMobile } = useGetDeviceType();
+
   const { onDialogClose, onDialogOpen, openedDialog } = useDialogActions();
 
   const [currentFamilyMemberDetail, setCurrentFamilyMemberDetail] =
@@ -66,28 +73,30 @@ export const FamilyMemberDetailList = ({
 
   return (
     <>
-      <AgGridV2<FamilyMemberFormFieldValues>
-        isLoading={isFetching}
-        rowData={familyMemberFormValues}
-        columnDefs={column}
-        height={300}
-        actions={[
-          {
-            onClick: (data) => {
-              onDialogOpen("edit");
-              setCurrentFamilyMemberDetail(data);
+      <Box sx={{ overflow: "hidden", width: "100%" }}>
+        <AgGridV2<FamilyMemberFormFieldValues>
+          isLoading={isFetching}
+          rowData={familyMemberFormValues}
+          columnDefs={column}
+          height={isMobile ? 500 : 300}
+          actions={[
+            {
+              onClick: (data) => {
+                onDialogOpen("edit");
+                setCurrentFamilyMemberDetail(data);
+              },
+              title: t("common.edit"),
             },
-            title: t("common.edit"),
-          },
-          {
-            onClick: (data) => {
-              onDialogOpen("delete");
-              setCurrentFamilyMemberDetail(data);
+            {
+              onClick: (data) => {
+                onDialogOpen("delete");
+                setCurrentFamilyMemberDetail(data);
+              },
+              title: t("common.delete"),
             },
-            title: t("common.delete"),
-          },
-        ]}
-      />
+          ]}
+        />
+      </Box>
       {openedDialog && dialogRenderer[openedDialog]}
     </>
   );

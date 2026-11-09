@@ -35,6 +35,9 @@ export const Popper = ({
         background: mirage[900],
         width: "203px",
         zIndex: 1300,
+        maxHeight: "calc(100vh - 500px)",
+        overflow: "auto",
+        height: "fit-content",
       }}
     >
       {children}

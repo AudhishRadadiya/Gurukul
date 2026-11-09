@@ -4,17 +4,30 @@ import { type MouseEvent, useState } from "react";
 import { PadBox } from "../../PadBox";
 import { Popover } from "./Popover";
 import type { OnAction } from "../../utils/types";
+import { useGetDeviceType } from "../../utils/hooks/useGetDeviceType";
 
 type AgGridActionColumn = {
   title: string;
   onClick: OnAction;
+  disabled?: boolean;
+};
+
+type SmartGridActionItems = {
+  href?: string;
+  isView?: boolean;
+  onClick?: OnAction;
+  title: string;
+  disabled?: boolean;
 };
 
 type ActionColumnProps = {
-  items: AgGridActionColumn[];
+  items: AgGridActionColumn[] | SmartGridActionItems[];
   disabled?: boolean;
 };
+
 export const ActionCell = ({ items, disabled }: ActionColumnProps) => {
+  const { isMobile } = useGetDeviceType();
+
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
 
   const HandleClose = () => {
@@ -33,7 +46,7 @@ export const ActionCell = ({ items, disabled }: ActionColumnProps) => {
         onClick={HandleClick}
         disabled={disabled}
       >
-        <MoreVertIcon />
+        <MoreVertIcon fontSize={isMobile ? "small" : "medium"} />
       </IconButton>
 
       {!!anchorEl && (
@@ -43,9 +56,10 @@ export const ActionCell = ({ items, disabled }: ActionColumnProps) => {
               return (
                 <Box key={item.title}>
                   <ListItemButton
+                    disabled={!!item.disabled}
                     sx={{ width: "100%", textAlign: "start" }}
                     onClick={() => {
-                      item?.onClick();
+                      item?.onClick?.();
                       setAnchorEl(null);
                     }}
                   >

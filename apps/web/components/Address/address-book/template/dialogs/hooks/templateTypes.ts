@@ -1,7 +1,7 @@
 export type AddressBookColumnHideTypes = {
+  aadhar_no: boolean;
   address: boolean;
   address_type: boolean;
-  adhar_no: boolean;
   alternet_mobile_no: boolean;
   anniversary_date: boolean;
   anniversary_day: boolean;

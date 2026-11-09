@@ -1,8 +1,9 @@
 import { useTheme } from "@mui/material";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import { t } from "i18next";
 import { useRouter } from "next/navigation";
 import type { ForwardedRef } from "react";
-import { forwardRef, useImperativeHandle } from "react";
+import { forwardRef, useImperativeHandle, useState } from "react";
 import type { FieldValues } from "react-hook-form";
 
 import type { CancelReceiptListRef } from "@web/app/donation/cancel-receipt/page";
@@ -12,14 +13,16 @@ import { useCancelReceiptColumns } from "@web/components/Donation/cancelReceipt/
 import type { CancelReceipt } from "@web/components/Donation/cancelReceipt/cancelReceiptList/hooks/useGetCancelReceipt";
 import { useGetCancelReceipt } from "@web/components/Donation/cancelReceipt/cancelReceiptList/hooks/useGetCancelReceipt";
 import { useBranch } from "@web/context/BranchContext";
+import { filterSearchParams } from "@web/utils/helper";
 
 export type CancelReceiptListProps = {
   externalFilter?: FieldValues;
+  search: string;
 };
 
 export const CancelReceiptList = forwardRef(
   (
-    { externalFilter = {} }: CancelReceiptListProps,
+    { externalFilter = {}, search }: CancelReceiptListProps,
     ref: ForwardedRef<CancelReceiptListRef>
   ) => {
     const router = useRouter();
@@ -37,9 +40,20 @@ export const CancelReceiptList = forwardRef(
 
     const endRow = startRow + rowsPerPage;
 
+    const [agGridState, setAgGridState] = useState<{
+      filterModel: FilterModel;
+      sortModel: SortModelItem[];
+    }>({
+      filterModel: {},
+      sortModel: [],
+    });
+
     const { data, isFetching, refetch } = useGetCancelReceipt({
       endRow,
       externalFilter: { ...externalFilter, branch_id: [branchIds] },
+      filterModel: agGridState.filterModel,
+      quickFilter: filterSearchParams(search),
+      sortModel: agGridState.sortModel,
       startRow,
     });
 
@@ -69,8 +83,9 @@ export const CancelReceiptList = forwardRef(
         rowData={cancelDonations}
         onPageChange={onPageChange}
         count={full_count}
+        onGridStateChange={setAgGridState}
         onRowsPerPageChange={onRowsPerPageChange}
-        height={200}
+        height={160}
         actions={[
           {
             onClick: (data) => {

@@ -32,7 +32,7 @@ export function useGetTrustOptionsFromMultipleBranch({
   };
 
   return useQuery({
-    enabled: branchIds.length > 0 && _every(branchIds, Boolean),
+    enabled: branchIds?.length > 0 && _every(branchIds, Boolean),
     initialData: [],
     queryFn: fetchTrustOptions,
     queryKey: trustKeys.multipleOptions(branchIds),

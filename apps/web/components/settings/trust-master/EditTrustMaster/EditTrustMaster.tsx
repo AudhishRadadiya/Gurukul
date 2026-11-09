@@ -1,4 +1,8 @@
-import { Button, toasts } from "@codezee/sixtify-brahma";
+import {
+  Button,
+  ButtonContainer,
+  toasts,
+} from "@codezee/sixtify-brahma";
 import { Stack } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/navigation";
@@ -42,14 +46,14 @@ export const EditTrustMaster = ({ trustMasterId }: EditTrustMasterProps) => {
   };
 
   return (
-    <Stack spacing={2}>
+    <Stack spacing={{ md: 2, xs: 1.5 }} sx={{ p: { md: 0, xs: "0 2px" } }}>
       <TrustMasterForm
         ref={formRef}
         defaultValues={trustMasterDetails}
         loading={isTrustMasterLoading}
       />
 
-      <Stack direction="row" gap="15px" justifyContent="flex-end">
+      <ButtonContainer>
         <Button
           variant="outlined"
           onClick={() => {
@@ -60,7 +64,7 @@ export const EditTrustMaster = ({ trustMasterId }: EditTrustMasterProps) => {
         </Button>
 
         <EditAction onClick={onEditTrustMaster} loading={isPending} />
-      </Stack>
+      </ButtonContainer>
     </Stack>
   );
 };

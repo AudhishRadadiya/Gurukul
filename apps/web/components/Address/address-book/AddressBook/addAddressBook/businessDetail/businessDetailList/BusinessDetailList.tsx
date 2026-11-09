@@ -1,5 +1,6 @@
 import type { DialogRenderer } from "@codezee/sixtify-brahma";
-import { useDialogActions } from "@codezee/sixtify-brahma";
+import { useDialogActions, useGetDeviceType } from "@codezee/sixtify-brahma";
+import { Box } from "@mui/material";
 import { t } from "i18next";
 import { useState } from "react";
 import type { UseFormSetValue } from "react-hook-form";
@@ -22,6 +23,8 @@ export const BusinessDetailList = ({
   isFetching = false,
   setValue,
 }: BusinessDetailListProps) => {
+  const { isMobile } = useGetDeviceType();
+
   const { onDialogClose, onDialogOpen, openedDialog } = useDialogActions();
 
   const [currentBusinessDetail, setCurrentBusinessDetail] =
@@ -48,7 +51,10 @@ export const BusinessDetailList = ({
         onEdit={(formValues) => {
           const businessDetailData = businessDetailFormValues.map(
             (businessDetail) => {
-              if (businessDetail.id === currentBusinessDetail.id) {
+              if (
+                businessDetail.business_detail_id ===
+                currentBusinessDetail.business_detail_id
+              ) {
                 return { ...businessDetail, ...formValues };
               }
 
@@ -65,28 +71,30 @@ export const BusinessDetailList = ({
 
   return (
     <>
-      <AgGridV2<BusinessDetailFormFieldValues>
-        isLoading={isFetching}
-        rowData={businessDetailFormValues}
-        columnDefs={column}
-        height={300}
-        actions={[
-          {
-            onClick: (data) => {
-              onDialogOpen("edit");
-              setCurrentBusinessDetail(data);
+      <Box sx={{ overflow: "hidden", width: "100%" }}>
+        <AgGridV2<BusinessDetailFormFieldValues>
+          isLoading={isFetching}
+          rowData={businessDetailFormValues}
+          columnDefs={column}
+          height={isMobile ? 500 : 300}
+          actions={[
+            {
+              onClick: (data) => {
+                onDialogOpen("edit");
+                setCurrentBusinessDetail(data);
+              },
+              title: t("common.edit"),
             },
-            title: t("common.edit"),
-          },
-          {
-            onClick: (data) => {
-              onDialogOpen("delete");
-              setCurrentBusinessDetail(data);
+            {
+              onClick: (data) => {
+                onDialogOpen("delete");
+                setCurrentBusinessDetail(data);
+              },
+              title: t("common.delete"),
             },
-            title: t("common.delete"),
-          },
-        ]}
-      />
+          ]}
+        />
+      </Box>
       {openedDialog && dialogRenderer[openedDialog]}
     </>
   );

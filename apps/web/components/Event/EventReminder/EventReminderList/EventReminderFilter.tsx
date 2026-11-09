@@ -1,55 +1,39 @@
 import type { FilterListType } from "@codezee/sixtify-brahma";
 import { FilterListV2 } from "@codezee/sixtify-brahma";
 import { t } from "i18next";
+import _isEmpty from "lodash/isEmpty";
 import { useMemo, useState } from "react";
 import type { FieldValues } from "react-hook-form";
 
-import {
-  fromFilterDate,
-  toFilterDate,
-} from "@web/app/event/event-reminder/page";
 import { useGetFilterEventOptions } from "@web/components/common/Autocomplete/hooks/useGetFilterEventOptions";
 
 type EventReminderFilterProps = {
   filterListData: FieldValues;
-  setFilterListData: (data: FieldValues) => void;
+  handleApplyFilter: (data: FieldValues) => void;
 };
 
 export const EventReminderFilter = ({
   filterListData,
-  setFilterListData,
+  handleApplyFilter,
 }: EventReminderFilterProps) => {
   const [currentFilter, setCurrentFilter] = useState<FieldValues>({});
 
   const { data: filterEventOptions } = useGetFilterEventOptions();
 
-  const fromDate = currentFilter.from_date ?? fromFilterDate;
-
-  const toDate = currentFilter.to_date ?? toFilterDate;
+  useMemo(() => {
+    if (!_isEmpty(filterListData)) {
+      setCurrentFilter(filterListData);
+    }
+  }, [filterListData]);
 
   const filterListItems: FilterListType[] = useMemo(
     () => [
       {
-        key: "event_type",
+        key: "event_id",
         label: t("eventType.label"),
         options: filterEventOptions,
         type: "autoComplete",
-        value: currentFilter.event_type,
-      },
-      {
-        key: "from_date",
-        label: t("fromDate.label"),
-        required: true,
-        type: "date",
-        value: fromDate,
-      },
-      {
-        isDisabled: !fromDate,
-        key: "to_date",
-        label: t("toDate.label"),
-        required: !!fromDate,
-        type: "date",
-        value: toDate,
+        value: currentFilter.event_id,
       },
     ],
     [filterEventOptions, currentFilter]
@@ -61,14 +45,13 @@ export const EventReminderFilter = ({
     }
   };
 
-  const onClear = () => {
-    const filterData = {
-      from_date: fromFilterDate,
-      to_date: toFilterDate,
-    };
+  const onApply = (data: FieldValues) => {
+    handleApplyFilter(data);
+  };
 
-    setCurrentFilter(filterData);
-    setFilterListData(filterData);
+  const onClear = () => {
+    setCurrentFilter({});
+    handleApplyFilter({});
   };
 
   return (
@@ -76,7 +59,7 @@ export const EventReminderFilter = ({
       filterListItems={filterListItems}
       filterListData={filterListData}
       onChange={onChange}
-      onApply={setFilterListData}
+      onApply={onApply}
       onClear={onClear}
     />
   );

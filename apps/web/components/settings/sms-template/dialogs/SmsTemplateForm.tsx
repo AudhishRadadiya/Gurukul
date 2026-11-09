@@ -1,7 +1,6 @@
 import {
   AddIconAction,
   FormRow,
-  PadBox,
   RadioGroupField,
   TextField,
 } from "@codezee/sixtify-brahma";
@@ -201,8 +200,8 @@ export const SmsTemplateForm = forwardRef(
     }, [tempTemplateParameter]);
 
     return (
-      <Stack gap="30px">
-        <Stack gap="10px">
+      <Stack gap={{ sm: "30px", xs: "16px" }}>
+        <Stack gap={{ sm: "10px", xs: "8px" }}>
           <FormRow maxColumn={2}>
             <TextField
               loading={loading}
@@ -221,7 +220,13 @@ export const SmsTemplateForm = forwardRef(
               control={control}
               containerProps={{
                 sx: {
-                  flexWrap: "wrap",
+                  columnGap: { sm: 1.5, xs: 0.5 },
+                  display: "grid",
+                  gridTemplateColumns: {
+                    sm: "repeat(2, minmax(0, 1fr))",
+                    xs: "repeat(2, minmax(0, 1fr))",
+                  },
+                  rowGap: { sm: 0.5, xs: 0 },
                 },
               }}
               loading={loading}
@@ -270,8 +275,13 @@ export const SmsTemplateForm = forwardRef(
               ]}
             />
 
-            <Stack direction="row" gap="10px" alignItems="center">
-              <Box flex="0 0 90%">
+            <Stack
+              direction="row"
+              gap={1}
+              alignItems="center"
+              sx={{ width: "100%" }}
+            >
+              <Box sx={{ flex: 1, minWidth: 0 }}>
                 <TemplateParametersAutocomplete
                   templateType={templateType}
                   label={t("common.template.parameters")}
@@ -283,7 +293,7 @@ export const SmsTemplateForm = forwardRef(
                 />
               </Box>
 
-              <Box flex="0 0 10%">
+              <Box sx={{ flexShrink: 0 }}>
                 <AddIconAction onClick={handleInsertParam} />
               </Box>
             </Stack>
@@ -304,9 +314,16 @@ export const SmsTemplateForm = forwardRef(
               helperText={errorMessages(template_parameter_text?.message)}
             />
 
-            <Stack direction="row" gap="80px" alignItems="center">
+            <Stack
+              direction={{ sm: "row", xs: "column" }}
+              gap={{ sm: 3, xs: 1 }}
+              alignItems={{ sm: "center", xs: "stretch" }}
+              flexWrap={{ sm: "nowrap", xs: "wrap" }}
+              sx={{ width: "100%" }}
+            >
               <RadioGroupField
                 name="is_active"
+                isHorizontal
                 control={control}
                 loading={loading}
                 label={t("isActive.label")}
@@ -324,29 +341,24 @@ export const SmsTemplateForm = forwardRef(
                 ]}
               />
 
-              <PadBox
-                padding={{
-                  paddingTop: "25px",
-                }}
+              <Stack
+                direction="row"
+                gap={{ sm: 3, xs: 2 }}
+                flexWrap="wrap"
+                sx={{ flexShrink: 0 }}
               >
                 <CheckboxWithLabel
                   control={control}
                   name="is_whatsapp"
                   label={t("common.whatsApp.label")}
                 />
-              </PadBox>
 
-              <PadBox
-                padding={{
-                  paddingTop: "25px",
-                }}
-              >
                 <CheckboxWithLabel
                   control={control}
                   name="is_sms"
                   label={t("sms.label")}
                 />
-              </PadBox>
+              </Stack>
             </Stack>
           </FormRow>
         </Stack>

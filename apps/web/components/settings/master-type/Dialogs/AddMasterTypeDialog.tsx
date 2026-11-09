@@ -52,7 +52,7 @@ export const AddMasterTypeDialog = ({
 
   return (
     <Dialog
-      maxWidth="sm"
+      maxWidth="xs"
       onClose={onClose}
       open={open}
       title={t("common.button.add", {

@@ -1,5 +1,6 @@
 import { ChevronRight } from "@mui/icons-material";
 import { Box, useTheme } from "@mui/material";
+import type { MouseEvent } from "react";
 import { Bullet } from "../Bullet";
 import { MenuItem, type MenuItemProps } from "../MenuItem";
 
@@ -10,6 +11,7 @@ type CloseDrawerMenuItemProps = {
   onClick: MenuItemProps["onClick"];
   selected?: MenuItemProps["selected"];
   onMouseEnter?: MenuItemProps["onMouseEnter"];
+  onOpen?: (event: MouseEvent<HTMLDivElement>) => void;
 };
 
 export const CloseDrawerMenuItem = ({
@@ -19,6 +21,7 @@ export const CloseDrawerMenuItem = ({
   onClick,
   selected = false,
   onMouseEnter,
+  onOpen,
 }: CloseDrawerMenuItemProps) => {
   const theme = useTheme();
 
@@ -27,6 +30,7 @@ export const CloseDrawerMenuItem = ({
   return (
     <Box
       component="li"
+      onClick={onOpen}
       sx={{
         bgcolor: selected && !isShowEndAdornment ? butterflyBlue[900] : "",
         padding: !title ? "2.5px 0" : "0px",

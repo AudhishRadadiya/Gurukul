@@ -7,12 +7,15 @@ import { useGetDonationOptions } from "@web/components/common/Autocomplete/hooks
 type DonationAutocompleteProps<P extends FieldValues> = Omit<
   AutocompleteProps<P>,
   "options"
->;
+> & {
+  isUserWiseAll?: boolean;
+};
 
-export const DonationAutocomplete = <P extends FieldValues>(
-  props: DonationAutocompleteProps<P>
-) => {
-  const { data: donationOptions } = useGetDonationOptions();
+export const DonationAutocomplete = <P extends FieldValues>({
+  isUserWiseAll = false,
+  ...props
+}: DonationAutocompleteProps<P>) => {
+  const { data: donationOptions } = useGetDonationOptions({ isUserWiseAll });
 
   return (
     <Autocomplete

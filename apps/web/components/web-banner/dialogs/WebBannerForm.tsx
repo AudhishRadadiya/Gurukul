@@ -349,7 +349,10 @@ export const WebBannerForm = forwardRef(
                 sx={{
                   border: "1px solid #e0e0e0",
                   borderRadius: "5px",
-                  p: "10px",
+                  minWidth: 0,
+                  overflow: "hidden",
+                  p: { sm: "10px", xs: "6px" },
+                  width: "100%",
                 }}
               >
                 <AccordionSummary expandIcon={<ExpandMore />}>
@@ -365,7 +368,7 @@ export const WebBannerForm = forwardRef(
                   </Stack>
                 </AccordionSummary>
 
-                <AccordionDetails>
+                <AccordionDetails sx={{ minWidth: 0, px: { sm: 2, xs: 0 } }}>
                   <WebBannerSlotFields
                     index={index}
                     control={control}

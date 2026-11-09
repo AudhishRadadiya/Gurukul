@@ -1,4 +1,5 @@
-import type { FilterModel } from "ag-grid-community";
+import { useGetDeviceType } from "@codezee/sixtify-brahma";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import _flatMap from "lodash/flatMap";
 import _isEmpty from "lodash/isEmpty";
 import _mapValues from "lodash/mapValues";
@@ -12,16 +13,24 @@ import { useEventItemSummaryColumns } from "@web/components/Event/eventItemSumma
 import type { EventItemSummary } from "@web/components/Event/eventItemSummary/eventItemSummaryList/hooks/useGetEventItemSummary";
 import { useGetEventItemSummary } from "@web/components/Event/eventItemSummary/eventItemSummaryList/hooks/useGetEventItemSummary";
 import { useBranch } from "@web/context/BranchContext";
+import { filterSearchParams } from "@web/utils/helper";
 
 export type EventSummaryListProps = {
-  agGridFilterModel: FilterModel;
+  agGridState: {
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  };
   endRow: number;
   externalFilter: FieldValues;
   onPageChange: (newPage: number) => void;
   onRowsPerPageChange: (newRows: number) => void;
   page: number;
   rowsPerPage: number;
-  setAgGridFilterModel: (data: FilterModel) => void;
+  search: string;
+  setAgGridState: (data: {
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }) => void;
   startRow: number;
 };
 
@@ -32,22 +41,27 @@ export const buildQuery = (filters: Record<string, string>) =>
   );
 
 export const EventItemSummaryList = ({
-  agGridFilterModel,
+  agGridState,
   endRow,
   externalFilter,
   onPageChange,
   onRowsPerPageChange,
   page,
   rowsPerPage,
-  setAgGridFilterModel,
+  search,
+  setAgGridState,
   startRow,
 }: EventSummaryListProps) => {
   const { branchIds } = useBranch();
 
+  const { isMobile } = useGetDeviceType();
+
   const { data, isFetching, isLoading } = useGetEventItemSummary({
     endRow,
     externalFilter: { ...externalFilter, branch_id: [branchIds] },
-    filterModel: agGridFilterModel,
+    filterModel: agGridState.filterModel,
+    quickFilter: filterSearchParams(search),
+    sortModel: agGridState.sortModel,
     startRow,
   });
 
@@ -78,9 +92,9 @@ export const EventItemSummaryList = ({
       rowData={eventItemSummary}
       onPageChange={onPageChange}
       count={totalCount}
-      onFilterChange={setAgGridFilterModel}
+      onGridStateChange={setAgGridState}
       onRowsPerPageChange={onRowsPerPageChange}
-      height={260}
+      height={isMobile ? 200 : 230}
     />
   );
 };

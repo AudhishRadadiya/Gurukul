@@ -11,24 +11,28 @@ import {
 
 export type DateFiltersFormValues = {
   date_filter_period: string;
+  date_range: string[];
   from_date: string;
   only_contact_no: boolean;
+  search: string;
   to_date: string;
 };
 
 export type UseDateFiltersReturn = {
   control: Control<DateFiltersFormValues>;
   dateFilterPeriod: string;
+  dateRange: string[];
   fromDate: string;
   onlyContactNo: boolean;
+  search: string;
   setValue: (
     name: keyof DateFiltersFormValues,
-    value: string | boolean
+    value: string | boolean | string[]
   ) => void;
   toDate: string;
 };
 
-const calculateFromDate = (period: string): string => {
+export const calculateFromDate = (period: string): string => {
   if (period === SEVEN_DAYS) {
     return DateTime.now().minus({ days: 7 }).toISODate();
   }
@@ -72,8 +76,13 @@ export function useDateFilters(
   const { control, setValue, watch } = useForm<DateFiltersFormValues>({
     defaultValues: {
       date_filter_period: defaultPeriod,
+      date_range: [
+        calculateFromDate(defaultPeriod),
+        DateTime.now().toISODate(),
+      ],
       from_date: calculateFromDate(defaultPeriod),
       only_contact_no: false,
+      search: "",
       to_date: DateTime.now().toISODate(),
     },
   });
@@ -82,7 +91,11 @@ export function useDateFilters(
 
   const fromDate = watch("from_date");
 
+  const dateRange = watch("date_range");
+
   const toDate = watch("to_date");
+
+  const search = watch("search");
 
   const onlyContactNo = watch("only_contact_no");
 
@@ -114,8 +127,10 @@ export function useDateFilters(
   return {
     control,
     dateFilterPeriod,
+    dateRange,
     fromDate,
     onlyContactNo,
+    search,
     setValue,
     toDate,
   };

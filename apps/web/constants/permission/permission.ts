@@ -6,9 +6,16 @@ export const CREATE = "create";
 export const EDIT = "edit";
 export const DELETE = "delete";
 
+export const DASHBOARD = "dashboard";
+export const TOTAL_CARD_COUNT = "total_card_count";
+export const ANNIVERSARY_LIST = "anniversary_list";
+export const BIRTHDAY_LIST = "birthday_list";
+export const TRUST_WISE_CHART = "trust_wise_chart";
+
 export const USER = "user";
 export const USER_LOGIN_REPORT = "user_login_report";
 export const USER_MASTER = "user_master";
+export const WEB_USER_MASTER = "web_user_master";
 
 export const DONATION = "donation";
 export const DONATION_MODE = "donation_mode";
@@ -36,6 +43,8 @@ export const BANK_MASTER = "bank_master";
 export const DONATION_MASTER = "donation_master";
 export const EMAIL_SETTINGS = "email_settings";
 export const WHATSAPP_SETTINGS = "whatsapp_settings";
+export const META_WHATSAPP_SETTING = "meta_whatsapp_setting";
+export const META_WHATSAPP_TEMPLATE = "meta_whatsapp_template";
 export const EVENT_MASTER = "event_master";
 export const MASTER_PARAMETER = "master_parameter";
 export const PAYMENT_GATEWAY = "payment_gateway";
@@ -48,14 +57,19 @@ export const TRUST_MASTER = "trust_master";
 export const WEB_BANNER = "web_banner";
 export const MASTER_TYPE = "master_type";
 export const DRAFT_PAYMENT = "temp_payment";
+export const ATG_CERTIFICATE = "atg_certificate";
+export const CSR_CERTIFICATE = "csr_certificate";
+export const EVENT_CONTACT_DETAIL = "event_contact_detail";
 
 export const ADDRESS = "address";
 export const ADDRESS_BOOK = "address_book";
 export const ADDRESS_BOOK_IMPORT_FROM_EXCEL = "address_book_import_from_excel";
 export const DONAR_ADDRESS_LIST = "donar_address_list";
+export const HASTAK_LIST = "hastak_list";
 export const UPDATE_DONAR_ADDRESS = "update_donar_address";
 
 export const REPORT = "report";
 export const DAILY_COLLECTION_REPORT = "daily_collection_report";
 export const DONATION_COLLECTION_REPORT = "donation_collection_report";
 export const DONATION_REPORT = "donation_report";
+export const WHATSAPP_HISTORY = "whatsapp_history";

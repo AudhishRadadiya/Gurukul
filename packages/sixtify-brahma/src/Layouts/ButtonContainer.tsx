@@ -15,9 +15,9 @@ export const ButtonContainer = ({
   children,
   sx,
 }: ButtonContainerProps) => {
-  const { layout } = useGetDeviceType();
+  const { isMobile } = useGetDeviceType();
 
-  return layout === "mobile" ? (
+  return isMobile ? (
     <FormGridLayout columnsOnMobile={columnsOnMobile} columns={columns}>
       {children}
     </FormGridLayout>

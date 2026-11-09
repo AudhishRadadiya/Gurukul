@@ -2,87 +2,129 @@ import { Breadcrumbs, SvgHome } from "@codezee/sixtify-brahma";
 import { t } from "i18next";
 import _isEmpty from "lodash/isEmpty";
 import _omit from "lodash/omit";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
+import {
+  CLONE_DONATION_ENTRY,
+  donationEntryPage as donationEntryDetailPage,
+  EDIT_DONATION_ENTRY,
+} from "@web/app/donation/donation-entry/[donationId]/hooks/constant";
 import {
   ADD_DONATION_ENTRY,
   donationEntryPage,
-  LIST_DONATION_ENTRY,
 } from "@web/app/donation/donation-entry/hooks/constant";
 
-export type DonationEntryBreadcrumbProps = {
-  queryPage: keyof typeof donationEntryPage;
+type DonationEntrySubPage =
+  | typeof ADD_DONATION_ENTRY
+  | typeof CLONE_DONATION_ENTRY
+  | typeof EDIT_DONATION_ENTRY;
+
+const getDonationEntrySubPage = ({
+  isDonationEntryDetail,
+  page,
+}: {
+  isDonationEntryDetail: boolean;
+  page: string | null;
+}): DonationEntrySubPage | null => {
+  if (isDonationEntryDetail) {
+    return page === CLONE_DONATION_ENTRY
+      ? CLONE_DONATION_ENTRY
+      : EDIT_DONATION_ENTRY;
+  }
+
+  if (page === ADD_DONATION_ENTRY) {
+    return ADD_DONATION_ENTRY;
+  }
+
+  return null;
 };
 
-export const DonationEntryBreadcrumbs = ({
-  queryPage,
-}: DonationEntryBreadcrumbProps) => {
+const getDonationEntryPageText = (
+  donationEntrySubPage: DonationEntrySubPage | null
+) => {
+  if (!donationEntrySubPage) {
+    return "from Donation summary";
+  }
+
+  if (donationEntrySubPage === ADD_DONATION_ENTRY) {
+    return donationEntryPage[ADD_DONATION_ENTRY];
+  }
+
+  return donationEntryDetailPage[donationEntrySubPage];
+};
+
+export const DonationEntryBreadcrumbs = () => {
   const router = useRouter();
+
+  const pathname = usePathname();
 
   const searchParams = useSearchParams();
 
-  const isDonationEntryList = queryPage === LIST_DONATION_ENTRY;
+  const page = searchParams.get("page");
 
-  const isAddDonationEntry = queryPage === ADD_DONATION_ENTRY;
+  const segments = (pathname ?? "").split("/").filter(Boolean);
 
-  // Check if there are any query parameters (excluding the 'page' param)
-  const hasQueryParams = useMemo(() => {
-    const params = Object.fromEntries(searchParams.entries());
+  const isDonationEntryDetail =
+    segments[0] === "donation" &&
+    segments[1] === "donation-entry" &&
+    segments.length >= 3;
 
-    const otherParams = _omit(params, "page");
+  const isAddOnMainRoute =
+    !isDonationEntryDetail && page === ADD_DONATION_ENTRY;
 
-    return !_isEmpty(otherParams);
-  }, [searchParams]);
+  const isListOnMainRoute = !isDonationEntryDetail && !isAddOnMainRoute;
 
-  const breadcrumbsItems = useMemo(() => {
-    const items: Array<{
-      icon?: React.ReactNode;
-      onClick?: () => void;
-      text?: string;
-    }> = [
-      {
-        icon: <SvgHome />,
-        onClick: () => {
-          router.push("/");
-        },
+  const params = Object.fromEntries(searchParams.entries());
+
+  const otherParams = _omit(params, "page");
+
+  const hasSummaryParams = !_isEmpty(otherParams);
+
+  const donationEntrySubPage = getDonationEntrySubPage({
+    isDonationEntryDetail,
+    page,
+  });
+
+  const hasDonationEntrySubPage = Boolean(donationEntrySubPage);
+
+  const needsDonationEntryBackLink =
+    hasDonationEntrySubPage || (isListOnMainRoute && hasSummaryParams);
+
+  const showTrailingItem =
+    hasDonationEntrySubPage || (isListOnMainRoute && hasSummaryParams);
+
+  const breadcrumbsItems = [
+    {
+      icon: <SvgHome />,
+      onClick: () => {
+        router.push("/");
       },
-      {
-        text: t("donation.menu.label"),
-      },
-    ];
-
-    if (hasQueryParams) {
-      items.push({
+    },
+    {
+      text: t("donation.menu.label"),
+    },
+    {
+      ...(needsDonationEntryBackLink && {
         onClick: () => {
           router.push("/donation/donation-entry");
         },
-        text: t("donation.entry.label"),
-      });
-      items.push({
-        text: "from Donation summary",
-      });
-    } else if (isAddDonationEntry) {
-      items.push({
-        onClick: () => {
-          router.push("/donation/donation-entry");
-        },
-        text: t("donation.entry.label"),
-      });
-    } else {
-      items.push({
-        text: t("donation.entry.label"),
-      });
-    }
+      }),
+      text: t("donation.entry.label"),
+    },
+  ];
 
-    if (!isDonationEntryList) {
-      items.push({
-        text: donationEntryPage[queryPage],
-      });
-    }
-
-    return items;
-  }, [hasQueryParams, isDonationEntryList, queryPage, router, t]);
-
-  return <Breadcrumbs items={breadcrumbsItems} />;
+  return (
+    <Breadcrumbs
+      items={
+        showTrailingItem
+          ? [
+              ...breadcrumbsItems,
+              {
+                text: getDonationEntryPageText(donationEntrySubPage),
+              },
+            ]
+          : breadcrumbsItems
+      }
+    />
+  );
 };

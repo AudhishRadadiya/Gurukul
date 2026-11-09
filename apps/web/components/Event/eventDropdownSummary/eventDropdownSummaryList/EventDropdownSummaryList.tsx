@@ -1,7 +1,8 @@
-import { PadBox, toasts } from "@codezee/sixtify-brahma";
-import { Stack, Typography } from "@mui/material";
-import { type FilterModel } from "ag-grid-community";
+import { PadBox, toasts, useGetDeviceType } from "@codezee/sixtify-brahma";
+import { Box, Stack, Typography } from "@mui/material";
+import type { SortModelItem, FilterModel } from "ag-grid-community";
 import { useRef, useState } from "react";
+import type { FieldValues } from "react-hook-form";
 
 import { AgGridV2 } from "@web/components/common/AgGridV2/AgGridV2";
 import { usePaginationParams } from "@web/components/common/AgGridV2/hooks/usePaginationParams";
@@ -16,24 +17,29 @@ import { useUserPermissions } from "@web/hooks/useUserPermissions/useUserPermiss
 import { PermissionGuard } from "@web/provider/PermissionGuard";
 import type { FilType } from "@web/types/shared-types";
 import { onError } from "@web/utils/errors";
-import { formatToIndianNumber } from "@web/utils/helper";
+import { filterSearchParams, formatToIndianNumber } from "@web/utils/helper";
 
 type EventDropdownSummaryListProps = {
   eventDropdownId: string | null;
-  eventMasterId: string | null;
-  fromDate: string;
-  toDate: string;
+  eventId: string | null;
+  externalFilter: FieldValues;
+  search: string;
 };
 
 export const EventDropdownSummaryList = ({
   eventDropdownId,
-  eventMasterId,
-  fromDate,
-  toDate,
+  eventId,
+  externalFilter,
+  search,
 }: EventDropdownSummaryListProps) => {
   const { allowPrintExport } = useUserPermissions();
 
-  const [agGridFilterModel, setAgGridFilterModel] = useState<FilterModel>({});
+  const { isMobile } = useGetDeviceType();
+
+  const [agGridState, setAgGridState] = useState<{
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }>({ filterModel: {}, sortModel: [] });
 
   const { branchIds } = useBranch();
 
@@ -43,13 +49,14 @@ export const EventDropdownSummaryList = ({
   const { data, isFetching } = useGetEventDropdownSummary({
     endRow: 0,
     externalFilter: {
+      ...externalFilter,
       branch_id: [branchIds],
       event_dropdown_id: eventDropdownId,
-      event_master_id: eventMasterId,
-      from_date: fromDate,
-      to_date: toDate,
+      event_id: eventId,
     },
-    filterModel: agGridFilterModel,
+    filterModel: agGridState.filterModel,
+    quickFilter: filterSearchParams(search),
+    sortModel: agGridState.sortModel,
     startRow: 0,
   });
 
@@ -77,11 +84,10 @@ export const EventDropdownSummaryList = ({
     externalFilter: {
       branch_id: [branchIds],
       event_dropdown_id: eventDropdownId,
-      event_master_id: eventMasterId,
-      from_date: fromDate,
-      to_date: toDate,
+      event_id: eventId,
     },
-    filterModel: agGridFilterModel,
+    filterModel: agGridState.filterModel,
+    sortModel: agGridState.sortModel,
     startRow: 0,
   });
 
@@ -96,12 +102,13 @@ export const EventDropdownSummaryList = ({
 
   return (
     <>
-      <PadBox padding={{ padding: "3px 5px" }}>
+      <PadBox padding={{ padding: { md: "3px 5px", xs: "8px 10px" } }}>
         <Stack
           direction="row"
-          gap="10px"
-          justifyContent="end"
+          gap={1}
+          justifyContent={{ md: "flex-end", xs: "flex-start" }}
           alignItems="center"
+          flexWrap="wrap"
         >
           <PermissionGuard canAccess={allowPrintExport}>
             <DataExport onExport={onExport} />
@@ -109,26 +116,33 @@ export const EventDropdownSummaryList = ({
         </Stack>
       </PadBox>
 
-      <AgGridV2<EventDropdownReport>
-        isLoading={isFetching}
-        page={page}
-        count={full_count}
-        columnDefs={column}
-        rowData={rowData}
-        rowsPerPage={rowsPerPage}
-        onPageChange={onPageChange}
-        onFilterChange={setAgGridFilterModel}
-        onRowsPerPageChange={onRowsPerPageChange}
-        height={270}
-        footer={
-          <Stack direction="row" gap="20px" marginLeft="10px">
-            <Typography variant="body2">Total Amount:</Typography>
-            <Typography variant="body1">
-              {formatToIndianNumber(Number(totalAmount))}
-            </Typography>
-          </Stack>
-        }
-      />
+      <Box sx={{ overflow: "hidden", width: "100%" }}>
+        <AgGridV2<EventDropdownReport>
+          isLoading={isFetching}
+          page={page}
+          count={full_count}
+          columnDefs={column}
+          rowData={rowData}
+          rowsPerPage={rowsPerPage}
+          onPageChange={onPageChange}
+          onGridStateChange={setAgGridState}
+          onRowsPerPageChange={onRowsPerPageChange}
+          height={isMobile ? 230 : 270}
+          footer={
+            <Stack
+              direction="row"
+              gap={{ md: "20px", xs: "10px" }}
+              marginLeft={{ md: "10px", xs: "4px" }}
+              flexWrap="wrap"
+            >
+              <Typography variant="body2">Total Amount:</Typography>
+              <Typography variant="body1">
+                {formatToIndianNumber(Number(totalAmount))}
+              </Typography>
+            </Stack>
+          }
+        />
+      </Box>
     </>
   );
 };

@@ -26,10 +26,6 @@ body {
   background-color: #f3f5f7;
 }
 
-.rdrDefinedRangesWrapper{
-  width:0px !important;
-}
-
 .ag-theme-quartz {
   --ag-font-family: 'Poppins', sans-serif;
 }
@@ -118,4 +114,137 @@ body {
 
 .ag-floating-bottom::-webkit-scrollbar {
   display: none;
+}
+
+.ag-custom-enum-filter-root {
+  display: contents;
+}
+
+.ag-filter-body-wrapper:has(.ag-custom-enum-filter),
+.ag-simple-filter-body-wrapper:has(.ag-custom-enum-filter),
+.ag-popup-child:has(.ag-custom-enum-filter),
+.ag-menu:has(.ag-custom-enum-filter) {
+  overflow: visible;
+}
+
+.ag-custom-enum-filter {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 155px;
+}
+
+.ag-custom-enum-filter-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 24px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  color: #333;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out,
+    background-color 0.15s ease-in-out;
+}
+
+.ag-custom-enum-filter-trigger:hover {
+  background-color: #fafbfc;
+  border-color: #d5d5d5;
+}
+
+.ag-custom-enum-filter-trigger:focus,
+.ag-custom-enum-filter-trigger:focus-visible {
+  outline: none;
+  border-color: rgba(33, 150, 243, 0.65);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(33, 150, 243, 0.35);
+  background-color: #f5f7fa;
+}
+
+.ag-custom-enum-filter-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ag-custom-enum-filter-chevron {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 12px;
+  transition: transform 0.15s ease-in-out;
+}
+
+.ag-custom-enum-filter-trigger--open .ag-custom-enum-filter-chevron {
+  transform: rotate(180deg);
+}
+
+.ag-custom-enum-filter-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 10000;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  max-height: 200px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  border: 1px solid #e0e0e0;
+  border-radius: 7px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.ag-custom-enum-filter-panel[hidden] {
+  display: none !important;
+}
+
+.ag-custom-enum-filter-option {
+  display: block;
+  width: 100%;
+  padding: 4px 6px;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  color: #333;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background-color 0.12s ease-in-out;
+}
+
+.ag-custom-enum-filter-option:last-child {
+  border-bottom: none;
+}
+
+.ag-custom-enum-filter-option:hover {
+  background-color: #eff9ff !important; 
+}
+
+.ag-custom-enum-filter-option--selected:hover {
+  background-color: #eff9ff !important;
 }

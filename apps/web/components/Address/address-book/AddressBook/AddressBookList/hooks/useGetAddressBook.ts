@@ -8,9 +8,9 @@ import type { GetListArgsAg2 } from "@web/types/shared-types";
 import { isBranchFilterEnabled } from "@web/utils/reactQuery";
 
 export type AddressBookDetails = {
+  aadhar_no: string;
   address: string;
   address_type: string;
-  adhar_no: string;
   alternet_mobile_no: string;
   anniversary_date: string;
   anniversary_day: string;

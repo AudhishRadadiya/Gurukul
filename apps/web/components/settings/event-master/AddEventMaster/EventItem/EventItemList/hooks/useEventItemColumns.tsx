@@ -20,6 +20,7 @@ export const useEventItemColumns = () => {
           : formatToIndianNumber(value);
       },
       field: "amount",
+      filter: "agNumberColumnFilter",
       headerName: "Amount",
     },
     {

@@ -1,11 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import type { IGetRowsParams } from "ag-grid-community";
-import type { FieldValues } from "react-hook-form";
 
 import { ADDRESS_MISMATCH_ROUTES } from "@web/constants/routes/address_book/address_mismatch/routes";
 import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
 import { updateDonorAddressKeys } from "@web/queryKeysFactories/updateDonorAddress";
 import type { ApiSuccessResponse } from "@web/types/apiResponse";
+import type { GetListArgsAg2 } from "@web/types/shared-types";
 import { isBranchFilterEnabled } from "@web/utils/reactQuery";
 
 export type MismatchedAddressList = {
@@ -29,17 +28,7 @@ export type GetUpdateDonorAddressSuccessResponse = ApiSuccessResponse<{
   totalCount: number;
 }>;
 
-type UseGetUpdateDonorAddressArgs = Partial<
-  IGetRowsParams & {
-    endRow: number;
-    externalFilter?: FieldValues;
-    is_active: boolean;
-    responseFields: string[];
-    startRow: number;
-  }
->;
-
-export function useGetUpdateDonorAddress(body: UseGetUpdateDonorAddressArgs) {
+export function useGetUpdateDonorAddress(body: GetListArgsAg2) {
   const { axiosPrivate } = useAxiosPrivate();
 
   const getUpdateDonorAddress = async () => {

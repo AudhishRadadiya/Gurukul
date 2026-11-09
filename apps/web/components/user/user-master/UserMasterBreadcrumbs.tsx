@@ -1,13 +1,21 @@
 import { Breadcrumbs, SvgHome } from "@codezee/sixtify-brahma";
 import { t } from "i18next";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export type UserMasterBreadcrumbsProps = {
-  page: "add-user-master" | "edit-user-master" | null;
-};
+import {
+  ADD_USER_MASTER,
+  EDIT_USER_MASTER,
+} from "@web/app/user/user-master/hooks/constant";
 
-export const UserMasterBreadcrumbs = ({ page }: UserMasterBreadcrumbsProps) => {
+export const UserMasterBreadcrumbs = () => {
   const router = useRouter();
+
+  const searchParams = useSearchParams();
+
+  const page = searchParams.get("page");
+
+  const userMasterPage =
+    page === ADD_USER_MASTER || page === EDIT_USER_MASTER ? page : null;
 
   const breadcrumbsItems = [
     {
@@ -18,9 +26,11 @@ export const UserMasterBreadcrumbs = ({ page }: UserMasterBreadcrumbsProps) => {
       text: t("common.user.label"),
     },
     {
-      onClick: () => {
-        router.push("/user/user-master");
-      },
+      ...(userMasterPage && {
+        onClick: () => {
+          router.push("/user/user-master");
+        },
+      }),
       text: t("common.master.label", {
         label: t("common.user.label"),
       }),
@@ -30,11 +40,11 @@ export const UserMasterBreadcrumbs = ({ page }: UserMasterBreadcrumbsProps) => {
   return (
     <Breadcrumbs
       items={
-        page
+        userMasterPage
           ? [
               ...breadcrumbsItems,
               {
-                text: `${page === "add-user-master" ? "Add" : "Edit"} User Master`,
+                text: `${userMasterPage === ADD_USER_MASTER ? "Add" : "Edit"} User Master`,
               },
             ]
           : breadcrumbsItems

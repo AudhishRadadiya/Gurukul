@@ -28,3 +28,7 @@ export * from "./SvgProfile";
 export * from "./SvgReGenerate";
 export * from "./SvgView";
 export * from "./SvgKeyBoard";
+export * from "./SvgEvent";
+export * from "./SvgReports";
+export * from "./SvgPermission";
+export * from "./SvgDonation";

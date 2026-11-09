@@ -4,15 +4,15 @@ import {
   FormContainer,
   FormGridLayout,
   HistoryIconAction,
-  PadBox,
   TextField,
   useDialogActions,
+  useGetDeviceType,
 } from "@codezee/sixtify-brahma";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Stack } from "@mui/material";
 import { t } from "i18next";
 import { DateTime } from "luxon";
-import type { ForwardedRef } from "react";
+import type { ForwardedRef, ReactNode } from "react";
 import { forwardRef, useImperativeHandle } from "react";
 import type { UseFormSetError } from "react-hook-form";
 import { FormProvider, useForm } from "react-hook-form";
@@ -95,6 +95,23 @@ const formDefaultValues: EventDonationEntryFormFieldValues = {
   note: null,
 };
 
+type FieldWithHistoryProps = {
+  field: ReactNode;
+  onHistoryClick: () => void;
+};
+
+const FieldWithHistory = ({ field, onHistoryClick }: FieldWithHistoryProps) => {
+  return (
+    <Stack direction="row" gap="10px" alignItems="center" flexWrap="nowrap">
+      <Box sx={{ flex: "1 1 auto", minWidth: 0, width: "auto" }}>{field}</Box>
+
+      <Box sx={{ flex: "0 0 auto" }}>
+        <HistoryIconAction onClick={onHistoryClick} />
+      </Box>
+    </Stack>
+  );
+};
+
 export const EventDonationEntryForm = forwardRef(
   (
     {
@@ -104,6 +121,8 @@ export const EventDonationEntryForm = forwardRef(
     ref: ForwardedRef<FormRef>
   ) => {
     const { onDialogClose, onDialogOpen, openedDialog } = useDialogActions();
+
+    const { isMobile } = useGetDeviceType();
 
     const methods = useForm<EventDonationEntryFormFieldValues>({
       mode: "all",
@@ -161,109 +180,97 @@ export const EventDonationEntryForm = forwardRef(
     return (
       <FormProvider {...methods}>
         <FormContainer>
-          <FormGridLayout columns={2}>
-            <BranchWiseEventAutocomplete
-              loading={loading}
-              name="event_id"
-              label={t("common.event.label")}
-              required
-              control={control}
-              error={!!event_id}
-              branchIds={[branchIds]}
-              helperText={errorMessages(event_id?.message)}
-            />
+          <Stack gap={isMobile ? 1 : 1.5}>
+            <FormGridLayout columns={2} columnsOnMobile={1}>
+              <BranchWiseEventAutocomplete
+                loading={loading}
+                name="event_id"
+                label={t("common.event.label")}
+                required
+                control={control}
+                error={!!event_id}
+                branchIds={[branchIds]}
+                helperText={errorMessages(event_id?.message)}
+              />
 
-            <DatePicker
-              control={control}
-              label={t("date.label")}
-              name="date"
-              loading={loading}
-              required
-              clearable={false}
-              error={!!date}
-              helperText={errorMessages(date?.message)}
-            />
-          </FormGridLayout>
+              <DatePicker
+                control={control}
+                label={t("date.label")}
+                name="date"
+                loading={loading}
+                required
+                clearable={false}
+                error={!!date}
+                helperText={errorMessages(date?.message)}
+              />
+            </FormGridLayout>
 
-          <FormGridLayout columns={2}>
-            <Stack direction="row" gap="10px" alignItems="center">
-              <Box flex="0 0 90%">
-                <TextField
-                  control={control}
-                  loading={loading}
-                  name="donar_name"
-                  label={t("donor.label")}
-                  required
-                  disabled
-                  setError={setError}
-                  error={!!donar_name}
-                  helperText={errorMessages(donar_name?.message)}
-                />
-              </Box>
-
-              <Box flex="0 0 10%">
-                <PadBox padding={{ paddingTop: "28px" }}>
-                  <HistoryIconAction
-                    onClick={() => {
-                      onDialogOpen("donarHistory");
-                    }}
+            <FormGridLayout columns={2} columnsOnMobile={1}>
+              <FieldWithHistory
+                onHistoryClick={() => {
+                  onDialogOpen("donarHistory");
+                }}
+                field={
+                  <TextField
+                    control={control}
+                    loading={loading}
+                    name="donar_name"
+                    label={t("donor.label")}
+                    required
+                    disabled
+                    setError={setError}
+                    error={!!donar_name}
+                    helperText={errorMessages(donar_name?.message)}
                   />
-                </PadBox>
-              </Box>
-            </Stack>
+                }
+              />
 
-            <Stack direction="row" gap="10px" alignItems="center">
-              <Box flex="0 0 90%">
-                <TextField
-                  control={control}
-                  loading={loading}
-                  name="hastak_name"
-                  label={t("hastak.label")}
-                  required
-                  disabled
-                  setError={setError}
-                  error={!!hastak_name}
-                  helperText={errorMessages(hastak_name?.message)}
-                />
-              </Box>
-
-              <Box flex="0 0 10%">
-                <PadBox padding={{ paddingTop: "28px" }}>
-                  <HistoryIconAction
-                    onClick={() => {
-                      onDialogOpen("hastakHistory");
-                    }}
+              <FieldWithHistory
+                onHistoryClick={() => {
+                  onDialogOpen("hastakHistory");
+                }}
+                field={
+                  <TextField
+                    control={control}
+                    loading={loading}
+                    name="hastak_name"
+                    label={t("hastak.label")}
+                    required
+                    disabled
+                    setError={setError}
+                    error={!!hastak_name}
+                    helperText={errorMessages(hastak_name?.message)}
                   />
-                </PadBox>
-              </Box>
-            </Stack>
-          </FormGridLayout>
+                }
+              />
+            </FormGridLayout>
 
-          <FormGridLayout columns={2}>
-            <NumericTextField
-              control={control}
-              loading={loading}
-              label={t("amount.label")}
-              required
-              name="amount"
-              error={!!amount}
-              thousandSeparator
-              removeDecimalScale
-              helperText={errorMessages(amount?.message)}
-            />
+            <FormGridLayout columns={2} columnsOnMobile={1}>
+              <NumericTextField
+                control={control}
+                loading={loading}
+                label={t("amount.label")}
+                required
+                name="amount"
+                error={!!amount}
+                thousandSeparator
+                removeDecimalScale
+                helperText={errorMessages(amount?.message)}
+              />
 
-            <TextField
-              name="note"
-              label={t("note.label")}
-              loading={loading}
-              control={control}
-              multiline
-              letterCase="mixed"
-              characterType="any-character"
-              error={!!note}
-              helperText={errorMessages(note?.message)}
-            />
-          </FormGridLayout>
+              <TextField
+                name="note"
+                label={t("note.label")}
+                loading={loading}
+                control={control}
+                multiline
+                letterCase="mixed"
+                characterType="any-character"
+                error={!!note}
+                helperText={errorMessages(note?.message)}
+              />
+            </FormGridLayout>
+          </Stack>
         </FormContainer>
 
         {openedDialog && dialogRenderer[openedDialog]}

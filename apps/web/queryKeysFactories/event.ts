@@ -1,4 +1,7 @@
 export const eventKeys = {
+  activeListing: (body: object = {}) =>
+    [...eventKeys.all, "active-listing", body] as const,
+
   add: () => [...eventKeys.all, "add"] as const,
 
   all: ["event"] as const,
@@ -24,6 +27,9 @@ export const eventKeys = {
 
   get: (eventMasterId: string) =>
     [...eventKeys.all, "get", eventMasterId] as const,
+
+  inActiveListing: (body: object = {}) =>
+    [...eventKeys.all, "inactive-listing", body] as const,
 
   listing: (body: object = {}) => [...eventKeys.all, "listing", body] as const,
 

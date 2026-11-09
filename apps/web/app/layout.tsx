@@ -4,8 +4,10 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { usePathname } from "next/navigation";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type { PropsWithChildren } from "react";
+import { validate as isUUID } from "uuid";
 
 import { Toaster } from "@web/components/common/Toaster";
 import { LayoutSelector } from "@web/components/Layouts/LayoutSelector";
@@ -15,6 +17,7 @@ import { AuthSessionProvider } from "@web/provider/AuthSessionProvider";
 import { LightThemeProvider } from "@web/provider/LightThemeProvider";
 import { SessionLoader } from "@web/provider/SessionLoader";
 import "@web/public/globals.css";
+import { newMenuItems } from "@web/utils/updatedRoutes";
 
 if (process.env.NEXT_PUBLIC_MOCKING_ENABLED === "true") {
   require("../mocks");
@@ -31,10 +34,34 @@ const queryClient = new QueryClient({
 });
 
 export function RootLayout({ children }: Readonly<PropsWithChildren>) {
+  const currentPathname = usePathname();
+
+  const formatTitleFromPath = (path: string) => {
+    return path
+      .replace(/^\//, "")
+      .split("/")
+      .filter((segment) => segment && !isUUID(segment))
+      .map((segment: string) =>
+        segment
+          .split("-")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ")
+      )
+      .join(" | ");
+  };
+
+  const newPathName = newMenuItems[currentPathname];
+
+  const pathName = newPathName ? `/${newPathName}` : currentPathname;
+
+  const pageTitle = pathName === "/" ? "Home" : formatTitleFromPath(pathName);
+
   return (
     <html lang="en">
       <head>
         <link rel="preload" href="/globals.css" as="style" />
+
+        <title>{pageTitle ?? "gurukul.work"}</title>
       </head>
 
       <body>

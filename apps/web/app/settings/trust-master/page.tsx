@@ -1,7 +1,7 @@
 "use client";
 
-import { ContentBox, PadBox } from "@codezee/sixtify-brahma";
-import { Stack, Typography } from "@mui/material";
+import { ContentBox, PadBox, useGetDeviceType } from "@codezee/sixtify-brahma";
+import { Box, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/navigation";
 import { useQueryState } from "nuqs";
@@ -10,7 +10,6 @@ import type { ReactNode } from "react";
 import { ADD_TRUST_MASTER } from "@web/app/settings/trust-master/hooks/constant";
 import { ButtonLayoutProvider } from "@web/components/common/responsive/ButtonLayoutProvider";
 import { AddTrustMaster } from "@web/components/settings/trust-master/AddTrustMaster/AddTrustMaster";
-import { TrustMasterBreadcrumbs } from "@web/components/settings/trust-master/TrustMasterBreadcrumbs";
 import { TrustMasterList } from "@web/components/settings/trust-master/TrustMasterList/TrustMasterList";
 import { TRUST_MASTER_PERMISSION } from "@web/constants/permission/settings/trustMaster/permission";
 import { useUserPermissions } from "@web/hooks/useUserPermissions/useUserPermissions";
@@ -28,6 +27,8 @@ const trustMasterPageRenderer: Record<TrustMasterPageType, ReactNode> = {
 
 // eslint-disable-next-line import/no-default-export
 export default function Page() {
+  const { isMobile } = useGetDeviceType();
+
   const [page] = useQueryState("page");
 
   const router = useRouter();
@@ -41,18 +42,20 @@ export default function Page() {
   );
 
   return (
-    <Stack gap="10px">
-      <TrustMasterBreadcrumbs page={queryPage} />
-
+    <Stack gap={{ md: "10px", xs: "8px" }}>
       <ContentBox>
         {!selectedAddTrustMasterPage && (
-          <PadBox padding={{ padding: "10px" }}>
+          <PadBox padding={{ padding: { md: "10px", xs: "8px 10px" } }}>
             <Stack
               direction="row"
               justifyContent="space-between"
               alignItems="center"
+              gap={1}
             >
-              <Typography variant="subtitle1">
+              <Typography
+                variant="subtitle1"
+                fontSize={isMobile ? "16px" : "18px"}
+              >
                 {t("common.master.label", {
                   label: t("trust.label"),
                 })}
@@ -78,7 +81,9 @@ export default function Page() {
         {selectedAddTrustMasterPage ? (
           queryPage && trustMasterPageRenderer[queryPage]
         ) : (
-          <TrustMasterList />
+          <Box sx={{ overflow: "hidden", width: "100%" }}>
+            <TrustMasterList />
+          </Box>
         )}
       </ContentBox>
     </Stack>

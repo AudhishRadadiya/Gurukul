@@ -9,7 +9,7 @@ import type { GetListArgsAg2 } from "@web/types/shared-types";
 export type Trust = {
   address: string;
   address_limit: number;
-  branch_name: string;
+  branch_names: string;
   cash_limit: number;
   cheque_limit: number;
   contact_no: string;

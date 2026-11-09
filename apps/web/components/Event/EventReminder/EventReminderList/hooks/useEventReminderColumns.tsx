@@ -28,6 +28,7 @@ export const useEventReminderColumns = () => {
         return !value ? AG_GRID_CELL_DEFAULT_VALUE : dateFormat(value, true);
       },
       field: "date",
+      filter: "agDateColumnFilter",
       headerName: t("date.label"),
       minWidth: 130,
     },
@@ -36,6 +37,7 @@ export const useEventReminderColumns = () => {
         return !value ? AG_GRID_CELL_DEFAULT_VALUE : dateFormat(value, true);
       },
       field: "event_reminder_date",
+      filter: "agDateColumnFilter",
       headerName: t("common.reminder.label", {
         label: t("date.label"),
       }),
@@ -60,7 +62,6 @@ export const useEventReminderColumns = () => {
     },
     {
       field: "contact_no",
-      filter: "agNumberColumnFilter",
       headerName: t("common.contact.label"),
       minWidth: 170,
     },

@@ -1,6 +1,7 @@
 import type { FilterListType } from "@codezee/sixtify-brahma";
 import { FilterListV2 } from "@codezee/sixtify-brahma";
 import { t } from "i18next";
+import _isEmpty from "lodash/isEmpty";
 import { useMemo, useState } from "react";
 import type { FieldValues } from "react-hook-form";
 
@@ -10,12 +11,12 @@ import { useGetTrustOptions } from "@web/components/common/Autocomplete/hooks/us
 
 type ChequeReconciliationFilterProps = {
   filterListData: FieldValues;
-  setFilterListData: (data: FieldValues) => void;
+  handleApplyFilter: (data: FieldValues) => void;
 };
 
 export const ChequeReconciliationFilter = ({
   filterListData,
-  setFilterListData,
+  handleApplyFilter,
 }: ChequeReconciliationFilterProps) => {
   const [currentFilter, setCurrentFilter] = useState<FieldValues>({});
 
@@ -24,6 +25,12 @@ export const ChequeReconciliationFilter = ({
   const { data: bankOptions } = useGetBankOptions();
 
   const { chequeStatusOptions } = useGetChequeStatusOptions();
+
+  useMemo(() => {
+    if (!_isEmpty(filterListData)) {
+      setCurrentFilter(filterListData);
+    }
+  }, [filterListData]);
 
   const filterListItems: FilterListType[] = useMemo(
     () => [
@@ -59,12 +66,12 @@ export const ChequeReconciliationFilter = ({
   };
 
   const onApply = (data: FieldValues) => {
-    setFilterListData(data);
+    handleApplyFilter(data);
     setCurrentFilter(data);
   };
 
   const onClear = () => {
-    setFilterListData({});
+    handleApplyFilter({});
     setCurrentFilter({});
   };
 

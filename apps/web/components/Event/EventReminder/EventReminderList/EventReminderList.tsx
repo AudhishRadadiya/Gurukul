@@ -1,4 +1,5 @@
-import type { FilterModel } from "ag-grid-community";
+import { useGetDeviceType } from "@codezee/sixtify-brahma";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import type { FieldValues } from "react-hook-form";
 
 import { AgGridV2 } from "@web/components/common/AgGridV2/AgGridV2";
@@ -6,36 +7,49 @@ import { useEventReminderColumns } from "@web/components/Event/EventReminder/Eve
 import type { EventReminder } from "@web/components/Event/EventReminder/EventReminderList/hooks/useGetEventReminder";
 import { useGetEventReminder } from "@web/components/Event/EventReminder/EventReminderList/hooks/useGetEventReminder";
 import { useBranch } from "@web/context/BranchContext";
+import { filterSearchParams } from "@web/utils/helper";
 
 export type EventReminderListProps = {
-  agGridFilterModel: FilterModel;
+  agGridState: {
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  };
   endRow: number;
   externalFilter: FieldValues;
   onPageChange: (newPage: number) => void;
   onRowsPerPageChange: (newRows: number) => void;
   page: number;
   rowsPerPage: number;
-  setAgGridFilterModel: (data: FilterModel) => void;
+  search: string;
+  setAgGridState: (data: {
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }) => void;
   startRow: number;
 };
 
 export const EventReminderList = ({
-  agGridFilterModel,
+  agGridState,
   endRow,
   externalFilter,
   onPageChange,
   onRowsPerPageChange,
   page,
   rowsPerPage,
-  setAgGridFilterModel,
+  search,
+  setAgGridState,
   startRow,
 }: EventReminderListProps) => {
   const { branchIds } = useBranch();
 
+  const { isMobile } = useGetDeviceType();
+
   const { data, isFetching } = useGetEventReminder({
     endRow,
     externalFilter: { ...externalFilter, branch_id: [branchIds] },
-    filterModel: agGridFilterModel,
+    filterModel: agGridState.filterModel,
+    quickFilter: filterSearchParams(search),
+    sortModel: agGridState.sortModel,
     startRow,
   });
 
@@ -53,8 +67,8 @@ export const EventReminderList = ({
       onPageChange={onPageChange}
       count={totalCount}
       onRowsPerPageChange={onRowsPerPageChange}
-      onFilterChange={setAgGridFilterModel}
-      height={260}
+      onGridStateChange={setAgGridState}
+      height={isMobile ? 220 : 230}
     />
   );
 };

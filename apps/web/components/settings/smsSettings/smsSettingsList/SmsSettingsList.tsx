@@ -1,6 +1,6 @@
 import type { DialogRenderer } from "@codezee/sixtify-brahma";
 import { useDialogActions } from "@codezee/sixtify-brahma";
-import type { FilterModel } from "ag-grid-community";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import { t } from "i18next";
 import { useState } from "react";
 
@@ -22,7 +22,10 @@ export const SmsSettingsList = () => {
 
   const { onDialogClose, onDialogOpen, openedDialog } = useDialogActions();
 
-  const [agGridFilterModel, setAgGridFilterModel] = useState<FilterModel>({});
+  const [agGridState, setAgGridState] = useState<{
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }>({ filterModel: {}, sortModel: [] });
 
   const [currentSmsSettings, setCurrentSmsSettings] =
     useState<SmsSettingDetail>();
@@ -33,7 +36,8 @@ export const SmsSettingsList = () => {
 
   const { data, isFetching, refetch } = useGetSmsSettings({
     endRow,
-    filterModel: agGridFilterModel,
+    filterModel: agGridState.filterModel,
+    sortModel: agGridState.sortModel,
     startRow,
   });
 
@@ -65,7 +69,7 @@ export const SmsSettingsList = () => {
         onPageChange={onPageChange}
         count={totalCount}
         onRowsPerPageChange={onRowsPerPageChange}
-        onFilterChange={setAgGridFilterModel}
+        onGridStateChange={setAgGridState}
         actions={[
           {
             isView: validateAccess(SMS_SETTINGS_PERMISSION.EDIT),
@@ -76,7 +80,7 @@ export const SmsSettingsList = () => {
             title: t("common.edit"),
           },
         ]}
-        height={260}
+        height={160}
       />
 
       {openedDialog && dialogRenderer[openedDialog]}

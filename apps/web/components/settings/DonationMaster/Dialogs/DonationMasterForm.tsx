@@ -1,5 +1,6 @@
 import {
   FormContainer,
+  GridProvider,
   RadioGroupField,
   TextField,
 } from "@codezee/sixtify-brahma";
@@ -35,6 +36,7 @@ const DonationMasterFormSchema = z.object({
       message: "common.required",
     }),
   is_active: z.boolean(),
+  is_csr: z.boolean(),
   remark: z.string().max(255, "common.maxLength").nullable(),
 });
 
@@ -58,6 +60,7 @@ const formDefaultValues: DonationMasterFormFieldValues = {
   branch_id: [],
   donation_master_name: null,
   is_active: true,
+  is_csr: false,
   remark: null,
 };
 
@@ -137,24 +140,45 @@ export const DonationMasterForm = forwardRef(
             rows={4}
           />
 
-          <RadioGroupField
-            name="is_active"
-            loading={loading}
-            control={control}
-            label={t("isActive.label")}
-            options={[
-              {
-                disabled: false,
-                label: t("common.yes"),
-                values: true,
-              },
-              {
-                disabled: false,
-                label: t("common.no"),
-                values: false,
-              },
-            ]}
-          />
+          <GridProvider gap="20px" columns={2}>
+            <RadioGroupField
+              name="is_active"
+              loading={loading}
+              control={control}
+              label={t("isActive.label")}
+              options={[
+                {
+                  disabled: false,
+                  label: t("common.yes"),
+                  values: true,
+                },
+                {
+                  disabled: false,
+                  label: t("common.no"),
+                  values: false,
+                },
+              ]}
+            />
+
+            <RadioGroupField
+              name="is_csr"
+              loading={loading}
+              control={control}
+              label={t("isCSR.label")}
+              options={[
+                {
+                  disabled: false,
+                  label: t("common.yes"),
+                  values: true,
+                },
+                {
+                  disabled: false,
+                  label: t("common.no"),
+                  values: false,
+                },
+              ]}
+            />
+          </GridProvider>
         </FormContainer>
       </Stack>
     );

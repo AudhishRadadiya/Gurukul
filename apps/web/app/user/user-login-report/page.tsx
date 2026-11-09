@@ -1,55 +1,49 @@
 "use client";
 
-import { ContentBox, DatePicker, PadBox } from "@codezee/sixtify-brahma";
+import {
+  ContentBox,
+  DateRangePickerField,
+  PadBox,
+  useGetDeviceType,
+} from "@codezee/sixtify-brahma";
 import { Stack, Typography } from "@mui/material";
 import { t } from "i18next";
-import { DateTime } from "luxon";
 
-import { DateFilterPeriodAutocomplete } from "@web/components/common/Autocomplete/DateFilterPeriodAutocomplete";
-import { UserLoginReportBreadcrumbs } from "@web/components/user/userLoginReport/UserLoginReportBreadcrumbs";
 import { UserLoginReportList } from "@web/components/user/userLoginReport/userLoginReportList/UserLoginReportList";
 import { useDateFilters } from "@web/hooks/useDateFilters";
 
 // eslint-disable-next-line import/no-default-export
 export default function Page() {
-  const { control, fromDate, toDate } = useDateFilters();
+  const { control, dateRange } = useDateFilters();
+
+  const { layout } = useGetDeviceType();
+
+  const isMobile = layout === "mobile";
 
   return (
     <Stack gap="10px">
-      <UserLoginReportBreadcrumbs />
-
       <ContentBox>
-        <PadBox padding={{ padding: "10px" }}>
+        <PadBox padding={{ padding: { sm: "10px", xs: "10px 10px 12px" } }}>
           <Stack
-            direction="row"
-            alignItems="center"
+            direction={{ sm: "row", xs: "column" }}
+            alignItems={{ sm: "center", xs: "stretch" }}
             justifyContent="space-between"
+            gap={{ sm: 2, xs: 1.5 }}
           >
-            <Typography variant="subtitle1">
+            <Typography
+              variant="subtitle1"
+              fontSize={{ lg: "18px", xs: "16px" }}
+            >
               {t("common.user.login.report")}
             </Typography>
 
-            <Stack direction="row" alignItems="center" gap="10px">
-              <DateFilterPeriodAutocomplete
-                name="date_filter_period"
+            <Stack>
+              <DateRangePickerField
+                name="date_range"
                 control={control}
-                clearIcon
-                sx={{ width: "160px" }}
-              />
-
-              <DatePicker
-                control={control}
-                name="from_date"
-                clearable={false}
-                containerProps={{ width: "160px" }}
-              />
-
-              <DatePicker
-                control={control}
-                name="to_date"
-                minDate={fromDate ? DateTime.fromISO(fromDate) : DateTime.now()}
-                clearable={false}
-                containerProps={{ width: "160px" }}
+                showPresets
+                size={isMobile ? "small" : "large"}
+                placeholder="Select Date Range"
               />
             </Stack>
           </Stack>
@@ -57,8 +51,8 @@ export default function Page() {
 
         <UserLoginReportList
           externalFilter={{
-            from_date: fromDate,
-            to_date: toDate,
+            from_date: dateRange[0],
+            to_date: dateRange[1],
           }}
         />
       </ContentBox>

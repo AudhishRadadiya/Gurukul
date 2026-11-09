@@ -16,11 +16,17 @@ type GetAddressBookPayload = {
 export type GetAddressBookPdfApiSuccessResponse =
   ApiSuccessResponse<GetAddressBookPayload>;
 
+export type UseGetAddressBookPdfRequest = {
+  code?: number | null;
+  is_masked: boolean;
+};
+
 type UseGetAddressBookPdfArgs = {
   addressBookIds: string[];
   options: UseMutationOptions<
     GetAddressBookPdfApiSuccessResponse,
-    ApiErrorResponse<GetAddressBookPayload>
+    ApiErrorResponse<GetAddressBookPayload>,
+    UseGetAddressBookPdfRequest
   >;
 };
 
@@ -31,11 +37,11 @@ export function useGetAddressBookPdf({
   const { axiosPrivate } = useAxiosPrivate();
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (payload: UseGetAddressBookPdfRequest) => {
       const { data } =
         await axiosPrivate.post<GetAddressBookPdfApiSuccessResponse>(
           ADDRESS_BOOK_ROUTES.printAddressBook,
-          { address_book_id: addressBookIds }
+          { ...payload, address_book_id: addressBookIds }
         );
 
       return data;

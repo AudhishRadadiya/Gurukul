@@ -14,6 +14,7 @@ export type ExcelImportProcessProps<T extends Record<string, string>> = {
   };
   excelImportFieldLabels: Record<keyof T, string>;
   name: string;
+  required: boolean;
   setExcelImportData: (value: { rows: T[]; titles: (keyof T)[] }) => void;
 };
 
@@ -21,6 +22,7 @@ export const ExcelImportProcess = <T extends FieldValues>({
   excelImportData,
   excelImportFieldLabels,
   name,
+  required,
   setExcelImportData,
 }: ExcelImportProcessProps<T>) => {
   const { rows, titles } = excelImportData;
@@ -38,7 +40,11 @@ export const ExcelImportProcess = <T extends FieldValues>({
 
   return (
     <Stack gap="20px">
-      <ExcelImport<T> name={name} setExcelImportData={setExcelImportData} />
+      <ExcelImport<T>
+        name={name}
+        required={required}
+        setExcelImportData={setExcelImportData}
+      />
 
       {!!rows.length && (
         <AgGridV2

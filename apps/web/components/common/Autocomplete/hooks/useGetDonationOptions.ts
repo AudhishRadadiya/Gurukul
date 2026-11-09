@@ -6,12 +6,18 @@ import { donationMasterKeys } from "@web/queryKeysFactories/donationMaster";
 import type { ApiSuccessResponse } from "@web/types/apiResponse";
 import type { OptionsType } from "@web/types/options";
 
-export function useGetDonationOptions() {
+type UseGetDonationOptionsProps = {
+  isUserWiseAll?: boolean;
+};
+
+export function useGetDonationOptions({
+  isUserWiseAll,
+}: UseGetDonationOptionsProps = {}) {
   const { axiosPrivate } = useAxiosPrivate();
 
   const fetchDonationOption = async () => {
     const { data } = await axiosPrivate.get<ApiSuccessResponse<OptionsType[]>>(
-      DONATION_MASTER_ROUTES.options
+      DONATION_MASTER_ROUTES.userWiseOptions(isUserWiseAll)
     );
 
     return data.data;
@@ -20,6 +26,6 @@ export function useGetDonationOptions() {
   return useQuery({
     initialData: [],
     queryFn: fetchDonationOption,
-    queryKey: donationMasterKeys.options(),
+    queryKey: donationMasterKeys.userWiseOptions(isUserWiseAll),
   });
 }

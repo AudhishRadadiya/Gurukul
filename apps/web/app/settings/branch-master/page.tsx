@@ -1,7 +1,7 @@
 "use client";
 
-import { ContentBox, PadBox } from "@codezee/sixtify-brahma";
-import { Stack, Typography } from "@mui/material";
+import { ContentBox, PadBox, useGetDeviceType } from "@codezee/sixtify-brahma";
+import { Box, Stack, Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useForm } from "react-hook-form";
@@ -10,7 +10,6 @@ import type { Status } from "@web/components/common/Autocomplete/hooks/useGetSta
 import { StatusAutocomplete } from "@web/components/common/Autocomplete/StatusAutocomplete";
 import { ACTIVE, ALL, INACTIVE } from "@web/components/common/hooks/constant";
 import { ButtonLayoutProvider } from "@web/components/common/responsive/ButtonLayoutProvider";
-import { BranchMasterBreadcrumbs } from "@web/components/settings/branch-master/BranchMasterBreadcrumbs";
 import { BranchMasterList } from "@web/components/settings/branch-master/BranchMasterList/BranchMasterList";
 import { AddBranchMasterDialog } from "@web/components/settings/branch-master/Dialogs/AddBranchMasterDialog";
 import { BRANCH_MASTER_PERMISSION } from "@web/constants/permission/settings/branchMaster/permission";
@@ -26,6 +25,8 @@ export type BranchMasterValues = {
 
 // eslint-disable-next-line import/no-default-export
 export default function Page() {
+  const { isMobile } = useGetDeviceType();
+
   const { onDialogClose, onDialogOpen, openedDialog } = useDialogActions();
 
   const { validateAccess } = useUserPermissions();
@@ -70,25 +71,38 @@ export default function Page() {
   };
 
   return (
-    <Stack gap="10px">
-      <BranchMasterBreadcrumbs />
-
+    <Stack gap={{ md: "10px", xs: "8px" }}>
       <ContentBox>
-        <PadBox padding={{ padding: "10px" }}>
+        <PadBox padding={{ padding: { md: "10px", xs: "8px 10px" } }}>
           <Stack
-            direction="row"
+            direction={{ sm: "row", xs: "column" }}
             justifyContent="space-between"
-            alignItems="center"
+            alignItems={{ sm: "center", xs: "stretch" }}
+            gap={1}
           >
-            <Typography variant="subtitle1">
+            <Typography
+              variant="subtitle1"
+              fontSize={isMobile ? "16px" : "18px"}
+            >
               {t("branch.master.menu.label")}
             </Typography>
 
-            <Stack direction="row" gap="10px">
+            <Stack
+              direction="row"
+              justifyContent={{ sm: "flex-end", xs: "space-between" }}
+              alignItems="center"
+              gap={1}
+              sx={{ minWidth: 0 }}
+            >
               <StatusAutocomplete
                 name="is_active"
                 control={isActiveControl}
                 closeText="Close"
+                sx={{
+                  flex: { sm: "0 0 160px", xs: "1 1 auto" },
+                  minWidth: 0,
+                  width: { sm: "160px", xs: "auto" },
+                }}
               />
 
               <PermissionGuard
@@ -108,9 +122,11 @@ export default function Page() {
           </Stack>
         </PadBox>
 
-        <BranchMasterList
-          isActive={getIsActiveValue(watchIsActive("is_active"))}
-        />
+        <Box sx={{ overflow: "hidden", width: "100%" }}>
+          <BranchMasterList
+            isActive={getIsActiveValue(watchIsActive("is_active"))}
+          />
+        </Box>
       </ContentBox>
 
       {openedDialog && dialogRenderer[openedDialog]}

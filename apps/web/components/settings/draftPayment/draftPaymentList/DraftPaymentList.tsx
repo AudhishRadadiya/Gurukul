@@ -1,4 +1,4 @@
-import type { FilterModel } from "ag-grid-community";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import { useState } from "react";
 
 import { AgGridV2 } from "@web/components/common/AgGridV2/AgGridV2";
@@ -11,7 +11,10 @@ export const DraftPaymentList = () => {
   const { onPageChange, onRowsPerPageChange, page, rowsPerPage } =
     usePaginationParams();
 
-  const [agGridFilterModel, setAgGridFilterModel] = useState<FilterModel>({});
+  const [agGridState, setAgGridState] = useState<{
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }>({ filterModel: {}, sortModel: [] });
 
   const startRow = page * rowsPerPage;
 
@@ -19,7 +22,8 @@ export const DraftPaymentList = () => {
 
   const { data, isFetching } = useGetDraftPayment({
     endRow,
-    filterModel: agGridFilterModel,
+    filterModel: agGridState.filterModel,
+    sortModel: agGridState.sortModel,
     startRow,
   });
 
@@ -37,8 +41,8 @@ export const DraftPaymentList = () => {
       onPageChange={onPageChange}
       count={totalCount}
       onRowsPerPageChange={onRowsPerPageChange}
-      onFilterChange={setAgGridFilterModel}
-      height={200}
+      onGridStateChange={setAgGridState}
+      height={160}
     />
   );
 };

@@ -3,34 +3,48 @@
 import {
   Autocomplete,
   ContentBox,
-  DatePicker,
+  DateRangePickerField,
   PadBox,
+  SearchField,
+  useGetDeviceType,
 } from "@codezee/sixtify-brahma";
-import { Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
-import { DateTime } from "luxon";
+import _isEmpty from "lodash/isEmpty";
+import type { ChangeEvent } from "react";
 import { useMemo } from "react";
 import { useForm } from "react-hook-form";
+import { useDebounceValue } from "usehooks-ts";
 
-import { DateFilterPeriodAutocomplete } from "@web/components/common/Autocomplete/DateFilterPeriodAutocomplete";
 import { useGetEventDropdownOptions } from "@web/components/common/Autocomplete/hooks/useGetEventDropdownOptions";
 import { useGetFilterEventOptionsFromMultipleBranch } from "@web/components/common/Autocomplete/hooks/useGetFilterEventOptionsFromMultipleBranch";
 import { ONE_MONTH } from "@web/components/common/hooks/constant";
-import { EventDropdownSummaryBreadcrumbs } from "@web/components/Event/eventDropdownSummary/EventDropdownSummaryBreadcrumbs";
 import { EventDropdownSummaryList } from "@web/components/Event/eventDropdownSummary/eventDropdownSummaryList/EventDropdownSummaryList";
 import { useBranch } from "@web/context/BranchContext";
+import { useSavedFiltersHandler } from "@web/hooks/savedFilters/hooks/useSavedFiltersHandler";
+import { SaveFiltersCheckbox } from "@web/hooks/savedFilters/SaveFiltersCheckbox";
 import { useAutoSelectFirstOption } from "@web/hooks/useAutoSelectFirstOption";
 import { useDateFilters } from "@web/hooks/useDateFilters";
-import { resetDependentFields } from "@web/utils/helper";
+import { Debounce_Delay, resetDependentFields } from "@web/utils/helper";
 
 type EventFilterFormValues = {
   event_dropdown_id: string | null;
-  event_master_id: string | null;
+  event_id: string | null;
+  is_save_filter: boolean;
 };
 
 // eslint-disable-next-line import/no-default-export
 export default function Page() {
-  const { control: dateControl, fromDate, toDate } = useDateFilters(ONE_MONTH);
+  const { isMobile } = useGetDeviceType();
+
+  const {
+    control: dateControl,
+    dateRange,
+    search,
+    setValue: setDateValue,
+  } = useDateFilters(ONE_MONTH);
+
+  const [searchInput] = useDebounceValue(search, Debounce_Delay);
 
   const { branchIds } = useBranch();
 
@@ -43,11 +57,12 @@ export default function Page() {
   } = useForm<EventFilterFormValues>({
     defaultValues: {
       event_dropdown_id: null,
-      event_master_id: null,
+      event_id: null,
+      is_save_filter: false,
     },
   });
 
-  const eventMasterId = watchEventFilter("event_master_id") ?? "";
+  const eventId = watchEventFilter("event_id") ?? "";
 
   const eventDropdownId = watchEventFilter("event_dropdown_id");
 
@@ -58,20 +73,20 @@ export default function Page() {
     });
 
   const { data: eventDropdownOptions } = useGetEventDropdownOptions({
-    eventMasterId,
+    eventId,
   });
 
   useAutoSelectFirstOption({
-    currentValue: eventMasterId,
+    currentValue: eventId,
     enabled: !!branchIds,
-    fieldName: "event_master_id",
+    fieldName: "event_id",
     options: filterEventOptions,
     setValue: setEventFilterValue,
   });
 
   useAutoSelectFirstOption({
     currentValue: eventDropdownId,
-    enabled: !!eventMasterId,
+    enabled: !!eventId,
     fieldName: "event_dropdown_id",
     options: eventDropdownOptions,
     setValue: setEventFilterValue,
@@ -79,9 +94,9 @@ export default function Page() {
 
   // Reset both fields when branchIds changes (branchIds is not a form field, so handle manually)
   useMemo(() => {
-    setEventFilterValue("event_master_id", null, { shouldDirty: true });
+    setEventFilterValue("event_id", null, { shouldDirty: true });
     setEventFilterValue("event_dropdown_id", null, { shouldDirty: true });
-    clearErrors("event_master_id");
+    clearErrors("event_id");
     clearErrors("event_dropdown_id");
   }, [branchIds]);
 
@@ -89,7 +104,7 @@ export default function Page() {
   const dependentFieldsMap: Partial<
     Record<keyof EventFilterFormValues, (keyof EventFilterFormValues)[]>
   > = {
-    event_master_id: ["event_dropdown_id"],
+    event_id: ["event_dropdown_id"],
   };
 
   useMemo(() => {
@@ -97,78 +112,188 @@ export default function Page() {
       clearErrors,
       dependentFieldsMap,
       dirtyFields,
-      fieldName: "event_master_id",
-      fieldValue: eventMasterId || null,
+      fieldName: "event_id",
+      fieldValue: eventId || null,
       setValue: setEventFilterValue,
     });
-  }, [eventMasterId, branchIds]);
+  }, [eventId, branchIds]);
+
+  const {
+    filters,
+    isFetchingSavedFilters,
+    isPendingSaveFilters,
+    isSaveFilter,
+    saveFiltersAction,
+  } = useSavedFiltersHandler({
+    moduleKey: "event",
+  });
+
+  const handleSaveFilters = (checked: boolean) => {
+    const payload = checked
+      ? {
+          from_date: dateRange[0],
+          to_date: dateRange[1],
+          ...(eventId && { event_id: [eventId] }),
+          ...(eventDropdownId && { event_dropdown_id: eventDropdownId }),
+        }
+      : {};
+
+    saveFiltersAction({
+      filters: payload,
+      is_save_filter: checked,
+    });
+  };
+
+  const onSaveFiltersChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const checked = event.target.checked;
+
+    setEventFilterValue("is_save_filter", checked);
+
+    handleSaveFilters(checked);
+  };
+
+  useMemo(() => {
+    if (!_isEmpty(filters)) {
+      const { event_dropdown_id, event_id, from_date, to_date } =
+        filters as Record<string, string>;
+
+      setEventFilterValue("is_save_filter", isSaveFilter);
+
+      if (from_date && to_date) {
+        setDateValue("date_range", [from_date, to_date]);
+      }
+
+      if (event_id && Array.isArray(event_id)) {
+        setEventFilterValue("event_id", event_id[0]);
+      }
+
+      if (event_dropdown_id) {
+        setEventFilterValue("event_dropdown_id", event_dropdown_id);
+      }
+    }
+  }, [filters]);
 
   return (
-    <Stack gap="10px">
-      <EventDropdownSummaryBreadcrumbs />
+    <Stack gap={{ md: "10px", xs: "8px" }}>
       <ContentBox>
-        <PadBox padding={{ padding: "10px" }}>
-          <Stack direction="row" gap="10px" justifyContent="space-between">
-            <Typography variant="subtitle1">
-              {t("event.dropdown.summary.label")}
+        <PadBox padding={{ padding: { md: "10px", xs: "8px 10px" } }}>
+          <Stack
+            direction={{ md: "row", xs: "column" }}
+            gap={3}
+            justifyContent="space-between"
+            alignItems={{ md: "center", xs: "stretch" }}
+          >
+            <Typography
+              variant="subtitle1"
+              fontSize={isMobile ? "16px" : "18px"}
+              whiteSpace="nowrap"
+            >
+              {t("form.options.summary.label")}
             </Typography>
 
-            <Stack direction="row" gap="10px" alignItems="center">
-              <Autocomplete<EventFilterFormValues>
-                control={eventControl}
-                name="event_master_id"
-                options={filterEventOptions}
-                placeholder={t("common.select.label", {
-                  label: t("common.event.label"),
-                })}
-                clearIcon
-                sx={{ width: "250px" }}
-              />
+            <Stack
+              direction="row"
+              gap={1.25}
+              alignItems="center"
+              flexWrap="wrap"
+              justifyContent={{ md: "flex-end", xs: "flex-start" }}
+              sx={{ minWidth: 0, width: { md: "auto", xs: "100%" } }}
+            >
+              <Box sx={{ flexShrink: 0 }}>
+                <SaveFiltersCheckbox
+                  name="is_save_filter"
+                  control={eventControl}
+                  disabled={isFetchingSavedFilters || isPendingSaveFilters}
+                  onChange={onSaveFiltersChange}
+                />
+              </Box>
 
-              <Autocomplete<EventFilterFormValues>
-                control={eventControl}
-                name="event_dropdown_id"
-                options={eventDropdownOptions}
-                placeholder={t("common.select.label", {
-                  label: t("common.event.dropdown"),
-                })}
-                clearIcon
-                sx={{ width: "250px" }}
-              />
+              <Box
+                sx={{
+                  flex: { md: "0 0 220px", xs: "1 1 100%" },
+                  minWidth: 0,
+                  width: { md: "auto", xs: "100%" },
+                }}
+              >
+                <Autocomplete<EventFilterFormValues>
+                  control={eventControl}
+                  name="event_id"
+                  options={filterEventOptions}
+                  placeholder={t("common.select.label", {
+                    label: t("common.event.label"),
+                  })}
+                  clearIcon
+                  sx={{ minWidth: 0, width: "100%" }}
+                />
+              </Box>
 
-              <DateFilterPeriodAutocomplete
-                name="date_filter_period"
-                control={dateControl}
-                clearIcon
-                sx={{ width: "160px" }}
-              />
+              <Box
+                sx={{
+                  flex: { md: "0 0 220px", xs: "1 1 100%" },
+                  minWidth: 0,
+                  width: { md: "auto", xs: "100%" },
+                }}
+              >
+                <Autocomplete<EventFilterFormValues>
+                  control={eventControl}
+                  name="event_dropdown_id"
+                  options={eventDropdownOptions}
+                  placeholder={t("common.select.label", {
+                    label: t("common.form.options.label"),
+                  })}
+                  clearIcon
+                  sx={{ minWidth: 0, width: "100%" }}
+                />
+              </Box>
 
-              <DatePicker
-                control={dateControl}
-                name="from_date"
-                clearable={false}
-                containerProps={{ width: "160px" }}
-              />
+              <Box
+                sx={{
+                  flex: { md: "0 0 220px", xs: "1 1 100%" },
+                  minWidth: 0,
+                  width: { md: "auto", xs: "100%" },
+                }}
+              >
+                <SearchField
+                  name="search"
+                  characterType="any-character"
+                  letterCase="mixed"
+                  control={dateControl}
+                  containerProps={{ width: "100%" }}
+                />
+              </Box>
 
-              <DatePicker
-                control={dateControl}
-                name="to_date"
-                minDate={fromDate ? DateTime.fromISO(fromDate) : DateTime.now()}
-                clearable={false}
-                containerProps={{ width: "160px" }}
-              />
+              <Box
+                sx={{
+                  flex: { md: "0 0 auto", xs: "1 1 100%" },
+                  minWidth: 0,
+                  width: { md: "auto", xs: "100%" },
+                }}
+              >
+                <DateRangePickerField
+                  name="date_range"
+                  control={dateControl}
+                  showPresets
+                  size={isMobile ? "small" : "large"}
+                  placeholder="Select Date Range"
+                />
+              </Box>
             </Stack>
           </Stack>
         </PadBox>
       </ContentBox>
 
       <ContentBox>
-        <EventDropdownSummaryList
-          eventMasterId={eventMasterId}
-          eventDropdownId={eventDropdownId}
-          fromDate={fromDate}
-          toDate={toDate}
-        />
+        <Box sx={{ overflow: "hidden", width: "100%" }}>
+          <EventDropdownSummaryList
+            eventId={eventId}
+            eventDropdownId={eventDropdownId}
+            externalFilter={{
+              from_date: dateRange[0],
+              to_date: dateRange[1],
+            }}
+            search={searchInput}
+          />
+        </Box>
       </ContentBox>
     </Stack>
   );

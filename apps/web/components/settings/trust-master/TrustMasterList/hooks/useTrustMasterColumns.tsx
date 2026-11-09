@@ -1,9 +1,13 @@
 import { t } from "i18next";
 
+import { useGetTrueFalseOptions } from "@web/components/common/Autocomplete/hooks/useGetTrueFalseOptions";
 import type { Trust } from "@web/components/settings/trust-master/TrustMasterList/hooks/useGetTrustMaster";
 import type { AgColumnsWithActions } from "@web/types/agGrid";
+import { CustomEnumFilter } from "@web/utils/ag-grid-custom-filter";
 
 export const useTrustMasterColumns = () => {
+  const { trueFalseOptions } = useGetTrueFalseOptions();
+
   const column: AgColumnsWithActions<Trust> = [
     {
       field: "trust_name",
@@ -18,8 +22,8 @@ export const useTrustMasterColumns = () => {
       minWidth: 200,
     },
     {
-      field: "branch_name",
-      headerName: t("branch.name.label"),
+      field: "branch_names",
+      headerName: t("branch.names.label"),
       minWidth: 200,
     },
     {
@@ -49,31 +53,39 @@ export const useTrustMasterColumns = () => {
     },
     {
       field: "cash_limit",
+      filter: "agNumberColumnFilter",
       headerName: t("cashLimit.label"),
       minWidth: 200,
     },
     {
       field: "cheque_limit",
+      filter: "agNumberColumnFilter",
       headerName: t("chequeLimit.label"),
       minWidth: 200,
     },
     {
       field: "date_lock",
+      filter: CustomEnumFilter,
+      filterParams: {
+        filterOptions: trueFalseOptions,
+        source: "server",
+      },
       headerName: t("dateLock.label"),
       minWidth: 100,
     },
     {
       field: "is_active",
+      filter: CustomEnumFilter,
+      filterParams: {
+        filterOptions: trueFalseOptions,
+        source: "server",
+      },
       headerName: t("isActive.label"),
     },
     {
       field: "address_limit",
+      filter: "agNumberColumnFilter",
       headerName: t("addressLimit.label"),
-      minWidth: 200,
-    },
-    {
-      field: "branch_name",
-      headerName: t("branch.name.label"),
       minWidth: 200,
     },
     {
@@ -88,6 +100,7 @@ export const useTrustMasterColumns = () => {
     },
     {
       field: "sms_limit",
+      filter: "agNumberColumnFilter",
       headerName: t("smsLimit.label"),
       minWidth: 200,
     },

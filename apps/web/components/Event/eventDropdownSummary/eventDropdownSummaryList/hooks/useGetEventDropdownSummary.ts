@@ -31,7 +31,7 @@ export function useGetEventDropdownSummary(body: GetListArgsAg2) {
     return data.data;
   };
 
-  const eventMasterId = body.externalFilter?.event_master_id;
+  const eventId = body.externalFilter?.event_id;
 
   const eventDropdownId = body.externalFilter?.event_dropdown_id;
 
@@ -40,7 +40,7 @@ export function useGetEventDropdownSummary(body: GetListArgsAg2) {
   const hasBranchId =
     _isArray(branchId) && !_isEmpty(branchId) && !!_first(branchId);
 
-  const isEnabled = Boolean(eventMasterId && eventDropdownId && hasBranchId);
+  const isEnabled = Boolean(eventId && eventDropdownId && hasBranchId);
 
   return useQuery({
     enabled: isEnabled,

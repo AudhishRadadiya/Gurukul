@@ -67,8 +67,13 @@ export type DialogTypes =
   | "receiptEntry"
   | "rejectBulkOvertime"
   | "exportOptions"
+  | "printAddressBookOptions"
   | "cancelDonationEntryConfirmation"
-  | "addEventDropdown";
+  | "addEventDropdown"
+  | "donationReceipt"
+  | "donationLetter"
+  | "clone"
+  | "createContact";
 
 export type DialogRenderer = { [key in DialogTypes]?: ReactNode };
 

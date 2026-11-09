@@ -5,19 +5,25 @@ import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
 import { donationModeKeys } from "@web/queryKeysFactories/donationMode";
 import type { ApiSuccessResponse } from "@web/types/apiResponse";
 
-type DonationModeOptionsType = {
+export type DonationModeOptionsType = {
   is_bank: boolean;
   label: string;
   value: string;
 };
 
-export function useGetDonationModeOptions() {
+type UseGetDonationModeOptionsProps = {
+  isUserWiseAll?: boolean;
+};
+
+export function useGetDonationModeOptions({
+  isUserWiseAll,
+}: UseGetDonationModeOptionsProps = {}) {
   const { axiosPrivate } = useAxiosPrivate();
 
   const fetchDonationModeOption = async () => {
     const { data } = await axiosPrivate.get<
       ApiSuccessResponse<DonationModeOptionsType[]>
-    >(DONATION_MODE_ROUTES.options);
+    >(DONATION_MODE_ROUTES.userWiseOptions(isUserWiseAll));
 
     return data.data;
   };
@@ -25,6 +31,6 @@ export function useGetDonationModeOptions() {
   return useQuery({
     initialData: [],
     queryFn: fetchDonationModeOption,
-    queryKey: donationModeKeys.options(),
+    queryKey: donationModeKeys.userWiseOptions(isUserWiseAll),
   });
 }

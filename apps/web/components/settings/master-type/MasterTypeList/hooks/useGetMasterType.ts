@@ -8,6 +8,7 @@ import type { GetListArgsAg2 } from "@web/types/shared-types";
 
 export type MasterType = {
   full_count: string;
+  is_hastak: boolean;
   master_type: string;
   master_type_id: string;
 };

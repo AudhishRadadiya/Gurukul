@@ -13,6 +13,7 @@ export type DonationMaster = {
   donation_master_name: string;
   full_count: string;
   is_active: boolean;
+  is_csr: boolean;
   is_deleted: boolean;
   remark: string;
 };

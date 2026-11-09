@@ -1,22 +1,16 @@
 import { AppBar, UserProfileMenu } from "@codezee/sixtify-brahma";
 import { Close, Logout, Menu } from "@mui/icons-material";
-import { IconButton, Stack, Typography, useTheme } from "@mui/material";
+import { Box, IconButton, Stack, useTheme } from "@mui/material";
 import { t } from "i18next";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 
 import { BranchSelector } from "@web/components/BranchSelector";
 import { DONATION_ENTRY_PREFERENCES_KEY } from "@web/components/Donation/donationEntry/addDonationEntry/AddDonationEntry";
-import {
-  drawerMenuItems,
-  type DrawerMenuItemsKeys,
-} from "@web/components/Drawer/hooks/useDrawerMenuItems";
-import {
-  REPORT_ROUTES_WITH_BRANCH_SELECTOR,
-  ROUTES_WITHOUT_BRANCH_SELECTOR,
-  ROUTES_WITH_BRANCH_SELECTOR,
-} from "@web/components/user/hooks/constant";
 import { useBranch } from "@web/context/BranchContext";
+
+import { HeaderBreadcrumbs } from "./Header/HeaderBreadcrumbs";
+import { useShouldShowBranchSelector } from "./Header/useShouldShowBranchSelector";
 
 export const Header = ({
   isDrawerOpen = false,
@@ -30,6 +24,8 @@ export const Header = ({
   const router = useRouter();
 
   const { setBranchIds } = useBranch();
+
+  const shouldShowBranchSelector = useShouldShowBranchSelector();
 
   const DonationEntryStoredPreferences = localStorage.getItem(
     DONATION_ENTRY_PREFERENCES_KEY
@@ -71,66 +67,75 @@ export const Header = ({
     },
   ];
 
-  const currentPathname = usePathname();
-
-  const searchParams = useSearchParams();
-
-  const menuKey = currentPathname?.split("/")[1] as DrawerMenuItemsKeys;
-
-  const headerTitleItems: Record<DrawerMenuItemsKeys, string> = drawerMenuItems;
-
-  // Check if current route should exclude BranchSelector
-  const shouldExcludeBranchSelector = ROUTES_WITHOUT_BRANCH_SELECTOR.some(
-    (route) => {
-      const pathnameMatches = currentPathname?.startsWith(route.pathname);
-
-      const queryParamMatches =
-        searchParams.get(route.queryParam) === route.queryValue;
-
-      return pathnameMatches && queryParamMatches;
-    }
-  );
-
-  const shouldShowBranchSelector =
-    !shouldExcludeBranchSelector &&
-    (ROUTES_WITH_BRANCH_SELECTOR.includes(menuKey) ||
-      currentPathname == REPORT_ROUTES_WITH_BRANCH_SELECTOR);
-
   return (
     <AppBar drawerOpen={isDrawerOpen}>
       <Stack
         direction="row"
-        justifyContent="space-between"
-        alignItems="center"
+        alignItems={{ sm: "center", xs: "flex-start" }}
         width="100%"
+        gap={{ sm: 1.5, xs: 0.5 }}
+        py={{ sm: 0, xs: 0.5 }}
       >
-        <Stack gap="24px" direction="row" alignItems="center">
-          <IconButton
-            color="primary"
-            aria-label="open drawer"
-            onClick={() => setIsDrawerOpen(!isDrawerOpen)}
-            edge="start"
+        <IconButton
+          color="primary"
+          aria-label="open drawer"
+          onClick={() => setIsDrawerOpen(!isDrawerOpen)}
+          edge="start"
+          sx={{ flexShrink: 0 }}
+        >
+          {isDrawerOpen ? <Close /> : <Menu />}
+        </IconButton>
+
+        <Stack
+          direction="row"
+          flexWrap={{ sm: "nowrap", xs: "wrap" }}
+          alignItems="center"
+          justifyContent="space-between"
+          flex={1}
+          minWidth={0}
+          gap={{ sm: 2, xs: 1 }}
+          pr={{ md: 1, sm: 0.5, xs: 0.5 }}
+        >
+          <Box
+            sx={{
+              flex: 1,
+              maxWidth: { sm: "none", xs: "calc(100% - 48px)" },
+              minWidth: 0,
+              order: 1,
+              overflow: "hidden",
+            }}
           >
-            {isDrawerOpen ? <Close /> : <Menu />}
-          </IconButton>
+            <HeaderBreadcrumbs />
+          </Box>
 
-          <Typography variant="h6" color="primary">
-            {headerTitleItems[menuKey] || "Home"}
-          </Typography>
-        </Stack>
-
-        <Stack direction="row" gap={2} alignItems="center">
           {shouldShowBranchSelector && (
-            <BranchSelector onBranchChange={handleBranchChange} />
+            <Box
+              sx={{
+                flex: { sm: "0 0 auto", xs: "1 1 100%" },
+                minWidth: 0,
+                order: { sm: 2, xs: 3 },
+                width: { md: "200px", sm: "160px", xs: "100%" },
+              }}
+            >
+              <BranchSelector onBranchChange={handleBranchChange} />
+            </Box>
           )}
 
-          <UserProfileMenu
-            userDetails={{
-              avatar: data?.user.avatar ?? "",
-              name: data?.user.login_name ?? "",
+          <Box
+            sx={{
+              flexShrink: 0,
+              ml: { sm: 0, xs: "auto" },
+              order: { sm: 3, xs: 2 },
             }}
-            menuItems={menulist}
-          />
+          >
+            <UserProfileMenu
+              userDetails={{
+                avatar: data?.user.avatar ?? "",
+                name: data?.user.login_name ?? "",
+              }}
+              menuItems={menulist}
+            />
+          </Box>
         </Stack>
       </Stack>
     </AppBar>

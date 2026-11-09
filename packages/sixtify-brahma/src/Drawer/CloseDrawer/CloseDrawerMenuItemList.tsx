@@ -58,7 +58,19 @@ export const CloseDrawerMenuItemList = ({
         .map((menuItem, i) => {
           const { onClick, key: key1, icon, menuItems = [] } = menuItem;
 
+          const hasSubMenu = menuItems.length > 0;
+
+          const openSubMenu = (event: MouseEvent<HTMLDivElement>) => {
+            setAnchorEl(event.currentTarget);
+            setCurrentMenuItem(menuItem);
+            setCurrentMenuIndex(i);
+          };
+
           const handleClick = (target?: HTMLAttributeAnchorTarget) => {
+            if (hasSubMenu) {
+              return;
+            }
+
             if (onClick) {
               if (key1 === "home") {
                 onClick("/", target);
@@ -71,10 +83,8 @@ export const CloseDrawerMenuItemList = ({
           };
 
           const onMouseEnter = (event: MouseEvent<HTMLDivElement>) => {
-            if (menuItems.length > 0) {
-              setAnchorEl(event.currentTarget);
-              setCurrentMenuItem(menuItem);
-              setCurrentMenuIndex(i);
+            if (hasSubMenu) {
+              openSubMenu(event);
             } else {
               handleClose();
             }
@@ -86,6 +96,7 @@ export const CloseDrawerMenuItemList = ({
             <CloseDrawerMenuItem
               key={uuidv4()}
               onClick={handleClick}
+              {...(hasSubMenu && { onOpen: openSubMenu })}
               onMouseEnter={onMouseEnter}
               icon={icon}
               selected={isMenuSelected}

@@ -4,6 +4,7 @@ import {
   GridProvider,
   HistoryIconAction,
   TextField,
+  useGetDeviceType,
 } from "@codezee/sixtify-brahma";
 import { MailOutlineOutlined } from "@mui/icons-material";
 import CachedIcon from "@mui/icons-material/Cached";
@@ -13,15 +14,13 @@ import {
   InputAdornment,
   Stack,
   Typography,
-  useTheme,
 } from "@mui/material";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { useDebounceValue } from "usehooks-ts";
 
-import { AlertMessage } from "@web/components/common/AlertMessage";
 import { BankAutocomplete } from "@web/components/common/Autocomplete/BankAutocomplete";
 import { BranchWiseEventAutocomplete } from "@web/components/common/Autocomplete/BranchWiseEventAutocomplete";
 import { BusinessNameAutocomplete } from "@web/components/common/Autocomplete/BusinessNameAutocomplete";
@@ -30,6 +29,7 @@ import { CommonAutocomplete } from "@web/components/common/Autocomplete/CommonAu
 import { ContactNumberAutocomplete } from "@web/components/common/Autocomplete/ContactNumberAutocomplete";
 import { DonationAutocomplete } from "@web/components/common/Autocomplete/DonationAutocomplete";
 import { DonationModeAutocomplete } from "@web/components/common/Autocomplete/DonationModeAutocomplete";
+import type { DonationModeOptionsType } from "@web/components/common/Autocomplete/hooks/useGetDonationModeOptions";
 import { StateAutocomplete } from "@web/components/common/Autocomplete/StateAutocomplete";
 import { TrustAutocompleteFromMultipleBranch } from "@web/components/common/Autocomplete/TrustAutocompleteFromMultipleBranch";
 import { CheckboxWithLabel } from "@web/components/common/checkboxWithLabel/CheckboxWithLabel";
@@ -48,6 +48,7 @@ import { donationEntryFields } from "@web/components/Donation/donationEntry/dial
 import { useBranch } from "@web/context/BranchContext";
 import { usePostCityAndStateFromPinCode } from "@web/hooks/address/usePostCityAndStateFromPinCode";
 import { cancelReceiptKeys } from "@web/queryKeysFactories/cancelReceipt";
+import { donationModeKeys } from "@web/queryKeysFactories/donationMode";
 import type { DialogTypes } from "@web/types/dialogs";
 import { Debounce_Delay, errorMessages } from "@web/utils/helper";
 
@@ -64,9 +65,9 @@ export const DonationEntryFormFields = ({
   setToggleDonationEntryList,
   toggleDonationEntryList,
 }: DonationEntryFormFieldsArgs) => {
-  const theme = useTheme();
+  const { layout } = useGetDeviceType();
 
-  const { lightBlue } = theme.palette.app.color;
+  const isMobile = layout === "mobile";
 
   const queryClient = useQueryClient();
 
@@ -105,9 +106,27 @@ export const DonationEntryFormFields = ({
 
   const addressLimit = watch("trust_data.address_limit");
 
-  const chequeLimit = watch("trust_data.cheque_limit");
+  // const chequeLimit = watch("trust_data.cheque_limit");
 
-  const isShowIdFields = watch("show_id_fields");
+  // const isShowIdFields = watch("show_id_fields");
+
+  const { data: DonationModeOptions = [] } = useQuery<
+    DonationModeOptionsType[]
+  >({
+    enabled: false,
+    queryFn: () => {
+      return [];
+    },
+    queryKey: donationModeKeys.userWiseOptions(),
+  });
+
+  const isDefaultDonationModeDigital = useMemo(() => {
+    const selectedDonationMode = DonationModeOptions.find(
+      ({ label }) => label?.toLowerCase() === "digital"
+    );
+
+    return selectedDonationMode?.value === defaultValues?.donation_mode_id;
+  }, [defaultValues?.donation_mode_id]);
 
   const onRefreshReceiptNumber = () => {
     if (trustId && branchIds) {
@@ -117,7 +136,9 @@ export const DonationEntryFormFields = ({
     }
   };
 
-  const [pincodeInput] = useDebounceValue(watch("pincode"), Debounce_Delay);
+  const pincode = watch("pincode");
+
+  const [pincodeInput] = useDebounceValue(pincode, Debounce_Delay);
 
   const [shouldFetchPreviousDonation, setShouldFetchPreviousDonation] =
     useState(false);
@@ -129,35 +150,51 @@ export const DonationEntryFormFields = ({
     startRow: 0,
   });
 
-  const { data } = usePostCityAndStateFromPinCode({
+  const { data: locationData } = usePostCityAndStateFromPinCode({
     pinCode: !errors.pincode && pincodeInput ? pincodeInput : "",
   });
+
+  const isLocationFromPincode = useMemo(
+    () =>
+      !!pincode &&
+      pincode === pincodeInput &&
+      !errors.pincode &&
+      !!locationData?.city &&
+      !!locationData.state,
+    [
+      errors.pincode,
+      locationData?.city,
+      locationData?.state,
+      pincode,
+      pincodeInput,
+    ]
+  );
 
   const { city, state } = useMemo<
     Pick<DonationEntryFormFieldValues, "city" | "state">
   >(() => {
     return {
-      city: data?.city ?? null,
-      state: data?.state ?? null,
+      city: locationData?.city ?? null,
+      state: locationData?.state ?? null,
     };
-  }, [data]);
+  }, [locationData]);
 
   useMemo(() => {
     setValue("city", city, { shouldValidate: true });
     setValue("state", state, { shouldValidate: true });
   }, [city, state, showBusinessName]);
 
-  useMemo(() => {
-    if (!isShowIdFields) {
-      if (isBankMode && chequeLimit && amount) {
-        if (amount > chequeLimit) {
-          setValue("show_id_fields", true);
-        } else {
-          setValue("show_id_fields", false);
-        }
-      }
-    }
-  }, [amount, isBankMode, chequeLimit]);
+  // useMemo(() => {
+  //   if (!isShowIdFields) {
+  //     if (isBankMode && chequeLimit && amount) {
+  //       if (amount > chequeLimit) {
+  //         setValue("show_id_fields", true);
+  //       } else {
+  //         setValue("show_id_fields", false);
+  //       }
+  //     }
+  //   }
+  // }, [amount, isBankMode, chequeLimit]);
 
   // Auto-fill form fields from previous donation when Tab is pressed
   useMemo(() => {
@@ -194,19 +231,35 @@ export const DonationEntryFormFields = ({
         });
       });
 
-      clearErrors(donationEntryFields);
+      clearErrors([...donationEntryFields]);
       setShouldFetchPreviousDonation(false);
     }
   }, [previousDonationData, contactNumber, shouldFetchPreviousDonation]);
 
   return (
-    <Stack gap="20px" padding="20px">
-      <Stack direction="row" gap="20px" alignItems="center">
-        <Typography width="15%" variant="h5">
+    <Stack
+      gap={{ sm: "20px", xs: "12px" }}
+      padding={{ sm: "20px", xs: "12px" }}
+    >
+      <Stack
+        direction={{ sm: "row", xs: "column" }}
+        gap={{ sm: "20px", xs: "12px" }}
+        alignItems={{ sm: "center", xs: "flex-start" }}
+      >
+        <Typography
+          width={{ sm: "15%", xs: "100%" }}
+          variant="h5"
+          fontSize={isMobile ? "17px" : "18px"}
+        >
           {t("donation.entry.label")}
         </Typography>
 
-        <Stack direction="row" gap="20px" flexWrap="wrap">
+        <Stack
+          direction="row"
+          gap={{ sm: "20px", xs: "12px" }}
+          flexWrap="wrap"
+          paddingY={{ lg: "0px", md: "0px", sm: "8px", xs: "15px" }}
+        >
           <CheckboxWithLabel
             control={control}
             name="atg"
@@ -325,10 +378,11 @@ export const DonationEntryFormFields = ({
           loading={loading}
           name="donation_mode_id"
           disabled={
-            !trustId ||
-            (!!defaultValues?.donation_mode_id &&
-              dirtyFields.donation_mode_id) ||
-            !!defaultValues?.donation_mode_id
+            (!trustId ||
+              (!!defaultValues?.donation_mode_id &&
+                dirtyFields.donation_mode_id) ||
+              !!defaultValues?.donation_mode_id) &&
+            isDefaultDonationModeDigital
           }
           control={control}
           required
@@ -381,7 +435,6 @@ export const DonationEntryFormFields = ({
           disabled={!receiptNo}
           name="email_id"
           letterCase="mixed"
-          required
           loading={loading}
           error={!!errors.email_id}
           helperText={errorMessages(errors.email_id?.message)}
@@ -408,7 +461,7 @@ export const DonationEntryFormFields = ({
           characterType="string"
           createOptionOnType
           letterCase="uppercase"
-          label={t("common.first.name")}
+          label={t("yourName.label")}
           error={!!errors.first_name}
           helperText={errorMessages(errors.first_name?.message)}
           setError={setError}
@@ -425,7 +478,7 @@ export const DonationEntryFormFields = ({
           createOptionOnType
           letterCase="uppercase"
           module="past-entry"
-          label={t("middleName.label")}
+          label={t("fatherName.label")}
           error={!!errors.middle_name}
           helperText={errorMessages(errors.middle_name?.message)}
           setError={setError}
@@ -444,7 +497,7 @@ export const DonationEntryFormFields = ({
               letterCase="uppercase"
               control={control}
               module="past-entry"
-              label={t("common.last.name")}
+              label={t("surname.label")}
               error={!!errors.last_name}
               helperText={errorMessages(errors.last_name?.message)}
               setError={setError}
@@ -517,11 +570,11 @@ export const DonationEntryFormFields = ({
         />
       </GridProvider>
 
-      <GridProvider gap="20px" columns={4}>
+      <GridProvider gap="20px" columns={3}>
         <CityAutocomplete
           name="city"
           loading={loading}
-          disabled={!receiptNo}
+          disabled={!receiptNo || isLocationFromPincode}
           control={control}
           error={!!errors.city}
           helperText={errorMessages(errors.city?.message)}
@@ -531,7 +584,7 @@ export const DonationEntryFormFields = ({
           name="state"
           control={control}
           loading={loading}
-          disabled={!receiptNo}
+          disabled={!receiptNo || isLocationFromPincode}
           error={!!errors.state}
           helperText={errorMessages(errors.state?.message)}
         />
@@ -548,7 +601,7 @@ export const DonationEntryFormFields = ({
           helperText={errorMessages(errors.pan_no?.message)}
         />
 
-        <TextField
+        {/* <TextField
           name="aadhar_no"
           disabled={!receiptNo}
           control={control}
@@ -559,10 +612,10 @@ export const DonationEntryFormFields = ({
           setError={setError}
           error={!!errors.aadhar_no}
           helperText={errorMessages(errors.aadhar_no?.message)}
-        />
+        /> */}
       </GridProvider>
 
-      <Stack
+      {/* <Stack
         sx={{
           border: `1px solid ${lightBlue[100]}`,
           borderRadius: "5px",
@@ -575,7 +628,7 @@ export const DonationEntryFormFields = ({
             <CheckboxWithLabel
               control={control}
               name="show_id_fields"
-              sx={{ gridColumn: "span 3" }}
+              sx={{ gridColumn: { lg: "span 3", xs: "span 1" } }}
               label={t("common.show_id_fields")}
             />
           </Stack>
@@ -629,7 +682,7 @@ export const DonationEntryFormFields = ({
           amount > chequeLimit && (
             <AlertMessage severity="warning" message={t("proof.validation")} />
           )}
-      </Stack>
+      </Stack> */}
 
       <GridProvider gap="20px" columns={3}>
         <Stack direction="row" gap="10px" alignItems="center">

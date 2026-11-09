@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Stack } from "@mui/material";
 import { t } from "i18next";
 import type { ForwardedRef } from "react";
-import { forwardRef, useImperativeHandle, useMemo } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useMemo } from "react";
 import type { UseFormSetError } from "react-hook-form";
 import { FormProvider, useForm } from "react-hook-form";
 import { useDebounceValue } from "usehooks-ts";
@@ -19,6 +19,7 @@ import { emailRegex, panCardRegex, pinCodeRegex } from "@web/utils/regex";
 
 export const BusinessDetailFormSchema = z.object({
   address: z.string().nullable(),
+  business_detail_id: z.string().nullable().optional(),
   business_name: z
     .string()
     .trim()
@@ -32,7 +33,6 @@ export const BusinessDetailFormSchema = z.object({
     .regex(emailRegex, "common.email.invalid")
     .optional()
     .nullable(),
-  id: z.string().nullable().optional(),
   pan: z
     .string()
     .regex(panCardRegex, "common.pan_card_no.invalid")
@@ -93,31 +93,68 @@ export const BusinessDetailForm = forwardRef(
       watch,
     } = formMethods;
 
-    const [pincodeInput] = useDebounceValue(watch("pincode"), Debounce_Delay);
+    const pincodeValue = watch("pincode");
 
-    const { data } = usePostCityAndStateFromPinCode({
+    const [pincodeInput] = useDebounceValue(pincodeValue, Debounce_Delay);
+
+    const { data: locationData } = usePostCityAndStateFromPinCode({
       pinCode: !errors.pincode && pincodeInput ? pincodeInput : "",
     });
+
+    const isLocationFromPincode = useMemo(
+      () =>
+        !!pincodeValue &&
+        pincodeValue === pincodeInput &&
+        !errors.pincode &&
+        !!locationData?.city &&
+        !!locationData.state,
+      [
+        errors.pincode,
+        locationData?.city,
+        locationData?.state,
+        pincodeValue,
+        pincodeInput,
+      ]
+    );
 
     const { city, state } = useMemo<
       Pick<DonationEntryFormFieldValues, "city" | "state">
     >(() => {
       return {
-        city: data?.city ?? null,
-        state: data?.state ?? null,
+        city: locationData?.city ?? null,
+        state: locationData?.state ?? null,
       };
-    }, [data]);
+    }, [locationData]);
 
-    useMemo(() => {
+    useEffect(() => {
+      if (!pincodeValue) {
+        setValue("city", null, { shouldValidate: true });
+        setValue("state", null, { shouldValidate: true });
+
+        return;
+      }
+
+      if (pincodeValue !== pincodeInput || errors.pincode || !locationData) {
+        return;
+      }
+
       setValue("city", city ?? null, { shouldValidate: true });
       setValue("state", state ?? null, { shouldValidate: true });
-    }, [city, state]);
+    }, [
+      city,
+      errors.pincode,
+      locationData,
+      pincodeValue,
+      pincodeInput,
+      setValue,
+      state,
+    ]);
 
     useImperativeHandle(ref, () => ({
       setError,
       submitForm(onSubmit) {
         handleSubmit((formValues) => {
-          onSubmit({ id: uuidv4(), ...formValues });
+          onSubmit({ business_detail_id: uuidv4(), ...formValues });
         })();
       },
     }));
@@ -172,6 +209,7 @@ export const BusinessDetailForm = forwardRef(
             <CityAutocomplete
               name="city"
               control={control}
+              disabled={isLocationFromPincode}
               error={!!errors.city}
               helperText={errorMessages(errors.city?.message)}
             />
@@ -179,6 +217,7 @@ export const BusinessDetailForm = forwardRef(
             <StateAutocomplete
               name="state"
               control={control}
+              disabled={isLocationFromPincode}
               error={!!errors.state}
               helperText={errorMessages(errors.state?.message)}
             />

@@ -1,4 +1,10 @@
-import { Button, ContentBox, PadBox, toasts } from "@codezee/sixtify-brahma";
+import {
+  Button,
+  ContentBox,
+  PadBox,
+  toasts,
+  useGetDeviceType,
+} from "@codezee/sixtify-brahma";
 import { Stack } from "@mui/material";
 import { t } from "i18next";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -16,6 +22,8 @@ import { onError } from "@web/utils/errors";
 
 export const AddAddressBook = () => {
   const router = useRouter();
+
+  const { isMobile } = useGetDeviceType();
 
   const searchParams = useSearchParams();
 
@@ -68,6 +76,13 @@ export const AddAddressBook = () => {
       onError: (error) => onError(error, formRef.current?.setError),
       onSuccess: (data) => {
         toasts.success({ title: data.message });
+
+        if (donationId) {
+          router.push("/address/donor-address");
+
+          return;
+        }
+
         router.push("/address/address-book");
       },
     },
@@ -81,22 +96,35 @@ export const AddAddressBook = () => {
 
   return (
     <ContentBox>
-      <PadBox padding={{ padding: "20px" }}>
-        <Stack gap="10px">
+      <PadBox padding={{ padding: { md: "20px", xs: "12px 10px" } }}>
+        <Stack gap={{ md: "10px", xs: "8px" }}>
           <AddressBookFrom ref={formRef} loading={isAddressBookLoading} />
 
-          <PadBox padding={{ paddingRight: "20px" }}>
-            <Stack direction="row" justifyContent="end" gap="10px">
+          <PadBox padding={{ paddingRight: { md: "20px", xs: 0 } }}>
+            <Stack
+              direction="row"
+              justifyContent={{ md: "flex-end", xs: "stretch" }}
+              gap={1}
+              flexWrap="wrap"
+              sx={{ width: "100%" }}
+            >
               <Button
                 variant="outlined"
+                size={isMobile ? "small" : "medium"}
                 onClick={() => {
                   router.push("/address/address-book");
                 }}
+                sx={{ flex: { md: "0 0 auto", xs: "1 1 auto" } }}
               >
                 {t("common.cancel.button")}
               </Button>
 
-              <Button loading={isPending} onClick={onCreateAddressBook}>
+              <Button
+                loading={isPending}
+                size={isMobile ? "small" : "medium"}
+                onClick={onCreateAddressBook}
+                sx={{ flex: { md: "0 0 auto", xs: "1 1 auto" } }}
+              >
                 {t("common.save.button")}
               </Button>
             </Stack>

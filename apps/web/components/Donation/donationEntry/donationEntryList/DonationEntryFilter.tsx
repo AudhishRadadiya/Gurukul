@@ -1,29 +1,41 @@
 import { FilterListV2, type FilterListType } from "@codezee/sixtify-brahma";
 import { t } from "i18next";
+import _isEmpty from "lodash/isEmpty";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type { FieldValues } from "react-hook-form";
 
+import { amountFilterOperatorOptions } from "@web/components/common/Autocomplete/hooks/useGetAmountFilterOperatorOptions";
 import { useGetBranchOptions } from "@web/components/common/Autocomplete/hooks/useGetBranchOptions";
 import { useGetDonationModeOptions } from "@web/components/common/Autocomplete/hooks/useGetDonationModeOptions";
 import { useGetEventDropdownOptions } from "@web/components/common/Autocomplete/hooks/useGetEventDropdownOptions";
 import { useGetFilterEventOptions } from "@web/components/common/Autocomplete/hooks/useGetFilterEventOptions";
 import { useGetTrustOptionsFromMultipleBranch } from "@web/components/common/Autocomplete/hooks/useGetTrustOptionsFromMultipleBranch";
+import { BETWEEN } from "@web/components/common/hooks/constant";
 import {
   fromFilterDate,
   toFilterDate,
 } from "@web/components/Donation/donationEntry/donationEntryList/DonationEntryList";
 import { useBranch } from "@web/context/BranchContext";
 
+const donationEntryAmountFilterKeys = {
+  betweenOperatorValue: BETWEEN,
+  fromAmountKey: "from_amount",
+  operatorKey: "operator",
+  toAmountKey: "to_amount",
+} as const;
+
 type DonationEntryFilterProps = {
   filterListData: FieldValues;
-  setFilterListData: (data: FieldValues) => void;
+  handleApplyFilter: (data: FieldValues) => void;
+  isHideRenderChips?: boolean;
   showEventDropdownFilter?: boolean;
 };
 
 export const DonationEntryFilter = ({
   filterListData,
-  setFilterListData,
+  handleApplyFilter,
+  isHideRenderChips = false,
   showEventDropdownFilter = true,
 }: DonationEntryFilterProps) => {
   const searchParams = useSearchParams();
@@ -45,10 +57,16 @@ export const DonationEntryFilter = ({
   const { data: filterEventOptions } = useGetFilterEventOptions();
 
   const { data: eventDropdownOptions } = useGetEventDropdownOptions({
-    eventMasterId: currentFilter.event_type_id,
+    eventId: currentFilter.event_type_id,
   });
 
   const { branchIds } = useBranch();
+
+  useMemo(() => {
+    if (!_isEmpty(filterListData)) {
+      setCurrentFilter(filterListData);
+    }
+  }, [filterListData]);
 
   useEffect(() => {
     const event_type_id = searchParams.get("event_type_id");
@@ -74,6 +92,7 @@ export const DonationEntryFilter = ({
         ...(filterListData.event_dropdown_filter && {
           event_dropdown_filter: filterListData.event_dropdown_filter,
         }),
+        ...(filterListData.amount && { amount: filterListData.amount }),
       };
 
       const hasChanged = JSON.stringify(newFilter) !== JSON.stringify(prev);
@@ -85,6 +104,8 @@ export const DonationEntryFilter = ({
     filterListData.donation_mode_id,
     filterListData.event_dropdown_filter,
     filterListData.event_type_id,
+    filterListData.trust_id,
+    filterListData.amount,
     searchParams,
   ]);
 
@@ -119,6 +140,7 @@ export const DonationEntryFilter = ({
       {
         key: "event_type_id",
         label: t("common.event.label"),
+        multiSelect: true,
         options: filterEventOptions,
         type: "autoComplete",
         value: currentFilter.event_type_id,
@@ -129,13 +151,27 @@ export const DonationEntryFilter = ({
       items.push({
         isDisabled: !currentFilter.event_type_id,
         key: "event_dropdown_filter",
-        label: t("common.event.dropdown"),
+        label: t("common.form.options.label"),
         multiSelect: true,
         options: eventDropdownOptions,
         type: "autoComplete",
         value: currentFilter.event_dropdown_filter,
       });
     }
+
+    items.push({
+      amountFilterKeys: donationEntryAmountFilterKeys,
+      amountFilterValues: {
+        fromAmount: currentFilter.amount?.from_amount ?? null,
+        operator: currentFilter.amount?.operator ?? null,
+        toAmount: currentFilter.amount?.to_amount ?? null,
+      },
+      key: "amount",
+      label: t("amount.label"),
+      options: amountFilterOperatorOptions,
+      type: "amountFilter",
+      value: currentFilter.amount,
+    });
 
     return items;
   }, [
@@ -154,6 +190,12 @@ export const DonationEntryFilter = ({
     }
   };
 
+  const onApply = (data: FieldValues) => {
+    setCurrentFilter(data);
+
+    handleApplyFilter(data);
+  };
+
   const onClear = () => {
     const filterData = {
       branch_id: [branchIds],
@@ -161,15 +203,16 @@ export const DonationEntryFilter = ({
 
     setCurrentFilter(filterData);
 
-    setFilterListData(filterData);
+    handleApplyFilter(filterData);
   };
 
   return (
     <FilterListV2
+      isHideRenderChips={isHideRenderChips}
       filterListItems={filterListItems}
       filterListData={filterListData}
       onChange={onChange}
-      onApply={setFilterListData}
+      onApply={onApply}
       onClear={onClear}
     />
   );

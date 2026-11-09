@@ -1,11 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import type { IGetRowsParams } from "ag-grid-community";
-import type { FieldValues } from "react-hook-form";
 
 import { EVENT_REMINDER_ROUTES } from "@web/constants/routes/event_reminder/routes";
 import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
 import { eventReminderKeys } from "@web/queryKeysFactories/eventReminder";
 import type { ApiSuccessResponse } from "@web/types/apiResponse";
+import type { GetListArgsAg2 } from "@web/types/shared-types";
 import { isBranchFilterEnabled } from "@web/utils/reactQuery";
 
 export type EventReminder = {
@@ -28,20 +27,10 @@ export type GetEventReminderSuccessResponse = ApiSuccessResponse<{
   totalCount: number;
 }>;
 
-type GetEventReminderListArgs = Partial<
-  IGetRowsParams & {
-    endRow: number;
-    externalFilter?: FieldValues;
-    is_active: boolean;
-    responseFields: string[];
-    startRow: number;
-  }
->;
-
-export function useGetEventReminder(body: GetEventReminderListArgs) {
+export function useGetEventReminder(body: GetListArgsAg2) {
   const { axiosPrivate } = useAxiosPrivate();
 
-  const getEventReminder = async (body: GetEventReminderListArgs) => {
+  const getEventReminder = async (body: GetListArgsAg2) => {
     const { data } = await axiosPrivate.post<GetEventReminderSuccessResponse>(
       EVENT_REMINDER_ROUTES.listing,
       body

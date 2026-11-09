@@ -1,6 +1,7 @@
 import type { DialogRenderer } from "@codezee/sixtify-brahma";
-import { useDialogActions } from "@codezee/sixtify-brahma";
+import { useDialogActions, useGetDeviceType } from "@codezee/sixtify-brahma";
 import { useTheme } from "@mui/material";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import { t } from "i18next";
 import { useState } from "react";
 import type { FieldValues } from "react-hook-form";
@@ -14,14 +15,19 @@ import { EditChequeReconciliationDialog } from "@web/components/Donation/chequeR
 import { CHEQUE_RECONCILIATION_PERMISSION } from "@web/constants/permission/donation/chequeReconciliation/permission";
 import { useBranch } from "@web/context/BranchContext";
 import { useUserPermissions } from "@web/hooks/useUserPermissions/useUserPermissions";
+import { filterSearchParams } from "@web/utils/helper";
 
 export type ChequeReconciliationListProps = {
   externalFilter: FieldValues;
+  search: string;
 };
 
 export const ChequeReconciliationList = ({
   externalFilter,
+  search,
 }: ChequeReconciliationListProps) => {
+  const { isMobile } = useGetDeviceType();
+
   const theme = useTheme();
 
   const { validateAccess } = useUserPermissions();
@@ -37,9 +43,20 @@ export const ChequeReconciliationList = ({
 
   const endRow = startRow + rowsPerPage;
 
+  const [agGridState, setAgGridState] = useState<{
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }>({
+    filterModel: {},
+    sortModel: [],
+  });
+
   const { data, isFetching, refetch } = useGetChequeReconciliation({
     endRow,
     externalFilter: { ...externalFilter, branch_id: [branchIds] },
+    filterModel: agGridState.filterModel,
+    quickFilter: filterSearchParams(search),
+    sortModel: agGridState.sortModel,
     startRow,
   });
 
@@ -84,8 +101,9 @@ export const ChequeReconciliationList = ({
         rowData={chequeReconciliationData}
         onPageChange={onPageChange}
         count={totalCount}
+        onGridStateChange={setAgGridState}
         onRowsPerPageChange={onRowsPerPageChange}
-        height={300}
+        height={isMobile ? 330 : 235}
         actions={[
           {
             isView: validateAccess(CHEQUE_RECONCILIATION_PERMISSION.EDIT),

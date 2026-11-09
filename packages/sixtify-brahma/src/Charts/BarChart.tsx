@@ -52,11 +52,20 @@ export const BarChart = ({
   tooltip = "item",
   series,
   layout = "vertical",
+  slotProps,
   ...rest
 }: BarChartProps) => {
   if (loading) {
     return <Skeleton height={height} width={width} variant="rectangular" />;
   }
+
+  const mergedSlotProps: MuiBarChartProps["slotProps"] = {
+    ...(slotProps ?? {}),
+    tooltip: {
+      ...(slotProps?.tooltip ?? {}),
+      trigger: tooltip,
+    },
+  };
 
   return (
     <StyledBarChart
@@ -65,8 +74,8 @@ export const BarChart = ({
       series={series}
       layout={layout}
       skipAnimation={skipAnimation}
-      slotProps={{ tooltip: { trigger: tooltip } }}
       {...rest}
+      slotProps={mergedSlotProps}
     />
   );
 };

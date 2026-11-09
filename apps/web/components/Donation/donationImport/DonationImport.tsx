@@ -1,4 +1,4 @@
-import { Button, ContentBox, PadBox, toasts } from "@codezee/sixtify-brahma";
+import { Button, ContentBox, PadBox, toasts, useGetDeviceType } from "@codezee/sixtify-brahma";
 import { Box, Stack } from "@mui/material";
 import type { ColDefField } from "ag-grid-community";
 import { t } from "i18next";
@@ -30,6 +30,8 @@ export type DonationFieldMetaData = {
 
 export const DonationImport = () => {
   const formRef = useRef<FormRef>(null);
+
+  const { isMobile } = useGetDeviceType();
 
   const [excelDonationImportData, setExcelDonationImportData] =
     useState<ExcelImportData>({
@@ -80,9 +82,9 @@ export const DonationImport = () => {
   };
 
   return (
-    <Stack direction="column" gap="10px">
+    <Stack direction="column" gap={{ sm: "10px", xs: "8px" }}>
       <ContentBox>
-        <PadBox padding={{ padding: "20px" }}>
+        <PadBox padding={{ padding: { sm: "20px", xs: "12px" } }}>
           <DonationImportForm
             ref={formRef}
             loading={isPending}
@@ -90,8 +92,16 @@ export const DonationImport = () => {
             setExcelDonationImportData={setExcelDonationImportData}
           />
 
-          <Box display="flex" justifyContent="end">
-            <Button onClick={onDonationImport}>
+          <Box
+            display="flex"
+            justifyContent={{ sm: "flex-end", xs: "stretch" }}
+            sx={{ mt: { sm: 0, xs: 1 } }}
+          >
+            <Button
+              size={isMobile ? "small" : "medium"}
+              onClick={onDonationImport}
+              sx={{ width: { sm: "auto", xs: "100%" } }}
+            >
               {t("common.save.button")}
             </Button>
           </Box>

@@ -1,4 +1,7 @@
 export const donationEntryKeys = {
+  activateDonationEntry: () =>
+    [...donationEntryKeys.all, "activateDonationEntry"] as const,
+
   add: () => [...donationEntryKeys.all, "add"] as const,
 
   all: ["donation-entry"],

@@ -4,6 +4,7 @@ import {
   PhoneInputField,
   RadioGroupField,
   TextField,
+  toasts,
 } from "@codezee/sixtify-brahma";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { t } from "i18next";
@@ -14,6 +15,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { MailSettingAutocomplete } from "@web/components/common/Autocomplete/MailSettingAutocomplete";
+import { MetaWhatsappSettingAutocomplete } from "@web/components/common/Autocomplete/MetaWhatsappSettingAutocomplete";
 import { SmsSettingAutocomplete } from "@web/components/common/Autocomplete/SmsSettingAutocomplete";
 import { WhatsappSettingAutocomplete } from "@web/components/common/Autocomplete/WhatsappSettingAutocomplete";
 import { ImageUploadField } from "@web/components/common/ImageUploadField";
@@ -21,93 +23,111 @@ import { SlugTextField } from "@web/components/common/PanCardTextField/SlugTextF
 import { useEnableDisableButton } from "@web/hooks/useEnableDisableButton";
 import { errorMessages, filterChangedFormFields } from "@web/utils/helper";
 import { isValidMobileNumber } from "@web/utils/mobileNumberValidate";
-import { gstNoRegex } from "@web/utils/regex";
+import { emailRegex, gstNoRegex } from "@web/utils/regex";
 
-const BranchMasterFormSchema = z.object({
-  address: z
-    .string()
-    .max(255, "common.maxLength")
-    .nullable()
-    .refine((value) => !!value, {
-      message: "common.required",
-    }),
-  branch_code: z
-    .string()
-    .max(20, "common.maxLength")
-    .nullable()
-    .refine((value) => !!value, {
-      message: "common.required",
-    }),
-  branch_name: z
-    .string()
-    .max(50, "common.maxLength")
-    .nullable()
-    .refine((value) => !!value, {
-      message: "common.required",
-    }),
-  branch_slug: z.string().nullable(),
-  city: z
-    .string()
-    .max(50, "common.maxLength")
-    .nullable()
-    .refine((value) => !!value, {
-      message: "common.required",
-    }),
-  contact_no: z
-    .string()
-    .refine(isValidMobileNumber, {
-      message: "common.mobileNumber.invalid",
-    })
-    .nullable()
-    .refine((value) => !!value, {
-      message: "common.required",
-    }),
-  contact_person_name: z
-    .string()
-    .max(20, "common.maxLength")
-    .nullable()
-    .refine((value) => !!value, {
-      message: "common.required",
-    }),
-  email_setting_id: z
-    .string()
-    .nullable()
-    .refine((value) => !!value, {
-      message: "common.required",
-    }),
-  gst_no: z
-    .string()
-    .trim()
-    .nullable()
-    .optional()
-    .refine(
-      (value) => {
-        if (!value || value === "") {
-          return true;
+const BranchMasterFormSchema = z
+  .object({
+    address: z
+      .string()
+      .max(255, "common.maxLength")
+      .nullable()
+      .refine((value) => !!value, {
+        message: "common.required",
+      }),
+    branch_code: z
+      .string()
+      .max(20, "common.maxLength")
+      .nullable()
+      .refine((value) => !!value, {
+        message: "common.required",
+      }),
+    branch_email: z
+      .string()
+      .regex(emailRegex, "common.email.invalid")
+      .optional()
+      .nullable(),
+    branch_name: z
+      .string()
+      .max(50, "common.maxLength")
+      .nullable()
+      .refine((value) => !!value, {
+        message: "common.required",
+      }),
+    branch_slug: z.string().nullable(),
+    city: z
+      .string()
+      .max(50, "common.maxLength")
+      .nullable()
+      .refine((value) => !!value, {
+        message: "common.required",
+      }),
+    contact_no: z
+      .string()
+      .refine(isValidMobileNumber, {
+        message: "common.mobileNumber.invalid",
+      })
+      .nullable()
+      .refine((value) => !!value, {
+        message: "common.required",
+      }),
+    contact_person_name: z
+      .string()
+      .max(20, "common.maxLength")
+      .nullable()
+      .refine((value) => !!value, {
+        message: "common.required",
+      }),
+    email_setting_id: z
+      .string()
+      .nullable()
+      .refine((value) => !!value, {
+        message: "common.required",
+      }),
+    gst_no: z
+      .string()
+      .trim()
+      .nullable()
+      .optional()
+      .refine(
+        (value) => {
+          if (!value || value === "") {
+            return true;
+          }
+
+          return gstNoRegex.test(value);
+        },
+        {
+          message: "common.gst_no.invalid",
         }
+      ),
+    is_active: z.boolean().default(true),
+    is_online: z.boolean().default(true),
+    logo: z.string().nullable(),
+    meta_desc: z.string().max(255, "common.maxLength").nullable().optional(),
+    meta_keywords: z.string().nullable().optional(),
+    meta_title: z.string().nullable().optional(),
+    meta_whatsapp_setting_id: z.string().nullable().optional(),
+    sms_setting_id: z
+      .string()
+      .nullable()
+      .refine((value) => !!value, {
+        message: "common.required",
+      }),
+    whatsapp_setting_id: z.string().nullable().optional(),
+    whatsapp_setting_validation: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    const hasWhatsappSettingId =
+      !!data.whatsapp_setting_id || !!data.meta_whatsapp_setting_id;
 
-        return gstNoRegex.test(value);
-      },
-      {
-        message: "common.gst_no.invalid",
-      }
-    ),
-  is_active: z.boolean().default(true),
-  is_online: z.boolean().default(true),
-  logo: z.string().nullable(),
-  sms_setting_id: z
-    .string()
-    .nullable()
-    .refine((value) => !!value, {
-      message: "common.required",
-    }),
-  whatsapp_setting_id: z
-    .string()
-    .nullable()
-    .refine((value) => !!value, {
-      message: "common.required",
-    }),
-});
+    if (!hasWhatsappSettingId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "whatsapp.setting.validation",
+        path: ["whatsapp_setting_validation"],
+      });
+    }
+  });
 
 export type BranchMasterFormFieldValues = z.infer<
   typeof BranchMasterFormSchema
@@ -128,6 +148,7 @@ export type FormRef = {
 const formDefaultValues: BranchMasterFormFieldValues = {
   address: null,
   branch_code: null,
+  branch_email: null,
   branch_name: null,
   branch_slug: null,
   city: null,
@@ -138,6 +159,10 @@ const formDefaultValues: BranchMasterFormFieldValues = {
   is_active: true,
   is_online: true,
   logo: null,
+  meta_desc: null,
+  meta_keywords: null,
+  meta_title: null,
+  meta_whatsapp_setting_id: null,
   sms_setting_id: null,
   whatsapp_setting_id: null,
 };
@@ -166,19 +191,33 @@ export const BranchMasterForm = forwardRef(
     useImperativeHandle(ref, () => ({
       setError,
       submitForm(onSubmit) {
-        handleSubmit((formValues) => {
-          const filterFormValues = filterChangedFormFields(
-            formValues,
-            dirtyFields
-          );
+        handleSubmit(
+          (formValues) => {
+            const filterFormValues = filterChangedFormFields(
+              formValues,
+              dirtyFields
+            );
 
-          onSubmit(filterFormValues);
-        })();
+            onSubmit(filterFormValues);
+          },
+
+          (formErrors) => {
+            if (
+              formErrors.whatsapp_setting_validation?.message ===
+              "whatsapp.setting.validation"
+            ) {
+              toasts.error({
+                title: t("whatsapp.setting.validation"),
+              });
+            }
+          }
+        )();
       },
     }));
 
     const {
       branch_code,
+      branch_email,
       branch_name,
       branch_slug,
       city,
@@ -186,6 +225,7 @@ export const BranchMasterForm = forwardRef(
       contact_person_name,
       email_setting_id,
       gst_no,
+      meta_whatsapp_setting_id,
       sms_setting_id,
       whatsapp_setting_id,
     } = errors;
@@ -292,9 +332,26 @@ export const BranchMasterForm = forwardRef(
             loading={loading}
             name="whatsapp_setting_id"
             control={control}
-            required
             error={!!whatsapp_setting_id}
             helperText={errorMessages(whatsapp_setting_id?.message)}
+          />
+
+          <MetaWhatsappSettingAutocomplete
+            name="meta_whatsapp_setting_id"
+            control={control}
+            loading={loading}
+            error={!!meta_whatsapp_setting_id}
+            helperText={errorMessages(meta_whatsapp_setting_id?.message)}
+            clearIcon
+          />
+
+          <TextField
+            name="branch_email"
+            control={control}
+            label={t("branch.email.label")}
+            letterCase="lowercase"
+            error={!!branch_email}
+            helperText={errorMessages(branch_email?.message)}
           />
 
           <TextField
@@ -311,9 +368,42 @@ export const BranchMasterForm = forwardRef(
             placeholder="Enter Address"
           />
 
+          <TextField
+            name="meta_desc"
+            control={control}
+            loading={loading}
+            label="Meta Description"
+            multiline
+            letterCase="mixed"
+            rows={4}
+            error={!!errors.meta_desc}
+            helperText={errorMessages(errors.meta_desc?.message)}
+          />
+
+          <TextField
+            name="meta_title"
+            control={control}
+            label="Meta Title"
+            letterCase="mixed"
+            error={!!errors.meta_title}
+            helperText={errorMessages(errors.meta_title?.message)}
+          />
+
+          <TextField
+            name="meta_keywords"
+            control={control}
+            label="Meta Keywords"
+            letterCase="mixed"
+            error={!!errors.meta_keywords}
+            helperText={errorMessages(errors.meta_keywords?.message)}
+          />
+        </GridProvider>
+
+        <GridProvider gap="15px" columns={3}>
           <RadioGroupField
             name="is_active"
             control={control}
+            isHorizontal
             label={t("isActive.label")}
             options={[
               {
@@ -333,6 +423,7 @@ export const BranchMasterForm = forwardRef(
           <RadioGroupField
             name="is_online"
             control={control}
+            isHorizontal
             label={t("isOnline.label")}
             options={[
               {

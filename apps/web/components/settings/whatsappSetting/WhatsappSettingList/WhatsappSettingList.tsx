@@ -1,6 +1,6 @@
 import type { DialogRenderer } from "@codezee/sixtify-brahma";
 import { useDialogActions } from "@codezee/sixtify-brahma";
-import type { FilterModel } from "ag-grid-community";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import { t } from "i18next";
 import { useState } from "react";
 
@@ -26,7 +26,10 @@ export const WhatsappSettingList = () => {
   const { onPageChange, onRowsPerPageChange, page, rowsPerPage } =
     usePaginationParams();
 
-  const [agGridFilterModel, setAgGridFilterModel] = useState<FilterModel>({});
+  const [agGridState, setAgGridState] = useState<{
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }>({ filterModel: {}, sortModel: [] });
 
   const startRow = page * rowsPerPage;
 
@@ -34,7 +37,8 @@ export const WhatsappSettingList = () => {
 
   const { data, isFetching, refetch } = useGetWhatsappSetting({
     endRow,
-    filterModel: agGridFilterModel,
+    filterModel: agGridState.filterModel,
+    sortModel: agGridState.sortModel,
     startRow,
   });
 
@@ -66,8 +70,8 @@ export const WhatsappSettingList = () => {
         onPageChange={onPageChange}
         count={totalCount}
         onRowsPerPageChange={onRowsPerPageChange}
-        onFilterChange={setAgGridFilterModel}
-        height={220}
+        onGridStateChange={setAgGridState}
+        height={160}
         actions={[
           {
             isView: validateAccess(WHATSAPP_SETTINGS_PERMISSION.EDIT),

@@ -14,11 +14,13 @@ const excelFileType =
 
 export type ExcelImportProps<T extends FieldValues> = {
   name: string;
+  required?: boolean;
   setExcelImportData: (value: { rows: T[]; titles: string[] }) => void;
 };
 
 export const ExcelImport = <T extends FieldValues>({
   name,
+  required: isRequired = false,
   setExcelImportData,
 }: ExcelImportProps<T>) => {
   const {
@@ -82,7 +84,7 @@ export const ExcelImport = <T extends FieldValues>({
         label={t("common.import.excel")}
         acceptTitle="Supported formates: Only XLS, XLSX files are accepted."
         size={5}
-        required
+        required={isRequired}
         accept={[
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
           "application/vnd.ms-excel",

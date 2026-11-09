@@ -6,6 +6,13 @@ import { eventKeys } from "@web/queryKeysFactories/event";
 import type { ApiSuccessResponse } from "@web/types/apiResponse";
 import type { GetListArgsAg2 } from "@web/types/shared-types";
 
+export type LinksType = {
+  branch_name: string;
+  branch_slug: string;
+  link: string;
+  quick_link: string;
+};
+
 export type EventMasterDetail = {
   branch_name: string;
   description: string;
@@ -19,6 +26,7 @@ export type EventMasterDetail = {
   is_one_time: boolean;
   is_online: boolean;
   is_send_sms: boolean;
+  links: LinksType[];
   location: string;
   start_date: string;
   trust_id: string[];

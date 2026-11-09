@@ -1,18 +1,18 @@
-import { PadBox, toasts } from "@codezee/sixtify-brahma";
-import { Stack, Typography, useTheme } from "@mui/material";
+import { PadBox, toasts, useGetDeviceType } from "@codezee/sixtify-brahma";
+import { Box, Stack, Typography, useTheme } from "@mui/material";
 import { isActive } from "@tiptap/core";
-import { type FilterModel } from "ag-grid-community";
+import type { SortModelItem, FilterModel } from "ag-grid-community";
 import _flatMap from "lodash/flatMap";
 import _split from "lodash/split";
 import _uniq from "lodash/uniq";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { type FieldValues } from "react-hook-form";
+import type { FieldValues } from "react-hook-form";
 
 import { AgGridV2 } from "@web/components/common/AgGridV2/AgGridV2";
 import { usePaginationParams } from "@web/components/common/AgGridV2/hooks/usePaginationParams";
 import { DataExport } from "@web/components/common/DataExport/DataExport";
-import { DonationEntryFilter } from "@web/components/Donation/donationEntry/donationEntryList/DonationEntryFilter";
+import { EventDonationFilter } from "@web/components/Event/eventDonation/eventDonationList/EventDonationFilter";
 import { useEventDonationColumns } from "@web/components/Event/eventDonation/eventDonationList/hooks/useEventDonationColumns";
 import type { EventDonation } from "@web/components/Event/eventDonation/eventDonationList/hooks/useGetEventDonation";
 import { useGetEventDonation } from "@web/components/Event/eventDonation/eventDonationList/hooks/useGetEventDonation";
@@ -23,18 +23,28 @@ import { useUserPermissions } from "@web/hooks/useUserPermissions/useUserPermiss
 import { PermissionGuard } from "@web/provider/PermissionGuard";
 import type { FilType } from "@web/types/shared-types";
 import { onError } from "@web/utils/errors";
-import { formatToIndianNumber } from "@web/utils/helper";
+import { filterSearchParams, formatToIndianNumber } from "@web/utils/helper";
 
 export type EventDonationListProps = {
   externalDateFilter?: FieldValues;
+  filterListData: FieldValues;
+  handleApplyFilter: (data: FieldValues) => void;
+  search: string;
+  setFilterListData: (data: FieldValues) => void;
 };
 
 const EVENT_SUMMARY = "event-summary";
 
 export const EventDonationList = ({
   externalDateFilter,
+  filterListData,
+  handleApplyFilter,
+  search,
+  setFilterListData,
 }: EventDonationListProps) => {
   const theme = useTheme();
+
+  const { isMobile } = useGetDeviceType();
 
   const searchParams = useSearchParams();
 
@@ -46,20 +56,19 @@ export const EventDonationList = ({
 
   const contact_no = searchParams.get("contact_no");
 
-  const event_type_id = searchParams.get("event_type_id");
-
-  const [filterListData, setFilterListData] = useState<FieldValues>({
-    branch_id: [""],
-  });
+  const event_id = searchParams.get("event_id");
 
   useMemo(() => {
-    setFilterListData((prev) => ({
+    setFilterListData((prev: FieldValues) => ({
       ...prev,
       branch_id: [branchIds],
     }));
   }, [branchIds]);
 
-  const [agGridFilterModel, setAgGridFilterModel] = useState<FilterModel>({});
+  const [agGridState, setAgGridState] = useState<{
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }>({ filterModel: {}, sortModel: [] });
 
   const { onPageChange, onRowsPerPageChange, page, rowsPerPage } =
     usePaginationParams();
@@ -73,9 +82,9 @@ export const EventDonationList = ({
 
     const trustId = searchParams.get("trust_id");
 
-    const eventTypeId = searchParams.get("event_type_id");
+    const eventId = searchParams.get("event_id");
 
-    setFilterListData((prev) => ({
+    setFilterListData((prev: FieldValues) => ({
       ...prev,
       ...(!!trustId && {
         trust_id:
@@ -83,8 +92,8 @@ export const EventDonationList = ({
             ? _split(trustId, ",")
             : trustId,
       }),
-      ...(!!eventTypeId && {
-        event_type_id: eventTypeId,
+      ...(!!eventId && {
+        event_id: eventId,
       }),
     }));
   }, [searchParams]);
@@ -97,9 +106,11 @@ export const EventDonationList = ({
       ...externalDateFilter,
       is_active: isActive,
       ...(contact_no && { contact_no }),
-      ...(event_type_id && { event_type_id }),
+      ...(event_id && { event_id }),
     },
-    filterModel: agGridFilterModel,
+    filterModel: agGridState.filterModel,
+    quickFilter: filterSearchParams(search),
+    sortModel: agGridState.sortModel,
     startRow,
   });
 
@@ -127,9 +138,10 @@ export const EventDonationList = ({
       ...externalDateFilter,
       is_active: isActive,
       ...(contact_no && { contact_no }),
-      ...(event_type_id && { event_type_id }),
+      ...(event_id && { event_id }),
     },
-    filterModel: agGridFilterModel,
+    filterModel: agGridState.filterModel,
+    sortModel: agGridState.sortModel,
     startRow: 0,
   });
 
@@ -166,7 +178,9 @@ export const EventDonationList = ({
         _flatMap(
           donationDetail || [],
           ({ event_items_detail }) =>
-            event_items_detail?.map((v) => v.title) || []
+            event_items_detail?.map((v) => {
+              return `${v.title}=${v.kind}`;
+            }) || []
         )
       ),
     [donationDetail]
@@ -180,21 +194,30 @@ export const EventDonationList = ({
 
   return (
     <>
-      <PadBox padding={{ padding: "3px 5px" }}>
+      <PadBox padding={{ padding: { md: "3px 5px", xs: "8px 10px" } }}>
         <Stack
           direction="row"
           gap="10px"
-          justifyContent="end"
+          justifyContent={{ md: "flex-end", xs: "flex-start" }}
           alignItems="center"
+          flexWrap="wrap"
+          sx={{
+            "& .MuiButton-root": {
+              flexGrow: { md: 0, xs: 1 },
+              minWidth: { md: "auto", xs: "calc(50% - 10px)" },
+              whiteSpace: "nowrap",
+            },
+          }}
         >
-          <DonationEntryFilter
+          <EventDonationFilter
             filterListData={filterListData}
-            setFilterListData={setFilterListData}
-            showEventDropdownFilter
+            handleApplyFilter={handleApplyFilter}
           />
 
           <PermissionGuard canAccess={allowPrintExport}>
-            <DataExport onExport={onExport} />
+            <Box sx={{ flexShrink: 0 }}>
+              <DataExport onExport={onExport} />
+            </Box>
           </PermissionGuard>
         </Stack>
       </PadBox>
@@ -216,33 +239,49 @@ export const EventDonationList = ({
         rowData={donationDetail}
         rowsPerPage={rowsPerPage}
         onPageChange={onPageChange}
-        onFilterChange={setAgGridFilterModel}
+        onGridStateChange={setAgGridState}
         onRowsPerPageChange={onRowsPerPageChange}
-        height={270}
+        noNeedToApplyPaginationHeight
+        height={isMobile ? 400 : 265}
         footer={
-          <Stack direction="row" gap="60px">
-            <Stack direction="row" gap="10px">
-              <Typography variant="body2">Total Amount:</Typography>
+          <PadBox padding={{ padding: { md: "8px 25px", xs: "8px 12px" } }}>
+            <Stack
+              direction="row"
+              gap={{ md: "60px", xs: "12px" }}
+              flexWrap="wrap"
+              sx={{ width: "100%" }}
+            >
+              <Stack direction="row" gap="10px" flexShrink={0}>
+                <Typography variant="body2" whiteSpace="nowrap">
+                  Total Amount:
+                </Typography>
 
-              <Typography variant="body1">
-                {formatToIndianNumber(Number(total_amount))}
-              </Typography>
+                <Typography variant="body1" whiteSpace="nowrap">
+                  {formatToIndianNumber(Number(total_amount))}
+                </Typography>
+              </Stack>
+
+              <Stack direction="row" gap="10px" flexShrink={0}>
+                <Typography variant="body2" whiteSpace="nowrap">
+                  Total Receipt:
+                </Typography>
+
+                <Typography variant="body1" whiteSpace="nowrap">
+                  {total_receipt || 0}
+                </Typography>
+              </Stack>
+
+              <Stack direction="row" gap="10px" flexShrink={0}>
+                <Typography variant="body2" whiteSpace="nowrap">
+                  Total Cancel Amount:
+                </Typography>
+
+                <Typography variant="body1" whiteSpace="nowrap">
+                  {formatToIndianNumber(Number(total_cancel_amount))}
+                </Typography>
+              </Stack>
             </Stack>
-
-            <Stack direction="row" gap="10px">
-              <Typography variant="body2">Total Receipt:</Typography>
-
-              <Typography variant="body1">{total_receipt || 0}</Typography>
-            </Stack>
-
-            <Stack direction="row" gap="10px">
-              <Typography variant="body2">Total Cancel Amount:</Typography>
-
-              <Typography variant="body1">
-                {formatToIndianNumber(Number(total_cancel_amount))}
-              </Typography>
-            </Stack>
-          </Stack>
+          </PadBox>
         }
       />
     </>

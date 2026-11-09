@@ -11,26 +11,26 @@ type EventDropdownOptionsType = {
 };
 
 type UseGetEventDropdownOptionsProps = {
-  eventMasterId: string;
+  eventId: string;
 };
 
 export function useGetEventDropdownOptions({
-  eventMasterId,
+  eventId,
 }: UseGetEventDropdownOptionsProps) {
   const { axiosPrivate } = useAxiosPrivate();
 
   const fetchEventDropdownOption = async () => {
     const { data } = await axiosPrivate.get<
       ApiSuccessResponse<EventDropdownOptionsType[]>
-    >(EVENT_MASTER_ROUTES.eventDropdownOptions(eventMasterId));
+    >(EVENT_MASTER_ROUTES.eventDropdownOptions(eventId));
 
     return data.data;
   };
 
   return useQuery({
-    enabled: !!eventMasterId,
+    enabled: !!eventId,
     initialData: [],
     queryFn: fetchEventDropdownOption,
-    queryKey: eventKeys.eventDropdownOptions(eventMasterId),
+    queryKey: eventKeys.eventDropdownOptions(eventId),
   });
 }

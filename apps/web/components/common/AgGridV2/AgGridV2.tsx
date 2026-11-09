@@ -4,6 +4,7 @@ import {
   getPaletteByTheme,
   PadBox,
   Theme,
+  useGetDeviceType,
 } from "@codezee/sixtify-brahma";
 import {
   Box,
@@ -18,6 +19,8 @@ import type {
   FilterChangedEvent,
   FilterModel,
   SelectionChangedEvent,
+  SortChangedEvent,
+  SortModelItem,
 } from "ag-grid-community";
 import {
   AllCommunityModule,
@@ -36,15 +39,15 @@ import {
 import type { AgGridReactProps } from "ag-grid-react";
 import { AgGridReact } from "ag-grid-react";
 import _isFunction from "lodash/isFunction";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
+
+import { useGridLayoutHeight } from "@web/hooks/useGridLayoutHeight";
 
 import type { UseActionColumnArgs } from "./hooks/useActionColumn";
 import { useActionColumn } from "./hooks/useActionColumn";
 
-const myTheme = themeBalham.withParams({
-  accentColor: getPaletteByTheme(Theme.light).palette.app.color
-    .butterflyBlue[900],
-});
+const accentColor = getPaletteByTheme(Theme.light).palette.app.color
+  .butterflyBlue[900];
 
 ModuleRegistry.registerModules([
   TextEditorModule,
@@ -65,7 +68,12 @@ type AgGridV2Props<T> = Omit<AgGridReactProps<T>, "onSelectionChanged"> & {
   footer?: JSX.Element;
   height: number;
   isLoading: boolean;
+  noNeedToApplyPaginationHeight?: boolean;
   onFilterChange?: (event: FilterModel) => void;
+  onGridStateChange?: (state: {
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }) => void;
   onPageChange?: (newPage: number) => void;
   onRowsPerPageChange?: (pageSize: number) => void;
   onSelectionChanged?: (data: string[]) => void;
@@ -102,7 +110,9 @@ export const AgGridV2 = <T,>({
   footer,
   height,
   isLoading,
+  noNeedToApplyPaginationHeight = false,
   onFilterChange,
+  onGridStateChange,
   onPageChange,
   onRowsPerPageChange,
   onSelectionChanged,
@@ -113,6 +123,27 @@ export const AgGridV2 = <T,>({
 }: AgGridV2Props<T>) => {
   const { rowSelection, ...gridProps } = restProps;
 
+  const { isMobile, isNarrowMobile, isTablet } = useGetDeviceType();
+
+  const resolvedFontSize = (() => {
+    if (isTablet || isMobile) {
+      return 11;
+    }
+
+    return 12;
+  })();
+
+  const gridTheme = useMemo(
+    () =>
+      themeBalham.withParams({
+        accentColor,
+        fontSize: resolvedFontSize,
+        headerFontSize: resolvedFontSize,
+        spacing: 4,
+      }),
+    [isMobile, resolvedFontSize]
+  );
+
   const visibleActions = useMemo(
     () => actions.filter(({ isView }) => isView !== false),
     [actions]
@@ -122,10 +153,28 @@ export const AgGridV2 = <T,>({
     return Math.ceil(count / rowsPerPage);
   }, [count, rowsPerPage]);
 
+  const shouldShowPagination = count > defaultPageSize;
+
+  const gridHeight = useGridLayoutHeight({
+    baseHeight: height,
+    noNeedToApplyPaginationHeight,
+    showPagination: shouldShowPagination,
+  });
+
+  const filterModelRef = useRef<FilterModel>({});
+
+  const sortModelRef = useRef<SortModelItem[]>([]);
+
   const RowsPerPageSelector = useMemo(() => {
     return (
-      <Stack direction="row" spacing={5} alignItems="center">
-        <Stack direction="row" spacing={1} alignItems="center">
+      <Stack
+        direction="row"
+        gap={{ md: 2, xs: 1 }}
+        alignItems="center"
+        flexWrap="wrap"
+        justifyContent="flex-end"
+      >
+        <Stack direction="row" gap={1} alignItems="center">
           <Typography variant="body2" fontSize={13} fontWeight={300}>
             Go to page
           </Typography>
@@ -203,10 +252,37 @@ export const AgGridV2 = <T,>({
   }, [defaultColDef]);
 
   const onFilterChanged = (event: FilterChangedEvent<T>) => {
-    if (_isFunction(onFilterChange)) {
-      const filterModel = event.api.getFilterModel();
+    const filterModel = event.api.getFilterModel();
 
-      onFilterChange(filterModel);
+    filterModelRef.current = filterModel;
+
+    if (_isFunction(onGridStateChange)) {
+      onFilterChange?.(filterModel);
+
+      onGridStateChange({
+        filterModel,
+        sortModel: sortModelRef.current,
+      });
+    }
+  };
+
+  const onSortChanged = (event: SortChangedEvent<T>) => {
+    const sortModel: SortModelItem[] = event.api
+      .getColumnState()
+      .filter((c) => c.sort === "asc" || c.sort === "desc")
+      .sort((a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0))
+      .map((c) => ({
+        colId: c.colId,
+        sort: c.sort!,
+      }));
+
+    sortModelRef.current = sortModel;
+
+    if (_isFunction(onGridStateChange)) {
+      onGridStateChange({
+        filterModel: filterModelRef.current,
+        sortModel,
+      });
     }
   };
 
@@ -242,37 +318,50 @@ export const AgGridV2 = <T,>({
     return columnDefs;
   }, [visibleActions.length, columnDefs, actionColumn]);
 
-  const shouldShowPagination = count > defaultPageSize;
-
   return (
     <>
-      <Box
-        height={`calc(100vh - ${shouldShowPagination ? height + 50 : height}px)`}
-      >
+      <Box height={gridHeight}>
         <AgGridReact
           columnDefs={newColDef}
           selectionColumnDef={{ pinned: "left", width: 35 }}
           rowData={rowData}
           defaultColDef={mergedDefaultColDef}
           loading={isLoading}
-          theme={myTheme}
+          theme={gridTheme}
           loadingOverlayComponent={FacebookCircularProgress}
           onFilterChanged={onFilterChanged}
+          onSortChanged={onSortChanged}
           rowSelection={rowSelectionConfig}
           onSelectionChanged={onSelection}
           {...gridProps}
         />
       </Box>
 
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        flexWrap="wrap"
+        gap={1}
+      >
         <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
           {footer}
         </Box>
 
         <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
           {shouldShowPagination && onPageChange && onRowsPerPageChange && (
-            <PadBox padding={{ padding: "8px 25px" }}>
-              <Stack direction="row" spacing={5} alignItems="center">
+            <PadBox
+              padding={{
+                padding: isMobile ? "8px 12px" : "8px 25px",
+              }}
+            >
+              <Stack
+                flexWrap="wrap"
+                direction="row"
+                gap={{ md: 2, xs: 1 }}
+                alignItems="center"
+                justifyContent="flex-end"
+              >
                 {RowsPerPageSelector}
 
                 <Pagination
@@ -281,10 +370,11 @@ export const AgGridV2 = <T,>({
                   variant="outlined"
                   shape="rounded"
                   color="secondary"
-                  siblingCount={1}
+                  siblingCount={isMobile ? 0 : 1}
                   boundaryCount={1}
                   showFirstButton
                   showLastButton
+                  size={isNarrowMobile ? "small" : "medium"}
                   onChange={(_, newPage) => {
                     onPageChange?.(newPage - 1);
                   }}

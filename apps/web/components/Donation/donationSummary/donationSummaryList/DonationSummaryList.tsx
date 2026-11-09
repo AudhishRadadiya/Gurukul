@@ -1,6 +1,10 @@
 import type { DialogRenderer } from "@codezee/sixtify-brahma";
-import { toasts, useDialogActions } from "@codezee/sixtify-brahma";
-import type { FilterModel } from "ag-grid-community";
+import {
+  toasts,
+  useDialogActions,
+  useGetDeviceType,
+} from "@codezee/sixtify-brahma";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import { t } from "i18next";
 import { useRouter } from "next/navigation";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
@@ -22,12 +26,11 @@ import { ExportModule } from "@web/constants/export";
 import { useBranch } from "@web/context/BranchContext";
 import type { FilType } from "@web/types/shared-types";
 import { onError } from "@web/utils/errors";
+import { filterSearchParams } from "@web/utils/helper";
 
 export type DonationSummaryListProps = {
   externalFilter: FieldValues;
-  fromDate: string;
-  onlyContactNo: boolean;
-  toDate: string;
+  search: string;
 };
 
 export type DonationSummaryListHandle = {
@@ -37,15 +40,20 @@ export type DonationSummaryListHandle = {
 export const DonationSummaryList = forwardRef<
   DonationSummaryListHandle,
   DonationSummaryListProps
->(({ externalFilter, fromDate, onlyContactNo, toDate }, ref) => {
+>(({ externalFilter, search }, ref) => {
   const router = useRouter();
+
+  const { isMobile } = useGetDeviceType();
 
   const { branchIds } = useBranch();
 
   const { onPageChange, onRowsPerPageChange, page, rowsPerPage } =
     usePaginationParams();
 
-  const [agGridFilterModel, setAgGridFilterModel] = useState<FilterModel>({});
+  const [agGridState, setAgGridState] = useState<{
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }>({ filterModel: {}, sortModel: [] });
 
   const startRow = page * rowsPerPage;
 
@@ -58,17 +66,18 @@ export const DonationSummaryList = forwardRef<
     externalFilter: {
       ...externalFilter,
       branch_id: [branchIds],
-      from_date: fromDate,
-      only_contact_no: onlyContactNo,
-      to_date: toDate,
     },
-    filterModel: agGridFilterModel,
+    filterModel: agGridState.filterModel,
+    quickFilter: filterSearchParams(search),
+    sortModel: agGridState.sortModel,
     startRow,
   });
 
   const { donationSummary: rowData, totalCount = 0 } = data ?? {};
 
-  const { column } = useDonationSummaryColumns({ onlyContactNo });
+  const { column } = useDonationSummaryColumns({
+    onlyContactNo: externalFilter.only_contact_no,
+  });
 
   const resetExportStateRef = useRef<(() => void) | null>(null);
 
@@ -113,11 +122,10 @@ export const DonationSummaryList = forwardRef<
     externalFilter: {
       ...externalFilter,
       branch_id: [branchIds],
-      from_date: fromDate,
-      only_contact_no: onlyContactNo,
-      to_date: toDate,
     },
-    filterModel: agGridFilterModel,
+    filterModel: agGridState.filterModel,
+    quickFilter: filterSearchParams(search),
+    sortModel: agGridState.sortModel,
     startRow: 0,
   });
 
@@ -156,17 +164,15 @@ export const DonationSummaryList = forwardRef<
         columnDefs={column}
         rowsPerPage={rowsPerPage}
         onPageChange={onPageChange}
-        onFilterChange={setAgGridFilterModel}
+        onGridStateChange={setAgGridState}
         onRowsPerPageChange={onRowsPerPageChange}
-        height={290}
+        height={isMobile ? 250 : 235}
         actions={[
           {
             onClick: (data) => {
               const query: FieldValues = buildQuery({
                 ...externalFilter,
                 contact_no: data.contact_no,
-                from_date: fromDate,
-                to_date: toDate,
               });
 
               const params = new URLSearchParams(query).toString();

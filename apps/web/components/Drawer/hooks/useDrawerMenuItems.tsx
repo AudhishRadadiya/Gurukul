@@ -1,8 +1,12 @@
 import {
   SettingIcon,
+  SvgDonation,
+  SvgEvent,
   SvgHome,
   SvgOrganization,
+  SvgPermission,
   SvgProfile,
+  SvgReports,
   type DrawerProps,
 } from "@codezee/sixtify-brahma";
 import { t } from "i18next";
@@ -60,6 +64,12 @@ export const useDrawerMenuItems = () => {
           title: "User Master",
         },
         {
+          isView: validateAccess(permissions.webUserMaster),
+          key: "web-user-master",
+          onClick: (href, target) => onClick(href, target),
+          title: "Web User Master",
+        },
+        {
           isView: validateAccess(permissions.userLoginReport),
           key: "user-login-report",
           onClick: (href, target) => onClick(href, target),
@@ -70,7 +80,7 @@ export const useDrawerMenuItems = () => {
       title: "User",
     },
     {
-      icon: <SvgProfile />,
+      icon: <SvgPermission />,
       isView: validateAccess(permissions.permissions),
       key: "permission",
       menuItems: [
@@ -90,7 +100,7 @@ export const useDrawerMenuItems = () => {
       title: t("permission.menu.label"),
     },
     {
-      icon: <SvgOrganization />,
+      icon: <SvgDonation />,
       isView: validateAccess(permissions.donation),
       key: "donation",
       menuItems: [
@@ -113,6 +123,12 @@ export const useDrawerMenuItems = () => {
           title: t("donation.entry.label"),
         },
         {
+          isView: validateAccess(permissions.donationEntry),
+          key: "donation-list",
+          onClick: (href, target) => onClick(href, target),
+          title: t("donation.list.label"),
+        },
+        {
           isView: validateAccess(permissions.donationImportFromExcel),
           key: "donation-import",
           onClick: (href, target) => onClick(href, target),
@@ -131,7 +147,7 @@ export const useDrawerMenuItems = () => {
       title: t("donation.menu.label"),
     },
     {
-      icon: <SvgHome />,
+      icon: <SvgEvent />,
       isView: validateAccess(permissions.event),
       key: "event",
       menuItems: [
@@ -161,13 +177,19 @@ export const useDrawerMenuItems = () => {
           isView: validateAccess(permissions.eventItemSummary),
           key: "event-item-summary",
           onClick: (href, target) => onClick(href, target),
-          title: t("event.item.summary.label"),
+          title: t("item.amount.summary.label"),
         },
         {
           isView: validateAccess(permissions.eventDropdownReport),
           key: "event-dropdown-summary",
           onClick: (href, target) => onClick(href, target),
-          title: t("event.dropdown.summary.label"),
+          title: t("form.options.summary.label"),
+        },
+        {
+          isView: validateAccess(permissions.eventContactDetail),
+          key: "event-contact-group",
+          onClick: (href, target) => onClick(href, target),
+          title: "Event Contact Group",
         },
       ],
       onClick: (href, target) => onClick(href, target),
@@ -199,6 +221,12 @@ export const useDrawerMenuItems = () => {
           }),
         },
         {
+          isView: validateAccess(permissions.hastakList),
+          key: "hastak",
+          onClick: (href, target) => onClick(href, target),
+          title: t("hastak.list.label"),
+        },
+        {
           isView: validateAccess(permissions.updateDonarAddress),
           key: "update-donor-address",
           onClick: (href, target) => onClick(href, target),
@@ -211,7 +239,7 @@ export const useDrawerMenuItems = () => {
       title: t("address.menu.label"),
     },
     {
-      icon: <SvgProfile />,
+      icon: <SvgReports />,
       isView: validateAccess(permissions.report),
       key: "report",
       menuItems: [
@@ -232,6 +260,12 @@ export const useDrawerMenuItems = () => {
           key: "donation-report",
           onClick: (href, target) => onClick(href, target),
           title: t("donation.report.menu.label"),
+        },
+        {
+          isView: validateAccess(permissions.whatsappHistory),
+          key: "whatsapp-history",
+          onClick: (href, target) => onClick(href, target),
+          title: t("common.whatsapp.history.label"),
         },
       ],
       onClick: (href, target) => onClick(href, target),
@@ -297,6 +331,18 @@ export const useDrawerMenuItems = () => {
           title: "Financial Year Master",
         },
         {
+          isView: validateAccess(permissions.atgCertificate),
+          key: "80G-certificate",
+          onClick: (href, target) => onClick(href, target),
+          title: "80G Certificate",
+        },
+        {
+          isView: validateAccess(permissions.csrCertificate),
+          key: "csr-certificate",
+          onClick: (href, target) => onClick(href, target),
+          title: t("csr.certificate.title"),
+        },
+        {
           isView: validateAccess(permissions.masterParameter),
           key: "master-entry",
           onClick: (href, target) => onClick(href, target),
@@ -357,6 +403,18 @@ export const useDrawerMenuItems = () => {
           key: "whatsapp-setting",
           onClick: (href, target) => onClick(href, target),
           title: t("whatsappSetting.label"),
+        },
+        {
+          isView: validateAccess(permissions.metaWhatsappSettings),
+          key: "meta-whatsapp-setting",
+          onClick: (href, target) => onClick(href, target),
+          title: "Meta whatsapp Setting",
+        },
+        {
+          isView: validateAccess(permissions.metaWhatsappTemplate),
+          key: "meta-whatsapp-template",
+          onClick: (href, target) => onClick(href, target),
+          title: t("metaWhatsappTemplate.label"),
         },
       ],
       onClick: (href, target) => onClick(href, target),

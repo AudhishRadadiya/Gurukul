@@ -1,9 +1,13 @@
 import { t } from "i18next";
 
+import { useGetTrueFalseOptions } from "@web/components/common/Autocomplete/hooks/useGetTrueFalseOptions";
 import type { DonationMode } from "@web/components/settings/DonationMode/DonationModeList/hooks/useGetDonationMode";
 import type { AgColumnsWithActions } from "@web/types/agGrid";
+import { CustomEnumFilter } from "@web/utils/ag-grid-custom-filter";
 
 export const useDonationModeColumns = () => {
+  const { trueFalseOptions } = useGetTrueFalseOptions();
+
   const column: AgColumnsWithActions<DonationMode> = [
     {
       field: "donation_mode_name",
@@ -29,11 +33,21 @@ export const useDonationModeColumns = () => {
     },
     {
       field: "is_active",
+      filter: CustomEnumFilter,
+      filterParams: {
+        filterOptions: trueFalseOptions,
+        source: "server",
+      },
       headerName: t("isActive.label"),
       maxWidth: 180,
     },
     {
       field: "is_bank",
+      filter: CustomEnumFilter,
+      filterParams: {
+        filterOptions: trueFalseOptions,
+        source: "server",
+      },
       headerName: t("isBank.label"),
       maxWidth: 180,
     },

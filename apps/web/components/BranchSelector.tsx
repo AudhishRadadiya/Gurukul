@@ -80,7 +80,7 @@ export const BranchSelector = ({ onBranchChange }: BranchSelectorProps) => {
       control={control}
       clearIcon={false}
       options={branchOptions}
-      sx={{ width: "200px" }}
+      sx={{ width: "100%" }}
       name="branchId"
     />
   );

@@ -53,6 +53,7 @@ export const useGetFamilyMemberColumns = ({
         return !value ? AG_GRID_CELL_DEFAULT_VALUE : dateFormat(value, true);
       },
       field: "birthdate",
+      filter: "agDateColumnFilter",
       headerName: t("common.birth.date"),
       hide: !birthdate,
     },
@@ -63,12 +64,13 @@ export const useGetFamilyMemberColumns = ({
     },
     {
       field: "age",
+      filter: "agNumberColumnFilter",
       headerName: t("common.age"),
       hide: !age,
     },
     {
       field: "relation",
-      headerName: t("common.remark"),
+      headerName: t("common.relation"),
       hide: !relation,
     },
     {

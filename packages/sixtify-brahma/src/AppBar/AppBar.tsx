@@ -22,7 +22,7 @@ export const AppBar = ({
       >
         <PadBox
           padding={{
-            padding: { lg: "0 20px", xs: "0px 5px" },
+            padding: { lg: "0 20px", md: "0 16px", xs: "0 8px" },
           }}
         >
           {children}

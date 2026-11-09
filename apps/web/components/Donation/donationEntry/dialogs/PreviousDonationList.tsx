@@ -24,8 +24,6 @@ export const donationEntryFields = [
   "city",
   "email_id",
   "pan_no",
-  "driving_licence_no",
-  "aadhar_no",
   "pincode",
 ] as const;
 
@@ -88,7 +86,7 @@ export const PreviousDonationList = ({
       }
     });
 
-    clearErrors(donationEntryFields);
+    clearErrors([...donationEntryFields]);
     setToggleDonationEntryList(false);
   };
 

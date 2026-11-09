@@ -23,6 +23,7 @@ export const useDonationReceiptEntryListColumns = ({
         return !value ? AG_GRID_CELL_DEFAULT_VALUE : dateFormat(value, true);
       },
       field: "date",
+      filter: "agDateColumnFilter",
       headerName: t("common.book", {
         label: t("date.label"),
       }),

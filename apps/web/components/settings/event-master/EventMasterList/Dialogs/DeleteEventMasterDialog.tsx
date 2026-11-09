@@ -2,7 +2,7 @@ import { DeleteDialog, toasts } from "@codezee/sixtify-brahma";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteEventMaster } from "@web/components/settings/event-master/EventMasterList/Dialogs/hooks/useDeleteEventMaster";
-import type { EventMasterDetail } from "@web/components/settings/event-master/EventMasterList/hooks/useGetEventMaster";
+import type { EventMasterDetail } from "@web/components/settings/event-master/EventMasterList/hooks/useGetActiveEventMaster";
 import { onError } from "@web/utils/errors";
 
 type DeleteEventMasterDialogProps = {

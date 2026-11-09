@@ -1,5 +1,9 @@
-import { Button, Dialog, toasts } from "@codezee/sixtify-brahma";
-import { Stack } from "@mui/material";
+import {
+  Button,
+  ButtonContainer,
+  Dialog,
+  toasts,
+} from "@codezee/sixtify-brahma";
 import { t } from "i18next";
 import { useMemo, useRef } from "react";
 
@@ -81,7 +85,7 @@ export const EditSmsTemplateDialog = ({
         label: t("sms.template.menu.label"),
       })}
       actions={
-        <Stack direction="row" gap="5px">
+        <ButtonContainer>
           <Button onClick={onClose} variant="outlined">
             Cancel
           </Button>
@@ -91,7 +95,7 @@ export const EditSmsTemplateDialog = ({
             loading={isPending}
             disabled={isDisabled()}
           />
-        </Stack>
+        </ButtonContainer>
       }
     >
       <SmsTemplateForm

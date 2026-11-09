@@ -1,8 +1,9 @@
 import { SaveDialog, toasts } from "@codezee/sixtify-brahma";
 import { t } from "i18next";
+import _isEmpty from "lodash/isEmpty";
 
 import { useCloneEventMaster } from "@web/components/settings/event-master/EventMasterList/Dialogs/hooks/useCloneEventMaster";
-import type { EventMasterDetail } from "@web/components/settings/event-master/EventMasterList/hooks/useGetEventMaster";
+import type { EventMasterDetail } from "@web/components/settings/event-master/EventMasterList/hooks/useGetActiveEventMaster";
 import { onError } from "@web/utils/errors";
 
 type CloneEventMasterDialogProps = {
@@ -22,10 +23,17 @@ export const CloneEventMasterDialog = ({
     eventMasterId: event.event_master_id,
     options: {
       onError: (error) => onError(error),
-      onSuccess: (data) => {
+
+      onSuccess: ({ data, message }) => {
+        if (!_isEmpty(data?.links)) {
+          data.links.forEach((link) => {
+            window.open(link, "_blank");
+          });
+        }
+
         onClose();
         onCloneSuccess();
-        toasts.success({ title: data.message });
+        toasts.success({ title: message });
       },
     },
   });

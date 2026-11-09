@@ -1,6 +1,7 @@
 import { InputLabel, Stack, Typography, useTheme } from "@mui/material";
 import { isFunction } from "lodash";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import type { DragEvent } from "react";
 import type {
   FieldError,
   FieldValues,
@@ -64,57 +65,98 @@ export function FileUpload<P extends FieldValues>({
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // eslint-disable-next-line sonarjs/cognitive-complexity
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const files = Array.from(event.target.files);
+  const [isDragging, setIsDragging] = useState(false);
 
-      const uploadFiles: File[] = [];
+  const processFiles = (files: File[]) => {
+    const selectedFiles = multiple ? files : files.slice(0, 1);
 
-      const inValidFiles: string[] = [];
+    const uploadFiles: File[] = [];
 
-      let isShowError: boolean = false;
+    const inValidFiles: string[] = [];
 
-      for (const element of files) {
-        if (!isFileSizeValid(element, size)) {
-          isShowError = true;
+    let isShowError = false;
 
-          inValidFiles.push(
-            t("fileUpload.fileSize.error.message", {
-              fileName: element.name,
-              fileSize: size,
-            })
-          );
-        } else if (accept.length && !isFileTypeValid(element, accept)) {
-          isShowError = true;
+    for (const element of selectedFiles) {
+      if (!isFileSizeValid(element, size)) {
+        isShowError = true;
 
-          inValidFiles.push(
-            t("fileUpload.fileType.error.message", {
-              fileName: element.name,
-            })
-          );
-        } else {
-          uploadFiles.push(element);
-        }
-      }
+        inValidFiles.push(
+          t("fileUpload.fileSize.error.message", {
+            fileName: element.name,
+            fileSize: size,
+          })
+        );
+      } else if (accept.length && !isFileTypeValid(element, accept)) {
+        isShowError = true;
 
-      if (isShowError) {
-        if (isFunction(setError)) {
-          setError(name, {
-            type: error_with_transaltion,
-            message: inValidFiles.join("\n"),
-          });
-        }
-
-        return;
-      }
-
-      if (uploadFiles?.length > 0) {
-        onChange(uploadFiles);
-
-        event.target.value = "";
+        inValidFiles.push(
+          t("fileUpload.fileType.error.message", {
+            fileName: element.name,
+          })
+        );
+      } else {
+        uploadFiles.push(element);
       }
     }
+
+    if (isShowError) {
+      if (isFunction(setError)) {
+        setError(name, {
+          type: error_with_transaltion,
+          message: inValidFiles.join("\n"),
+        });
+      }
+
+      return;
+    }
+
+    if (uploadFiles.length > 0) {
+      onChange(uploadFiles);
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      processFiles(Array.from(event.target.files));
+
+      event.target.value = "";
+    }
+  };
+
+  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  const handleDragEnter = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!isDisabled) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (event.currentTarget === event.target) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    setIsDragging(false);
+
+    if (isDisabled || !event.dataTransfer.files.length) {
+      return;
+    }
+
+    processFiles(Array.from(event.dataTransfer.files));
   };
 
   if (loading) {
@@ -128,9 +170,14 @@ export function FileUpload<P extends FieldValues>({
       </InputLabel>
 
       <FileUploadContainer
-        onClick={() => inputRef.current?.click()}
+        onClick={() => !isDisabled && inputRef.current?.click()}
+        onDragOver={handleDragOver}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         error={error}
         disabled={isDisabled}
+        isDragging={isDragging}
         {...restProps}
       >
         <PadBox padding={{ padding: "20px" }}>

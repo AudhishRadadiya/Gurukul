@@ -1,18 +1,28 @@
-import { FormContainer } from "@codezee/sixtify-brahma";
+import { FormContainer, PhoneInputField } from "@codezee/sixtify-brahma";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import type { ForwardedRef } from "react";
-import { forwardRef, useImperativeHandle } from "react";
+import { forwardRef, useImperativeHandle, useMemo } from "react";
 import type { UseFormSetError } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import type { MasterTypeOptionType } from "@web/components/common/Autocomplete/hooks/useGetMasterTypeOptions";
 import { MasterEntryAutocomplete } from "@web/components/common/Autocomplete/MasterEntryAutocomplete";
 import { MasterTypeAutocomplete } from "@web/components/common/Autocomplete/MasterTypeAutocomplete";
 import { useEnableDisableButton } from "@web/hooks/useEnableDisableButton";
+import { masterTypeKeys } from "@web/queryKeysFactories/masterType";
 import { errorMessages, filterChangedFormFields } from "@web/utils/helper";
+import { isValidMobileNumber } from "@web/utils/mobileNumberValidate";
 
 const MasterEntryFromSchema = z.object({
+  contact_number: z
+    .string()
+    .refine(isValidMobileNumber, {
+      message: "common.mobileNumber.invalid",
+    })
+    .nullable(),
   master_type_id: z
     .string()
     .nullable()
@@ -42,6 +52,7 @@ export type FormRef = {
 };
 
 const formDefaultValues: MasterEntryFormFieldValues = {
+  contact_number: null,
   master_type_id: null,
   name: null,
 };
@@ -60,11 +71,34 @@ export const MasterEntryForm = forwardRef(
       handleSubmit,
       setError,
       setValue,
+      watch,
     } = useForm({
       mode: "all",
       resolver: zodResolver(MasterEntryFromSchema),
       values: defaultValues,
     });
+
+    const masterTypeId = watch("master_type_id");
+
+    const { data: MasterTypeOptions = [] } = useQuery<MasterTypeOptionType[]>({
+      enabled: false,
+      queryFn: () => {
+        return [];
+      },
+      queryKey: masterTypeKeys.options(),
+    });
+
+    const isHastakMasterType = useMemo(() => {
+      if (masterTypeId) {
+        const selectedMasterType = MasterTypeOptions.find(
+          (option) => option.value === masterTypeId
+        );
+
+        return selectedMasterType?.is_hastak;
+      }
+
+      return false;
+    }, [masterTypeId]);
 
     useEnableDisableButton({ control, defaultValues, errors });
 
@@ -82,7 +116,7 @@ export const MasterEntryForm = forwardRef(
       },
     }));
 
-    const { master_type_id, name } = errors;
+    const { contact_number, master_type_id, name } = errors;
 
     return (
       <FormContainer>
@@ -106,6 +140,17 @@ export const MasterEntryForm = forwardRef(
           error={!!name}
           helperText={errorMessages(name?.message)}
         />
+
+        {isHastakMasterType && (
+          <PhoneInputField
+            name="contact_number"
+            control={control}
+            label={t("contactNumber.label")}
+            loading={loading}
+            error={!!contact_number}
+            helperText={errorMessages(contact_number?.message)}
+          />
+        )}
       </FormContainer>
     );
   }

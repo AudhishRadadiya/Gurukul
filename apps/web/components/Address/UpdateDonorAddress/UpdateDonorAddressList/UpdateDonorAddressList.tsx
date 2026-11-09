@@ -1,5 +1,7 @@
+import { useGetDeviceType } from "@codezee/sixtify-brahma";
+import { Box } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
-import type { FilterModel } from "ag-grid-community";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import { t } from "i18next";
 import { useState } from "react";
 import type { FieldValues } from "react-hook-form";
@@ -13,30 +15,41 @@ import { useBranch } from "@web/context/BranchContext";
 import { updateDonorAddressKeys } from "@web/queryKeysFactories/updateDonorAddress";
 import type { DialogRenderer } from "@web/types/dialogs";
 import { useDialogActions } from "@web/types/useDialogActions";
+import { filterSearchParams } from "@web/utils/helper";
 
 export type UpdateDonorAddressListProps = {
-  agGridFilterModel: FilterModel;
+  agGridState: {
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  };
   endRow: number;
   externalFilter: FieldValues;
   onPageChange: (newPage: number) => void;
   onRowsPerPageChange: (newRows: number) => void;
   page: number;
   rowsPerPage: number;
-  setAgGridFilterModel: (data: FilterModel) => void;
+  search: string;
+  setAgGridState: (data: {
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }) => void;
   startRow: number;
 };
 
 export const UpdateDonorAddressList = ({
-  agGridFilterModel,
+  agGridState,
   endRow,
   externalFilter,
   onPageChange,
   onRowsPerPageChange,
   page,
   rowsPerPage,
-  setAgGridFilterModel,
+  search,
+  setAgGridState,
   startRow,
 }: UpdateDonorAddressListProps) => {
+  const { isMobile } = useGetDeviceType();
+
   const { branchIds } = useBranch();
 
   const queryClient = useQueryClient();
@@ -48,7 +61,9 @@ export const UpdateDonorAddressList = ({
   const { data, isFetching } = useGetUpdateDonorAddress({
     endRow,
     externalFilter: { ...externalFilter, branch_id: [branchIds] },
-    filterModel: agGridFilterModel,
+    filterModel: agGridState.filterModel,
+    quickFilter: filterSearchParams(search),
+    sortModel: agGridState.sortModel,
     startRow,
   });
 
@@ -73,28 +88,30 @@ export const UpdateDonorAddressList = ({
 
   return (
     <>
-      <AgGridV2<MismatchedAddressList>
-        getRowId={(params) => params.data.donation_id}
-        isLoading={isFetching}
-        page={page}
-        columnDefs={column}
-        rowsPerPage={rowsPerPage}
-        rowData={mismatchedAddressList}
-        onPageChange={onPageChange}
-        count={totalCount}
-        onRowsPerPageChange={onRowsPerPageChange}
-        onFilterChange={setAgGridFilterModel}
-        height={200}
-        actions={[
-          {
-            onClick: (data) => {
-              onDialogOpen("delete");
-              setCurrentAddress(data);
+      <Box sx={{ overflow: "hidden", width: "100%" }}>
+        <AgGridV2<MismatchedAddressList>
+          getRowId={(params) => params.data.donation_id}
+          isLoading={isFetching}
+          page={page}
+          columnDefs={column}
+          rowsPerPage={rowsPerPage}
+          rowData={mismatchedAddressList}
+          onPageChange={onPageChange}
+          count={totalCount}
+          onRowsPerPageChange={onRowsPerPageChange}
+          onGridStateChange={setAgGridState}
+          height={isMobile ? 300 : 230}
+          actions={[
+            {
+              onClick: (data) => {
+                onDialogOpen("delete");
+                setCurrentAddress(data);
+              },
+              title: t("common.update.label"),
             },
-            title: t("common.update.label"),
-          },
-        ]}
-      />
+          ]}
+        />
+      </Box>
       {openedDialog && dialogRenderer[openedDialog]}
     </>
   );

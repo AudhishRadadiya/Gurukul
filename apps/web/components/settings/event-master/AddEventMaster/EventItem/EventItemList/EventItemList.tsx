@@ -64,7 +64,7 @@ export const EventItemList = ({
           );
 
           if (isDuplicateSequence) {
-            toasts.warning({ title: t("unique.sequence.message") });
+            toasts.warning({ title: t("common.unique.sequence.message") });
 
             return;
           }
@@ -92,7 +92,7 @@ export const EventItemList = ({
         rowData={eventItemFormValues}
         rowModelType="clientSide"
         columnDefs={column}
-        height={600}
+        height={550}
         actions={[
           {
             onClick: (data) => {

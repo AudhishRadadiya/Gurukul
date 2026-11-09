@@ -18,9 +18,15 @@ export type SimpleColDef = Pick<
   | "pinned"
 >;
 
+export type SmartGridColumnDef = {
+  accessorKey?: string;
+  header?: string;
+  hide?: boolean;
+};
+
 export type ColumnArrangerDialogProps<T extends Record<string, boolean>> = {
   open: boolean;
-  columns: SimpleColDef[];
+  columns: Array<SimpleColDef | SmartGridColumnDef>;
   onClose: OnAction;
   title?: string;
   onSave: (args: T) => void;

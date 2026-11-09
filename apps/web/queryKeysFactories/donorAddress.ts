@@ -6,6 +6,8 @@ export const donorAddressKeys = {
 
   all: ["donor-address-list"],
 
+  convert: () => [...donorAddressKeys.all, "convert"] as const,
+
   edit: () => [...donorAddressKeys.all, "edit"] as const,
 
   export: () => [...donorAddressKeys.all, "export"] as const,

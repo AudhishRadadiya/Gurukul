@@ -57,7 +57,7 @@ export const AddAddressTypeDialog = ({
       open={open}
       title="Add Address Type"
       actions={
-        <ButtonContainer>
+        <ButtonContainer columnsOnMobile={2}>
           <Button onClick={onClose} variant="outlined">
             {t("common.cancel.button")}
           </Button>

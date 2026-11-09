@@ -1,4 +1,4 @@
-import { AgGrid } from "@codezee/sixtify-brahma";
+import { AgGrid, useGetDeviceType } from "@codezee/sixtify-brahma";
 import { useState } from "react";
 import type { UseFormSetValue } from "react-hook-form";
 
@@ -19,6 +19,8 @@ export const BankDetailList = ({
   bankDetailFormValues,
   setValue,
 }: BankDetailListProps) => {
+  const { isMobile } = useGetDeviceType();
+
   const [currentBankDetail, setCurrentBankDetail] =
     useState<BankDetailFormFieldValues>();
 
@@ -69,7 +71,7 @@ export const BankDetailList = ({
         rowData={bankDetailFormValues}
         rowModelType="clientSide"
         columnDefs={column}
-        height="calc(100vh - 600px)"
+        height={isMobile ? "220px" : "calc(100vh - 600px)"}
       />
 
       {openedDialog && dialogRenderer[openedDialog]}

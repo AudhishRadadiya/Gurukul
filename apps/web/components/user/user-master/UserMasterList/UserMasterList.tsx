@@ -1,4 +1,5 @@
-import type { FilterModel } from "ag-grid-community";
+import { useGetDeviceType } from "@codezee/sixtify-brahma";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import { t } from "i18next";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -21,10 +22,17 @@ export const UserMasterList = () => {
 
   const { validateAccess } = useUserPermissions();
 
+  const { layout } = useGetDeviceType();
+
+  const isMobile = layout === "mobile";
+
   const { onPageChange, onRowsPerPageChange, page, rowsPerPage } =
     usePaginationParams();
 
-  const [agGridFilterModel, setAgGridFilterModel] = useState<FilterModel>({});
+  const [agGridState, setAgGridState] = useState<{
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }>({ filterModel: {}, sortModel: [] });
 
   const startRow = page * rowsPerPage;
 
@@ -36,7 +44,8 @@ export const UserMasterList = () => {
 
   const { data, isFetching, refetch } = useGetUserMaster({
     endRow,
-    filterModel: agGridFilterModel,
+    filterModel: agGridState.filterModel,
+    sortModel: agGridState.sortModel,
     startRow,
   });
 
@@ -68,8 +77,8 @@ export const UserMasterList = () => {
         onPageChange={onPageChange}
         count={totalCount}
         onRowsPerPageChange={onRowsPerPageChange}
-        onFilterChange={setAgGridFilterModel}
-        height={200}
+        onGridStateChange={setAgGridState}
+        height={isMobile ? 130 : 160}
         actions={[
           {
             isView: validateAccess(USER_MASTER_PERMISSION.EDIT),

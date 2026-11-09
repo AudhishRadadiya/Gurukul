@@ -27,6 +27,7 @@ export type AllowedCharacterType =
   | "string-dots-hyphens"
   | "string"
   | "string-hyphens"
+  | "string-number-hyphens"
   | "string-number"
   | "string-number-special"
   | "any-character"
@@ -40,6 +41,7 @@ export const characterTypeMessages: Record<AllowedCharacterType, string> = {
   string: "Only alphabetic characters are allowed.",
   "string-dots-hyphens": "Only letters, dots, and hyphens are allowed.",
   "string-hyphens": "Only letters and hyphens are allowed.",
+  "string-number-hyphens": "Only letters, numbers, and hyphens are allowed.",
   "string-number": "Only letters and numbers are allowed.",
   "string-number-special": "Special characters are allowed.",
   "string-special":
@@ -117,6 +119,9 @@ export function TextField<P extends FieldValues>({
 
       case "string-hyphens":
         return /^[A-Za-z-]*$/;
+
+      case "string-number-hyphens":
+        return /^[A-Za-z0-9-]*$/;
 
       case "string-number":
         return /^[A-Za-z0-9\s]*$/;

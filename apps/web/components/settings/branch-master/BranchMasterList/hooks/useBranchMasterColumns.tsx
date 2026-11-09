@@ -1,9 +1,13 @@
 import { t } from "i18next";
 
+import { useGetTrueFalseOptions } from "@web/components/common/Autocomplete/hooks/useGetTrueFalseOptions";
 import type { Branch } from "@web/components/settings/branch-master/BranchMasterList/hooks/useGetBranchMaster";
 import type { AgColumnsWithActions } from "@web/types/agGrid";
+import { CustomEnumFilter } from "@web/utils/ag-grid-custom-filter";
 
 export const useBranchMasterColumns = () => {
+  const { trueFalseOptions } = useGetTrueFalseOptions();
+
   const column: AgColumnsWithActions<Branch> = [
     {
       field: "branch_name",
@@ -35,10 +39,20 @@ export const useBranchMasterColumns = () => {
     },
     {
       field: "is_active",
+      filter: CustomEnumFilter,
+      filterParams: {
+        filterOptions: trueFalseOptions,
+        source: "server",
+      },
       headerName: t("isActive.label"),
     },
     {
       field: "is_online",
+      filter: CustomEnumFilter,
+      filterParams: {
+        filterOptions: trueFalseOptions,
+        source: "server",
+      },
       headerName: t("isOnline.label"),
     },
   ];

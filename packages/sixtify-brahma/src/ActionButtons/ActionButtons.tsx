@@ -2,7 +2,7 @@ import type { StackProps, SxProps } from "@mui/material";
 import { Button, IconButton, Menu, MenuItem, Stack } from "@mui/material";
 import _noop from "lodash/noop";
 import { Fragment, useRef, useState } from "react";
-import { useGlobalKeyboardShortcut } from "../utils";
+import { useGetDeviceType, useGlobalKeyboardShortcut } from "../utils";
 import type { ActionButton, DataProps } from "./types";
 
 export type ActionButtonsProps = DataProps & {
@@ -22,6 +22,10 @@ export function ActionButtons({
   shouldOpenMenuOnShortcut = false,
   shortcutKey = "a",
 }: ActionButtonsProps) {
+  const { isMobile } = useGetDeviceType();
+
+  const buttonSize = isMobile ? "small" : "medium";
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const [openMenuKey, setOpenMenuKey] = useState<string | null>(null);
@@ -89,12 +93,13 @@ export function ActionButtons({
             <Fragment key={key}>
               {button.label ? (
                 <Button
-                  sx={buttonSx}
                   key={key}
-                  {...buttonProps}
+                  sx={buttonSx}
                   ref={(el) => {
                     buttonRefs.current[key] = el;
                   }}
+                  size={buttonSize}
+                  {...buttonProps}
                 >
                   {button.label}
                 </Button>
@@ -104,6 +109,7 @@ export function ActionButtons({
                   ref={(el) => {
                     buttonRefs.current[key] = el;
                   }}
+                  size={buttonSize}
                   {...buttonProps}
                 >
                   {button.icon}

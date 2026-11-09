@@ -1,6 +1,7 @@
 import type { FilterListType } from "@codezee/sixtify-brahma";
 import { FilterListV2 } from "@codezee/sixtify-brahma";
 import { t } from "i18next";
+import _isEmpty from "lodash/isEmpty";
 import { useMemo, useState } from "react";
 import type { FieldValues } from "react-hook-form";
 
@@ -8,16 +9,22 @@ import { useGetTrustOptions } from "@web/components/common/Autocomplete/hooks/us
 
 type DonationSummaryFilterProps = {
   filterListData: FieldValues;
-  setFilterListData: (data: FieldValues) => void;
+  handleApplyFilter: (data: FieldValues) => void;
 };
 
 export const DonationSummaryFilter = ({
   filterListData,
-  setFilterListData,
+  handleApplyFilter,
 }: DonationSummaryFilterProps) => {
   const [currentFilter, setCurrentFilter] = useState<FieldValues>();
 
   const { data: trustOptions } = useGetTrustOptions({ useShortName: true });
+
+  useMemo(() => {
+    if (!_isEmpty(filterListData)) {
+      setCurrentFilter(filterListData);
+    }
+  }, [filterListData]);
 
   const filterListItems: FilterListType[] = useMemo(
     () => [
@@ -38,9 +45,13 @@ export const DonationSummaryFilter = ({
     }
   };
 
+  const onApply = (data: FieldValues) => {
+    handleApplyFilter(data);
+  };
+
   const onClear = () => {
     setCurrentFilter({});
-    setFilterListData({});
+    handleApplyFilter({});
   };
 
   return (
@@ -48,7 +59,7 @@ export const DonationSummaryFilter = ({
       filterListItems={filterListItems}
       filterListData={filterListData}
       onChange={onChange}
-      onApply={setFilterListData}
+      onApply={onApply}
       onClear={onClear}
     />
   );

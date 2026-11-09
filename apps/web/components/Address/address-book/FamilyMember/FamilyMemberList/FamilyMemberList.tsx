@@ -5,9 +5,10 @@ import {
   PadBox,
   toasts,
   useDialogActions,
+  useGetDeviceType,
 } from "@codezee/sixtify-brahma";
 import { Box, Stack } from "@mui/material";
-import type { FilterModel } from "ag-grid-community";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import { t } from "i18next";
 import { useState } from "react";
 
@@ -39,6 +40,8 @@ export const FamilyMemberList = ({
 }: FamilyMemberListProps) => {
   const { allowPrintExport } = useUserPermissions();
 
+  const { isMobile } = useGetDeviceType();
+
   const { onDialogClose, onDialogOpen, openedDialog } = useDialogActions();
 
   const { onPageChange, onRowsPerPageChange, page, rowsPerPage } =
@@ -46,7 +49,10 @@ export const FamilyMemberList = ({
 
   const { branchIds } = useBranch();
 
-  const [agGridFilterModel, setAgGridFilterModel] = useState<FilterModel>({});
+  const [agGridState, setAgGridState] = useState<{
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }>({ filterModel: {}, sortModel: [] });
 
   const startRow = page * rowsPerPage;
 
@@ -55,7 +61,8 @@ export const FamilyMemberList = ({
   const { data, isFetching } = useGetFamilyMember({
     endRow,
     externalFilter: { branch_id: [branchIds] },
-    filterModel: agGridFilterModel,
+    filterModel: agGridState.filterModel,
+    sortModel: agGridState.sortModel,
     startRow,
   });
 
@@ -86,7 +93,8 @@ export const FamilyMemberList = ({
         externalFilter: {
           branch_id: [branchIds],
         },
-        filterModel: agGridFilterModel,
+        filterModel: agGridState.filterModel,
+        sortModel: agGridState.sortModel,
         startRow: 0,
       },
       fileType,
@@ -109,34 +117,42 @@ export const FamilyMemberList = ({
 
   return (
     <>
-      <PadBox padding={{ padding: "3px 5px" }}>
-        <Box display="flex" justifyContent="flex-end">
-          <Stack direction="row" gap="15px">
-            <PermissionGuard canAccess={allowPrintExport}>
-              <DataExport onExport={onExport} />
-            </PermissionGuard>
+      <PadBox padding={{ padding: { md: "3px 5px", xs: "8px 10px" } }}>
+        <Stack
+          direction="row"
+          gap={1}
+          justifyContent={{ md: "flex-end", xs: "flex-start" }}
+          alignItems="center"
+          flexWrap="wrap"
+        >
+          <PermissionGuard canAccess={allowPrintExport}>
+            <DataExport onExport={onExport} />
+          </PermissionGuard>
 
+          <Box sx={{ flexShrink: 0, ml: { md: 0, xs: "auto" } }}>
             <ColumnIconAction
               onClick={() => {
                 onDialogOpen("columnChooser");
               }}
             />
-          </Stack>
-        </Box>
+          </Box>
+        </Stack>
       </PadBox>
 
-      <AgGridV2<FamilyMemberDetail>
-        isLoading={isFetching}
-        page={page}
-        columnDefs={columns}
-        rowsPerPage={rowsPerPage}
-        rowData={rowData}
-        onPageChange={onPageChange}
-        count={totalCount}
-        onRowsPerPageChange={onRowsPerPageChange}
-        onFilterChange={setAgGridFilterModel}
-        height={280}
-      />
+      <Box sx={{ overflow: "hidden", width: "100%" }}>
+        <AgGridV2<FamilyMemberDetail>
+          isLoading={isFetching}
+          page={page}
+          columnDefs={columns}
+          rowsPerPage={rowsPerPage}
+          rowData={rowData}
+          onPageChange={onPageChange}
+          count={totalCount}
+          onRowsPerPageChange={onRowsPerPageChange}
+          onGridStateChange={setAgGridState}
+          height={isMobile ? 230 : 280}
+        />
+      </Box>
 
       {openedDialog && dialogRenderer[openedDialog]}
     </>

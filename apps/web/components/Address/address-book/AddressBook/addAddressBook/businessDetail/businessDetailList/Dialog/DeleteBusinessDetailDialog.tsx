@@ -23,7 +23,8 @@ export const DeleteBusinessDetailDialog = ({
 }: DeleteBusinessDetailDialogProps) => {
   const onBusinessDetailHandler = useCallback(() => {
     const businessDetailData = businessDetailFormValues.filter(
-      ({ id }) => id !== businessDetail.id
+      ({ business_detail_id }) =>
+        business_detail_id !== businessDetail.business_detail_id
     );
 
     setValue("business_detail", businessDetailData);

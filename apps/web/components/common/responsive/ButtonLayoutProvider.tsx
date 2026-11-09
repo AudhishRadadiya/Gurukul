@@ -1,30 +1,39 @@
 import { useGetDeviceType, type ButtonProps } from "@codezee/sixtify-brahma";
 import { Add } from "@mui/icons-material";
 import { Button } from "@mui/material";
+import React from "react";
 
 type ButtonLayoutProviderProps = {
   isLabelCollapsed?: boolean;
   label: string;
   onClick: () => void;
+  startIcon?: React.ReactElement;
 } & Omit<ButtonProps, "onClick">;
 
 export const ButtonLayoutProvider = ({
   isLabelCollapsed,
   label,
   onClick,
+  startIcon,
   ...rest
 }: ButtonLayoutProviderProps) => {
-  const { layout } = useGetDeviceType();
+  const { isMobile } = useGetDeviceType();
 
-  const isMobile = isLabelCollapsed || layout === "mobile";
+  const showCollapsedLabel = isLabelCollapsed || isMobile;
 
   return (
     <Button
       variant="outlined"
       onClick={onClick}
-      {...(isMobile
+      {...(showCollapsedLabel
         ? {
-            children: <Add fontSize="small" />,
+            children: startIcon ? (
+              React.cloneElement(startIcon, {
+                fontSize: "small",
+              })
+            ) : (
+              <Add fontSize="small" />
+            ),
             sx: {
               borderRadius: "6px",
               height: "36px",
@@ -34,7 +43,7 @@ export const ButtonLayoutProvider = ({
           }
         : {
             children: label,
-            startIcon: <Add />,
+            startIcon: startIcon ? startIcon : <Add />,
           })}
       {...rest}
     />

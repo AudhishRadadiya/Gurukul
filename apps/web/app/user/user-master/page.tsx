@@ -1,23 +1,17 @@
 "use client";
 
 import {
-  Breadcrumbs,
-  Button,
   ContentBox,
   PadBox,
-  SvgHome,
 } from "@codezee/sixtify-brahma";
-import { Add } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/navigation";
-import { parseAsStringLiteral, useQueryState } from "nuqs";
+import { useQueryState } from "nuqs";
 import type { ReactNode } from "react";
 
-import {
-  ADD_USER_MASTER,
-  LIST_USER_MASTER,
-} from "@web/app/user/user-master/hooks/constant";
+import { ADD_USER_MASTER } from "@web/app/user/user-master/hooks/constant";
+import { ButtonLayoutProvider } from "@web/components/common/responsive/ButtonLayoutProvider";
 import { AddUserMaster } from "@web/components/user/user-master/AddUserMaster/AddUserMaster";
 import { UserMasterList } from "@web/components/user/user-master/UserMasterList/UserMasterList";
 import { USER_MASTER_PERMISSION } from "@web/constants/permission/user/userMaster/permission";
@@ -26,119 +20,70 @@ import { PermissionGuard } from "@web/provider/PermissionGuard";
 
 const userMasterPage = {
   [ADD_USER_MASTER]: "Add User Master",
-  [LIST_USER_MASTER]: "User Master",
 };
 
 type UserMasterPageType = keyof typeof userMasterPage;
-
-const queryPageEmus = [ADD_USER_MASTER, LIST_USER_MASTER] as const;
 
 // eslint-disable-next-line import/no-default-export
 export default function Page() {
   const router = useRouter();
 
+  const [page] = useQueryState("page");
+
   const { validateAccess } = useUserPermissions();
 
-  const [queryPage] = useQueryState(
-    "page",
-    parseAsStringLiteral(queryPageEmus).withDefault(LIST_USER_MASTER)
+  const queryPage = page === ADD_USER_MASTER ? ADD_USER_MASTER : null;
+
+  const selectedAddUserMasterPage = Object.keys(userMasterPage).includes(
+    queryPage ?? ""
   );
-
-  const isUserMasterList = queryPage === LIST_USER_MASTER;
-
-  const breadcrumbsItems = [
-    {
-      icon: <SvgHome />,
-      onClick: () => {
-        router.push("/");
-      },
-    },
-    {
-      text: t("common.user.label"),
-    },
-    ...(!isUserMasterList
-      ? [
-          {
-            onClick: () => {
-              router.push("/user/user-master");
-            },
-            text: t("common.master.label", {
-              label: t("common.user.label"),
-            }),
-          },
-        ]
-      : [
-          {
-            text: t("common.master.label", {
-              label: t("common.user.label"),
-            }),
-          },
-        ]),
-  ];
 
   const UserMasterPageRenderer: Record<UserMasterPageType, ReactNode> = {
     [ADD_USER_MASTER]: <AddUserMaster />,
-    [LIST_USER_MASTER]: <UserMasterList />,
   };
 
   return (
     <Stack gap="10px">
-      <Breadcrumbs
-        items={
-          !isUserMasterList
-            ? [
-                ...breadcrumbsItems,
-                {
-                  text: userMasterPage[queryPage],
-                },
-              ]
-            : breadcrumbsItems
-        }
-      />
-
       <ContentBox>
-        <PadBox padding={{ padding: "10px" }}>
+        <PadBox padding={{ padding: { sm: "10px", xs: "8px 10px" } }}>
           <Stack
             direction="row"
             justifyContent="space-between"
             alignItems="center"
           >
-            <Typography variant="h6">
+            <Typography variant="h6" fontSize={{ lg: "18px", xs: "16px" }}>
               {t("common.master.label", {
                 label: t("common.user.label"),
               })}
             </Typography>
 
             <Box>
-              {isUserMasterList && (
+              {!selectedAddUserMasterPage && (
                 <PermissionGuard
                   canAccess={validateAccess(USER_MASTER_PERMISSION.CREATE)}
                 >
-                  <Button
-                    variant="outlined"
-                    startIcon={<Add />}
+                  <ButtonLayoutProvider
                     onClick={() => {
                       router.push("/user/user-master?page=add-user-master");
                     }}
-                  >
-                    {t("common.button.add", {
+                    label={t("common.button.add", {
                       label: t("common.master.label", {
                         label: t("common.user.label"),
                       }),
                     })}
-                  </Button>
+                  />
                 </PermissionGuard>
               )}
             </Box>
           </Stack>
         </PadBox>
 
-        {isUserMasterList ? (
-          UserMasterPageRenderer[LIST_USER_MASTER]
-        ) : (
+        {selectedAddUserMasterPage ? (
           <PadBox padding={{ padding: "15px" }}>
-            {UserMasterPageRenderer[queryPage]}
+            {queryPage && UserMasterPageRenderer[queryPage]}
           </PadBox>
+        ) : (
+          <UserMasterList />
         )}
       </ContentBox>
     </Stack>

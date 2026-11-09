@@ -25,6 +25,10 @@ export function useGetDonationReportTypeOptions() {
       label: "Yearly Trust Wise Summary",
       value: 9,
     },
+    {
+      label: "Yearly Summary Branch Wise",
+      value: 10,
+    },
   ];
 
   return { donationReportTypeOptions };

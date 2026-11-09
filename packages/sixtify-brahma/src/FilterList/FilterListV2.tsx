@@ -46,11 +46,12 @@ import {
   FilterPopUpDateRangeWrapper,
   FilterPopupWrapper,
 } from "./FilterPopupWrapper";
-import type { FilterListType } from "./FilterTypeWrapper";
+import type { FilterCurrentValue, FilterListType } from "./FilterTypeWrapper";
 import { getFilterPopupComponent } from "./GetFilterPopupComponent";
 import { getFormValue } from "./getFormData";
 
 export type FilterListV2Props = {
+  isHideRenderChips?: boolean;
   filterListItems: FilterListType[];
   isDisabled?: boolean;
   filterListData?: FieldValues;
@@ -60,14 +61,72 @@ export type FilterListV2Props = {
   resetFormBasedOnFields?: string;
 };
 
+const getAmountFilterItemByKey = (
+  key: string,
+  filterListItems: FilterListType[]
+) => {
+  return filterListItems.find(
+    (item) =>
+      item.type === "amountFilter" &&
+      item.amountFilterKeys &&
+      (item.key === key ||
+        item.amountFilterKeys.fromAmountKey === key ||
+        item.amountFilterKeys.toAmountKey === key)
+  );
+};
+
+const hasFilterValue = (value: unknown) => {
+  if (typeof value === "number") {
+    return !Number.isNaN(value);
+  }
+
+  return !_isNil(value) && !_isEmpty(value);
+};
+
+const hasAmountFilterData = (filterData: FieldValues) => {
+  if (!filterData) {
+    return false;
+  }
+
+  if (typeof filterData === "object" && !Array.isArray(filterData)) {
+    return Object.values(filterData).some(hasFilterValue);
+  }
+
+  return !!filterData;
+};
+
+const shouldOmitFilterValue = (value: unknown) => {
+  if (typeof value === "number") {
+    return Number.isNaN(value);
+  }
+
+  return _isNil(value) || _isEmpty(value);
+};
+
+const getValidFilterValues = (value: FieldValues) => {
+  const cleanedValue = _omitBy(value, shouldOmitFilterValue);
+
+  if (_isEmpty(cleanedValue)) {
+    return null;
+  }
+
+  return cleanedValue;
+};
+
 export function formatFilterData(
   data: FieldValues,
   filterListItems: FilterListType[]
 ): Record<string, FieldValues> {
-  return Object.fromEntries(
+  const formattedData: Record<string, FieldValues> = Object.fromEntries(
     Object.entries(data).flatMap(([key, value]) => {
-      if (value) {
+      if (hasFilterValue(value)) {
         const config = filterListItems.find((item) => item.key === key);
+
+        if (typeof value === "object" && !Array.isArray(value)) {
+          const formattedObject = getValidFilterValues(value);
+
+          return [[key, formattedObject]];
+        }
 
         const formattedValue =
           config?.monthYearFormat && typeof value === "string"
@@ -80,9 +139,28 @@ export function formatFilterData(
       return [];
     })
   );
+
+  filterListItems.forEach((item) => {
+    if (item.type !== "amountFilter" || !item.amountFilterKeys) {
+      return;
+    }
+
+    const { key, amountFilterKeys } = item;
+
+    const { operatorKey, toAmountKey, betweenOperatorValue } = amountFilterKeys;
+
+    const amountData = formattedData[key];
+
+    if (amountData && amountData[operatorKey] !== betweenOperatorValue) {
+      delete amountData[toAmountKey];
+    }
+  });
+
+  return formattedData;
 }
 
 export const FilterListV2 = ({
+  isHideRenderChips = false,
   filterListItems,
   isDisabled = false,
   filterListData,
@@ -124,8 +202,21 @@ export const FilterListV2 = ({
   };
 
   const defaultValues: FieldValues = useMemo(() => {
+    // eslint-disable-next-line sonarjs/cognitive-complexity
     return filterListItems.reduce<FieldValues>((acc, item) => {
-      if (
+      if (item.type === "amountFilter" && item.amountFilterKeys) {
+        const { key, amountFilterKeys, amountFilterValues } = item;
+
+        const { fromAmountKey, toAmountKey, operatorKey } = amountFilterKeys;
+
+        const { fromAmount, toAmount, operator } = amountFilterValues ?? {};
+
+        acc[key] = {
+          [operatorKey]: operator ?? null,
+          [fromAmountKey]: fromAmount ?? null,
+          [toAmountKey]: toAmount ?? null,
+        };
+      } else if (
         item.type === "autoComplete" &&
         item.required &&
         item.options?.length === 1
@@ -150,7 +241,20 @@ export const FilterListV2 = ({
       const shape: Record<string, z.ZodTypeAny> = {};
 
       filterListItems.forEach((item) => {
-        if (item.multiSelect || item.type === "dateRange") {
+        if (item.type === "amountFilter" && item.amountFilterKeys) {
+          const { key, amountFilterKeys } = item;
+
+          const { fromAmountKey, toAmountKey, operatorKey } = amountFilterKeys;
+
+          shape[key] = z
+            .object({
+              [operatorKey]: z.string().nullable().optional(),
+              [fromAmountKey]: z.number().nullable().optional(),
+              [toAmountKey]: z.number().nullable().optional(),
+            })
+            .nullable()
+            .optional();
+        } else if (item.multiSelect || item.type === "dateRange") {
           shape[item.key] = z.array(z.string()).nullable().optional();
         } else if (item.type === "switch") {
           shape[item.key] = z.boolean().nullable().optional();
@@ -171,6 +275,51 @@ export const FilterListV2 = ({
           message: `${item.label} is required`,
           code: z.ZodIssueCode.custom,
         });
+      }
+
+      if (item.type === "amountFilter" && item.amountFilterKeys) {
+        const { key, amountFilterKeys } = item;
+
+        const {
+          fromAmountKey,
+          toAmountKey,
+          operatorKey,
+          betweenOperatorValue,
+        } = amountFilterKeys;
+
+        const amountData = data[key];
+
+        if (!amountData) {
+          return;
+        }
+
+        const operator = amountData[operatorKey];
+
+        if (!operator) {
+          return;
+        }
+
+        const isAmountEmpty = (value: number | null) =>
+          value == null || Number.isNaN(value);
+
+        if (isAmountEmpty(amountData[fromAmountKey])) {
+          ctx.addIssue({
+            path: [key, fromAmountKey],
+            message: "",
+            code: z.ZodIssueCode.custom,
+          });
+        }
+
+        if (
+          operator === betweenOperatorValue &&
+          isAmountEmpty(amountData[toAmountKey])
+        ) {
+          ctx.addIssue({
+            path: [key, toAmountKey],
+            message: "",
+            code: z.ZodIssueCode.custom,
+          });
+        }
       }
     });
   });
@@ -216,6 +365,21 @@ export const FilterListV2 = ({
   };
 
   const handleCloseFilterPopup = () => {
+    if (
+      currentFilter?.type === "amountFilter" &&
+      currentFilter.amountFilterKeys
+    ) {
+      const { key, amountFilterKeys } = currentFilter;
+
+      const { fromAmountKey, toAmountKey, operatorKey } = amountFilterKeys;
+
+      const amountData = filterListData?.[key];
+
+      setValue(`${key}.${operatorKey}`, amountData?.[operatorKey]);
+      setValue(`${key}.${fromAmountKey}`, amountData?.[fromAmountKey]);
+      setValue(`${key}.${toAmountKey}`, amountData?.[toAmountKey]);
+    }
+
     if (currentFilter?.key) {
       setValue(`${currentFilter?.key}`, filterListData?.[currentFilter.key]);
     }
@@ -249,7 +413,7 @@ export const FilterListV2 = ({
 
     const filteredData = _omitBy(
       formatFilterData(data, filterListItems),
-      (v) => _isNil(v) || _isEmpty(v)
+      shouldOmitFilterValue
     );
 
     onApply(filteredData, openFilterPopup, currentFilter?.key);
@@ -266,7 +430,8 @@ export const FilterListV2 = ({
   };
 
   const handleDelete = (key: string) => {
-    const item = getFilterItem(key);
+    const item =
+      getFilterItem(key) ?? getAmountFilterItemByKey(key, filterListItems);
 
     if (item?.required) {
       return toasts.error({
@@ -274,24 +439,56 @@ export const FilterListV2 = ({
       });
     }
 
-    setValue(`${key}`, null);
-
     const newData = { ...filterListData };
 
-    delete newData[key];
+    if (item?.type === "amountFilter" && item.amountFilterKeys) {
+      const { key, amountFilterKeys } = item;
+
+      const { operatorKey, fromAmountKey, toAmountKey } = amountFilterKeys;
+
+      setValue(`${key}.${operatorKey}`, null);
+      setValue(`${key}.${fromAmountKey}`, null);
+      setValue(`${key}.${toAmountKey}`, null);
+
+      delete newData[key];
+    } else {
+      setValue(`${key}`, null);
+
+      delete newData[key];
+    }
 
     onApply(newData, true, key);
   };
 
   const formData = useWatch({ control });
 
-  const currentFilterValue = currentFilter?.key
-    ? currentFilter.key === "switch"
-      ? watch(currentFilter.key)
-        ? "true"
-        : "false"
-      : watch(currentFilter.key)
-    : null;
+  const getCurrentFilterValue = (
+    filter: FilterListType | null
+  ): FilterCurrentValue => {
+    if (!filter?.key) {
+      return null;
+    }
+
+    if (filter.key === "switch") {
+      return watch(filter.key) ? "true" : "false";
+    }
+
+    if (filter.type === "amountFilter" && filter.amountFilterKeys) {
+      const { key, amountFilterKeys } = filter;
+
+      const { operatorKey, fromAmountKey, toAmountKey } = amountFilterKeys;
+
+      return {
+        operator: watch(`${key}.${operatorKey}`) ?? null,
+        fromAmount: watch(`${key}.${fromAmountKey}`) ?? null,
+        toAmount: watch(`${key}.${toAmountKey}`) ?? null,
+      };
+    }
+
+    return watch(filter.key);
+  };
+
+  const currentFilterValue = getCurrentFilterValue(currentFilter);
 
   useEffect(() => {
     onChange(formData, openFilterPopup);
@@ -362,13 +559,19 @@ export const FilterListV2 = ({
 
   const renderChips = (data: FieldValues) => {
     return Object.entries(data).map(([key, value]) => {
+      const amountFilterItem = getAmountFilterItemByKey(key, filterListItems);
+
+      if (amountFilterItem?.amountFilterKeys && key !== amountFilterItem.key) {
+        return;
+      }
+
       if (typeof value !== "boolean" && !value) {
         return;
       }
 
-      const item = getFilterItem(key);
+      const item = getFilterItem(key) ?? amountFilterItem;
 
-      const keyValue = item && getFormValue(value, item);
+      const keyValue = item && getFormValue(value, item, data);
 
       const formattedValue = formatKeyValue(
         typeof keyValue === "object"
@@ -403,10 +606,10 @@ export const FilterListV2 = ({
             setOpenFilterPopup(true);
             filterPopupAnchorElm.current = e.currentTarget;
 
-            const item = getFilterItem(key);
+            const filterItem = getFilterItem(key) ?? amountFilterItem;
 
-            if (item) {
-              setCurrentFilter(item);
+            if (filterItem) {
+              setCurrentFilter(filterItem);
             }
           }}
         />
@@ -440,7 +643,7 @@ export const FilterListV2 = ({
         justifyContent={{ xs: "end", md: "space-between" }}
         spacing={1}
       >
-        {isDesktop && (
+        {isDesktop && !isHideRenderChips && (
           <Stack
             direction="row"
             alignItems="center"
@@ -584,8 +787,8 @@ export const FilterListV2 = ({
                 <Accordion
                   defaultExpanded={
                     index === firstNonSwitchIndex ||
-                    !!filterListData?.[filter.key] ||
-                    !!defaultValues?.[filter.key] ||
+                    hasAmountFilterData(filterListData?.[filter.key]) ||
+                    hasAmountFilterData(defaultValues?.[filter.key]) ||
                     filter.required
                   }
                   disabled={filter.isDisabled}

@@ -1,6 +1,6 @@
-import { Button, FormSection } from "@codezee/sixtify-brahma";
+import { Button, FormSection, useGetDeviceType } from "@codezee/sixtify-brahma";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import type { ColDefField } from "ag-grid-community";
 import { t } from "i18next";
 import { Download } from "iconoir-react";
@@ -101,6 +101,8 @@ export const DonationImportForm = forwardRef(
 
     const { branchIds } = useBranch();
 
+    const { isMobile } = useGetDeviceType();
+
     useImperativeHandle(ref, () => ({
       setError,
 
@@ -122,28 +124,44 @@ export const DonationImportForm = forwardRef(
       <FormProvider {...methods}>
         <FormSection title={t("donation.import.label")}>
           <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
+            direction={{ sm: "row", xs: "column" }}
+            justifyContent={{ sm: "space-between", xs: "flex-start" }}
+            alignItems={{ sm: "center", xs: "stretch" }}
+            gap={1.25}
+            width="100%"
           >
-            <TrustAutocompleteFromMultipleBranch
-              loading={loading}
-              branchIds={[branchIds]}
-              name="trust_id"
-              control={control}
-              label={t("trust.label")}
-              required
+            <Box
               sx={{
-                width: "350px",
+                flex: { sm: "0 1 350px", xs: "1 1 auto" },
+                maxWidth: { sm: 350, xs: "100%" },
+                minWidth: 0,
+                width: { sm: "auto", xs: "100%" },
               }}
-              error={!!errors.trust_id}
-              helperText={errorMessages(errors.trust_id?.message)}
-            />
+            >
+              <TrustAutocompleteFromMultipleBranch
+                loading={loading}
+                branchIds={[branchIds]}
+                name="trust_id"
+                control={control}
+                label={t("trust.label")}
+                required
+                sx={{ width: "100%" }}
+                error={!!errors.trust_id}
+                helperText={errorMessages(errors.trust_id?.message)}
+              />
+            </Box>
 
             <Button
+              size={isMobile ? "small" : "medium"}
               startIcon={<Download height={22} width={22} />}
               onClick={() => {
                 downloadFile(SAMPLE_FILE, "donation_sample_file.xlsx");
+              }}
+              sx={{
+                alignSelf: { sm: "center", xs: "flex-start" },
+                flexShrink: 0,
+                whiteSpace: "nowrap",
+                width: { sm: "auto", xs: "100%" },
               }}
             >
               {t("sample.file.label")}
@@ -152,9 +170,10 @@ export const DonationImportForm = forwardRef(
         </FormSection>
 
         <FormSection>
-          <Stack gap="25px">
+          <Stack gap={{ sm: "25px", xs: "16px" }}>
             <ExcelImportProcess<DonationImportDetails>
               name="excel_file"
+              required
               excelImportFieldLabels={donationFieldLabels}
               excelImportData={excelDonationImportData}
               setExcelImportData={setExcelDonationImportData}

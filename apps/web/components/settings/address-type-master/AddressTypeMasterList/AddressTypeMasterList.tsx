@@ -1,4 +1,4 @@
-import type { FilterModel } from "ag-grid-community";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import { t } from "i18next";
 import { useState } from "react";
 
@@ -25,7 +25,10 @@ export const AddressTypeMasterList = () => {
   const { onPageChange, onRowsPerPageChange, page, rowsPerPage } =
     usePaginationParams();
 
-  const [agGridFilterModel, setAgGridFilterModel] = useState<FilterModel>({});
+  const [agGridState, setAgGridState] = useState<{
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }>({ filterModel: {}, sortModel: [] });
 
   const startRow = page * rowsPerPage;
 
@@ -33,7 +36,8 @@ export const AddressTypeMasterList = () => {
 
   const { data, isFetching, refetch } = useGetAddressTypeMaster({
     endRow,
-    filterModel: agGridFilterModel,
+    filterModel: agGridState.filterModel,
+    sortModel: agGridState.sortModel,
     startRow,
   });
 
@@ -65,8 +69,8 @@ export const AddressTypeMasterList = () => {
         onPageChange={onPageChange}
         count={totalCount}
         onRowsPerPageChange={onRowsPerPageChange}
-        onFilterChange={setAgGridFilterModel}
-        height={200}
+        onGridStateChange={setAgGridState}
+        height={160}
         actions={[
           {
             isView: validateAccess(ADDRESS_TYPE_PERMISSION.EDIT),

@@ -1,4 +1,5 @@
-import type { FilterModel } from "ag-grid-community";
+import { useGetDeviceType } from "@codezee/sixtify-brahma";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import { useState } from "react";
 import type { FieldValues } from "react-hook-form";
 
@@ -15,10 +16,17 @@ export type UserLoginReportListProps = {
 export const UserLoginReportList = ({
   externalFilter,
 }: UserLoginReportListProps) => {
+  const { layout } = useGetDeviceType();
+
+  const isMobile = layout === "mobile";
+
   const { onPageChange, onRowsPerPageChange, page, rowsPerPage } =
     usePaginationParams();
 
-  const [agGridFilterModel, setAgGridFilterModel] = useState<FilterModel>({});
+  const [agGridState, setAgGridState] = useState<{
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }>({ filterModel: {}, sortModel: [] });
 
   const startRow = page * rowsPerPage;
 
@@ -27,7 +35,8 @@ export const UserLoginReportList = ({
   const { data, isFetching } = userGetUserLoginReport({
     endRow,
     externalFilter,
-    filterModel: agGridFilterModel,
+    filterModel: agGridState.filterModel,
+    sortModel: agGridState.sortModel,
     startRow,
   });
 
@@ -44,9 +53,9 @@ export const UserLoginReportList = ({
       columnDefs={column}
       rowsPerPage={rowsPerPage}
       onPageChange={onPageChange}
-      onFilterChange={setAgGridFilterModel}
+      onGridStateChange={setAgGridState}
       onRowsPerPageChange={onRowsPerPageChange}
-      height={200}
+      height={isMobile ? 170 : 160}
     />
   );
 };

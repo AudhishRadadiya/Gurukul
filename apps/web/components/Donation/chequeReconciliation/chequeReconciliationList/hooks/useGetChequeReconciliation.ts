@@ -1,12 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import type { IGetRowsParams } from "ag-grid-community";
-import type { FieldValues } from "react-hook-form";
 
 import type { chequeStatus } from "@web/components/common/Autocomplete/hooks/useGetChequeStatusOptions";
 import { CHEQUE_RECONCILIATION_ROUTES } from "@web/constants/routes/cheque_reconciliation/routes";
 import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
 import { chequeReconciliationKeys } from "@web/queryKeysFactories/chequeReconciliation";
 import type { ApiSuccessResponse } from "@web/types/apiResponse";
+import type { GetListArgsAg2 } from "@web/types/shared-types";
 import { isBranchFilterEnabled } from "@web/utils/reactQuery";
 
 export type ChequeReconciliation = {
@@ -33,24 +32,10 @@ export type GetChequeReconciliationSuccessResponse = ApiSuccessResponse<{
   totalCount: number;
 }>;
 
-type GetChequeReconciliationListArgs = Partial<
-  IGetRowsParams & {
-    endRow: number;
-    externalFilter?: FieldValues;
-    is_active: boolean;
-    responseFields: string[];
-    startRow: number;
-  }
->;
-
-export function useGetChequeReconciliation(
-  body: GetChequeReconciliationListArgs
-) {
+export function useGetChequeReconciliation(body: GetListArgsAg2) {
   const { axiosPrivate } = useAxiosPrivate();
 
-  const getChequeReconciliation = async (
-    body: GetChequeReconciliationListArgs
-  ) => {
+  const getChequeReconciliation = async (body: GetListArgsAg2) => {
     const { data } =
       await axiosPrivate.post<GetChequeReconciliationSuccessResponse>(
         CHEQUE_RECONCILIATION_ROUTES.listing,

@@ -823,6 +823,62 @@ const formDefaultValues: RolesPermissionsFormFieldValues = {
         },
       ],
     },
+    {
+      module_key: "0284c7ef-bba0-4e3d-9f62-4fb156d76309",
+      module_name: "Dashboard",
+      permissions: {
+        create: false,
+        delete: false,
+        edit: false,
+        view: false,
+      },
+      sub_modules: [
+        {
+          module_key: "019d34ef-25af-4e2d-8e89-836502d4f37d",
+          module_name: "Total Count Card",
+          permissions: {
+            create: false,
+            delete: false,
+            edit: false,
+            view: false,
+          },
+          sub_modules: [],
+        },
+        {
+          module_key: "4dadcfb4-acb5-4dff-a70b-861022157fca",
+          module_name: "Anniversary List",
+          permissions: {
+            create: false,
+            delete: false,
+            edit: false,
+            view: false,
+          },
+          sub_modules: [],
+        },
+        {
+          module_key: "8b963b4d-2bb3-4e6a-9939-339ba629d48e",
+          module_name: "Birthday List",
+          permissions: {
+            create: false,
+            delete: false,
+            edit: false,
+            view: false,
+          },
+          sub_modules: [],
+        },
+        {
+          module_key: "8c2599c0-3d3f-49d6-9f64-b1730b325109",
+          module_name: "Trust Wise Chart",
+          permissions: {
+            create: false,
+            delete: false,
+            edit: false,
+            view: false,
+          },
+          sub_modules: [],
+        },
+      ],
+    },
   ],
   role_id: null,
   role_name: null,
@@ -911,7 +967,7 @@ export const RolesPermissionsForm = forwardRef(
     return (
       <FormProvider {...methods}>
         <Stack gap="40px">
-          <Stack gap="15px">
+          <Stack gap={{ md: "20px", xs: "15px" }}>
             <FormRow maxColumn={3}>
               {watch("is_user_permission") ? (
                 <>
@@ -938,13 +994,16 @@ export const RolesPermissionsForm = forwardRef(
                 />
               )}
             </FormRow>
-            <Typography variant="h6">{t("permission.menu.label")}</Typography>
 
-            <Typography variant="body2">
-              {t("common.role.page.typography")}
-            </Typography>
+            <Stack gap="10px">
+              <Typography variant="h6">{t("permission.menu.label")}</Typography>
 
-            <Box>
+              <Typography variant="body2">
+                {t("common.role.page.typography")}
+              </Typography>
+            </Stack>
+
+            <Box sx={{ overflowX: "hidden", width: "100%" }}>
               {permissionsData.length > 0 &&
                 permissionsData.map((module, index) => (
                   <NestedModule

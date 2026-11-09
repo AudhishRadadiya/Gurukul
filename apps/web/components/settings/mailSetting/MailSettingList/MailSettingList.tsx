@@ -1,11 +1,12 @@
 import type { DialogRenderer } from "@codezee/sixtify-brahma";
 import { useDialogActions } from "@codezee/sixtify-brahma";
-import type { FilterModel } from "ag-grid-community";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import { t } from "i18next";
 import { useState } from "react";
 
 import { AgGridV2 } from "@web/components/common/AgGridV2/AgGridV2";
 import { usePaginationParams } from "@web/components/common/AgGridV2/hooks/usePaginationParams";
+import { DeleteMailSettingDialog } from "@web/components/settings/mailSetting/MailSettingList/dialogs/DeleteMailSettingDialog";
 import { EditMailSettingDialog } from "@web/components/settings/mailSetting/MailSettingList/dialogs/EditMailSettingDialog";
 import {
   useGetMailSetting,
@@ -26,7 +27,10 @@ export const MailSettingList = () => {
   const { onPageChange, onRowsPerPageChange, page, rowsPerPage } =
     usePaginationParams();
 
-  const [agGridFilterModel, setAgGridFilterModel] = useState<FilterModel>({});
+  const [agGridState, setAgGridState] = useState<{
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }>({ filterModel: {}, sortModel: [] });
 
   const startRow = page * rowsPerPage;
 
@@ -34,7 +38,8 @@ export const MailSettingList = () => {
 
   const { data, isFetching, refetch } = useGetMailSetting({
     endRow,
-    filterModel: agGridFilterModel,
+    filterModel: agGridState.filterModel,
+    sortModel: agGridState.sortModel,
     startRow,
   });
 
@@ -43,6 +48,17 @@ export const MailSettingList = () => {
   const { column } = useMailSettingColumns();
 
   const dialogRenderer: DialogRenderer = {
+    delete: currentMailSetting && (
+      <DeleteMailSettingDialog
+        open
+        emailSetting={currentMailSetting}
+        onDeleteSuccess={() => {
+          refetch();
+        }}
+        onClose={onDialogClose}
+      />
+    ),
+
     edit: currentMailSetting && (
       <EditMailSettingDialog
         open
@@ -66,8 +82,8 @@ export const MailSettingList = () => {
         onPageChange={onPageChange}
         count={totalCount}
         onRowsPerPageChange={onRowsPerPageChange}
-        onFilterChange={setAgGridFilterModel}
-        height={220}
+        onGridStateChange={setAgGridState}
+        height={160}
         actions={[
           {
             isView: validateAccess(EMAIL_SETTINGS_PERMISSION.EDIT),
@@ -76,6 +92,14 @@ export const MailSettingList = () => {
               setCurrentMailSetting(data);
             },
             title: t("common.edit"),
+          },
+          {
+            isView: validateAccess(EMAIL_SETTINGS_PERMISSION.DELETE),
+            onClick: (data) => {
+              onDialogOpen("delete");
+              setCurrentMailSetting(data);
+            },
+            title: t("common.delete"),
           },
         ]}
       />

@@ -177,7 +177,7 @@ export const DonationEntryForm = forwardRef(
     }, [latestReceiptNo]);
 
     useEffect(() => {
-      const mode = donationModeOptions.find(
+      const mode = donationModeOptions?.find(
         ({ value }) => value === donationModeId
       );
 
@@ -263,6 +263,42 @@ export const DonationEntryForm = forwardRef(
       }
     }, [firstName, middleName, lastName, businessName]);
 
+    const { data: trustOptions } = useGetTrustOptions();
+
+    useMemo(() => {
+      if (!!trustOptions && !!trustId) {
+        const trustData = trustOptions.find(({ value }) => value === trustId);
+
+        if (trustData) {
+          setValue("trust_data", trustData);
+        }
+      }
+    }, [trustId, trustOptions]);
+
+    const getCashLimitIfExceeded = (
+      formValues: DonationEntryFormFieldValues
+    ) => {
+      const selectedDonationMode = donationModeOptions.find(
+        ({ value }) => value === formValues.donation_mode_id
+      );
+
+      const isCashMode = selectedDonationMode?.label?.toLowerCase() === "cash";
+
+      if (!isCashMode) {
+        return null;
+      }
+
+      const cashLimit = trustOptions.find(
+        ({ value }) => value === formValues.trust_id
+      )?.cash_limit;
+
+      if (!!cashLimit && !!formValues.amount && formValues.amount > cashLimit) {
+        return cashLimit;
+      }
+
+      return null;
+    };
+
     useImperativeHandle(ref, () => ({
       getValues,
       reset,
@@ -271,6 +307,18 @@ export const DonationEntryForm = forwardRef(
       submitForm(onSubmit) {
         handleSubmit(
           (formValues) => {
+            const exceededCashLimit = getCashLimitIfExceeded(formValues);
+
+            if (exceededCashLimit) {
+              toasts.error({
+                title: t("common.amount.cash_limit", {
+                  maximum_amount: exceededCashLimit,
+                }),
+              });
+
+              return;
+            }
+
             const filterFormValues = removeNegationValues(formValues);
 
             onSubmit({ ...filterFormValues, branch_id: branchIds });
@@ -330,16 +378,6 @@ export const DonationEntryForm = forwardRef(
         />
       ),
     };
-
-    const { data: trustOption } = useGetTrustOptions();
-
-    useMemo(() => {
-      const trustData = trustOption?.find(({ value }) => value === trustId);
-
-      if (trustData) {
-        setValue("trust_data", trustData);
-      }
-    }, [trustId]);
 
     // Show branch confirmation dialog on first load or when branch changes
     useMemo(() => {

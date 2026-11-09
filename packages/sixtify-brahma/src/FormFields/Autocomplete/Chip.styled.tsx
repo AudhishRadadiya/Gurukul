@@ -5,11 +5,11 @@ import { alpha, Chip, chipClasses, styled } from "@mui/material";
 export const StyledChip: StyledComponent<ChipProps> = styled(Chip, {
   shouldForwardProp: (prop) => prop !== "disabled",
 })(({ theme, disabled }) => {
-  const { lightBlue, iron } = theme.palette.app.color;
+  const { black, iron } = theme.palette.app.color;
 
   return {
-    backgroundColor: "transparent",
-    color: disabled ? iron[700] : lightBlue[100],
+    backgroundColor: alpha(iron[700], 0.6),
+    color: disabled ? iron[700] : black[900],
     borderRadius: "50px",
     padding: 0,
 

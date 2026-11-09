@@ -1,6 +1,6 @@
 import type { DialogRenderer } from "@codezee/sixtify-brahma";
 import { useDialogActions } from "@codezee/sixtify-brahma";
-import type { FilterModel } from "ag-grid-community";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import { t } from "i18next";
 import { useState } from "react";
 
@@ -27,7 +27,10 @@ export const SmsTemplateList = () => {
   const { onPageChange, onRowsPerPageChange, page, rowsPerPage } =
     usePaginationParams();
 
-  const [agGridFilterModel, setAgGridFilterModel] = useState<FilterModel>({});
+  const [agGridState, setAgGridState] = useState<{
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }>({ filterModel: {}, sortModel: [] });
 
   const startRow = page * rowsPerPage;
 
@@ -35,7 +38,8 @@ export const SmsTemplateList = () => {
 
   const { data, isFetching, refetch } = useGetSmsTemplate({
     endRow,
-    filterModel: agGridFilterModel,
+    filterModel: agGridState.filterModel,
+    sortModel: agGridState.sortModel,
     startRow,
   });
 
@@ -77,8 +81,8 @@ export const SmsTemplateList = () => {
         onPageChange={onPageChange}
         count={totalCount}
         onRowsPerPageChange={onRowsPerPageChange}
-        onFilterChange={setAgGridFilterModel}
-        height={200}
+        onGridStateChange={setAgGridState}
+        height={160}
         actions={[
           {
             isView: validateAccess(SMS_TEMPLATE_PERMISSION.EDIT),

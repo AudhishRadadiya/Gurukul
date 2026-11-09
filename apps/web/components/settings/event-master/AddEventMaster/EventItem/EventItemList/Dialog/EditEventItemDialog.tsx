@@ -32,11 +32,11 @@ export const EditEventItemDialog = ({
 
   return (
     <Dialog
-      maxWidth="sm"
+      maxWidth="lg"
       onClose={onClose}
       open={open}
       title={t("common.edit.label", {
-        label: t("common.event.item"),
+        label: t("common.item.amount.label"),
       })}
       actions={
         <ButtonContainer>

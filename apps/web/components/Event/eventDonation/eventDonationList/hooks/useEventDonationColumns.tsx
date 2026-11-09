@@ -1,6 +1,8 @@
+import { Stack, Typography } from "@mui/material";
 import type { ColDef } from "ag-grid-community";
 import type { CustomCellRendererProps } from "ag-grid-react";
 import { t } from "i18next";
+import _isEmpty from "lodash/isEmpty";
 import type { FieldPath } from "react-hook-form";
 
 import { AG_GRID_CELL_DEFAULT_VALUE } from "@web/components/common/AgGridV2/AgGridV2";
@@ -33,14 +35,14 @@ export const useEventDonationColumns = ({
           const { event_dropdown_detail } = data ?? {};
 
           if (!event_dropdown_detail) {
-            return "-";
+            return AG_GRID_CELL_DEFAULT_VALUE;
           }
 
           const dropdownDetail = event_dropdown_detail.find(
             (detail) => detail.title === variantType
           );
 
-          return dropdownDetail?.value ?? "-";
+          return dropdownDetail?.value ?? AG_GRID_CELL_DEFAULT_VALUE;
         },
         field: fieldName,
         headerName: variantType,
@@ -53,35 +55,64 @@ export const useEventDonationColumns = ({
       const fieldName =
         "event_items_detail" as const satisfies FieldPath<EventDonation>;
 
+      const [eventItemTitleValue, eventItemKindValue] =
+        eventItemTitle.split("=");
+
       return {
+        autoHeight: true,
         cellRenderer: ({ data }: CustomCellRendererProps<EventDonation>) => {
           const { event_items_detail } = data ?? {};
 
           if (!event_items_detail) {
-            return "-";
+            return AG_GRID_CELL_DEFAULT_VALUE;
           }
 
           const itemDetail = event_items_detail.find(
-            (detail) => detail.title === eventItemTitle
+            (detail) =>
+              detail.title === eventItemTitleValue &&
+              detail.kind === eventItemKindValue
           );
 
           if (!itemDetail) {
-            return "-";
+            return AG_GRID_CELL_DEFAULT_VALUE;
           }
 
           if (itemDetail.kind === "event_item") {
-            return itemDetail.total_amount ?? "-";
+            return itemDetail.total_amount ?? AG_GRID_CELL_DEFAULT_VALUE;
           }
 
           if (itemDetail.kind === "event_item_multi") {
-            return itemDetail.value ?? "-";
+            return itemDetail.value ?? AG_GRID_CELL_DEFAULT_VALUE;
           }
 
-          return "-";
+          if (itemDetail.kind === "event_item_sub_field") {
+            if (!_isEmpty(itemDetail.value)) {
+              return (
+                <Stack direction="column" gap={0.5}>
+                  {itemDetail.value.map((item) => {
+                    return (
+                      <Stack direction="row" gap={0.5} key={`${item}`}>
+                        <Typography variant="caption">{item}</Typography>
+                      </Stack>
+                    );
+                  })}
+                </Stack>
+              );
+            }
+
+            return AG_GRID_CELL_DEFAULT_VALUE;
+          }
+
+          return AG_GRID_CELL_DEFAULT_VALUE;
+        },
+        cellStyle: {
+          alignItems: "center",
+          display: "flex",
         },
         field: fieldName,
-        headerName: eventItemTitle,
+        headerName: eventItemTitleValue,
         minWidth: 150,
+        wrapText: true,
       };
     });
 
@@ -91,6 +122,7 @@ export const useEventDonationColumns = ({
         return !value ? AG_GRID_CELL_DEFAULT_VALUE : dateFormat(value, true);
       },
       field: "date",
+      filter: "agDateColumnFilter",
       headerName: t("date.label"),
       minWidth: 120,
     },
@@ -125,6 +157,7 @@ export const useEventDonationColumns = ({
           : formatToIndianNumber(value);
       },
       field: "amount",
+      filter: "agNumberColumnFilter",
       headerName: t("amount.label"),
       minWidth: 170,
     },

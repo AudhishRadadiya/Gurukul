@@ -1,6 +1,6 @@
 import type { DialogRenderer } from "@codezee/sixtify-brahma";
 import { useDialogActions } from "@codezee/sixtify-brahma";
-import type { FilterModel } from "ag-grid-community";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import { t } from "i18next";
 import { useState } from "react";
 
@@ -21,7 +21,10 @@ export const PaymentGatewayList = () => {
 
   const { onDialogClose, onDialogOpen, openedDialog } = useDialogActions();
 
-  const [agGridFilterModel, setAgGridFilterModel] = useState<FilterModel>({});
+  const [agGridState, setAgGridState] = useState<{
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }>({ filterModel: {}, sortModel: [] });
 
   const [currentPaymentGateway, setCurrentPaymentGateway] =
     useState<PaymentGatewayDetail>();
@@ -32,7 +35,8 @@ export const PaymentGatewayList = () => {
 
   const { data, isFetching, refetch } = useGetPaymentGateway({
     endRow,
-    filterModel: agGridFilterModel,
+    filterModel: agGridState.filterModel,
+    sortModel: agGridState.sortModel,
     startRow,
   });
 
@@ -63,9 +67,9 @@ export const PaymentGatewayList = () => {
         rowsPerPage={rowsPerPage}
         onPageChange={onPageChange}
         count={totalCount}
-        onFilterChange={setAgGridFilterModel}
+        onGridStateChange={setAgGridState}
         onRowsPerPageChange={onRowsPerPageChange}
-        height={200}
+        height={160}
         actions={[
           {
             isView: validateAccess(PAYMENT_GATEWAY_PERMISSION.EDIT),

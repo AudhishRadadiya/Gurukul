@@ -89,17 +89,29 @@ export const EditRole = ({ roleId }: EditRoleProps) => {
   }, [rolesDetails]);
 
   return (
-    <Stack spacing={2}>
+    <Stack spacing={{ md: 3, xs: 2 }}>
       <RolesPermissionsForm
         ref={formRef}
         defaultValues={defaultValues}
         loading={isPenaltyRuleLoading}
       />
 
-      <Stack direction="row" gap="15px" justifyContent="flex-end">
+      <Stack
+        direction="row"
+        gap="15px"
+        justifyContent="flex-end"
+        flexWrap="wrap"
+        sx={{
+          "& > *": {
+            flex: { sm: "0 0 auto", xs: "1 1 auto" },
+            minWidth: { sm: "auto", xs: "120px" },
+          },
+        }}
+      >
         <Button variant="outlined" onClick={onCancel}>
           {t("common.cancel.button")}
         </Button>
+
         <EditAction
           disabled={isDisabled()}
           onClick={onEditRoles}

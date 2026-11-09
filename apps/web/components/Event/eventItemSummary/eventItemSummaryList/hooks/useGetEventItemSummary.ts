@@ -7,13 +7,22 @@ import type { ApiSuccessResponse } from "@web/types/apiResponse";
 import type { GetListArgsAg2 } from "@web/types/shared-types";
 import { isBranchFilterEnabled } from "@web/utils/reactQuery";
 
+export type SelectedValues = {
+  amount: number;
+  label: string;
+  left_qty: number;
+  total_qty: number;
+};
+
 export type EventItem = {
   amount: number;
   event_item_id: string;
+  kind: string;
   qty: number;
+  selected_values: SelectedValues[];
   title: string;
   total_amount: number;
-  type: 0;
+  type: number;
   value: string;
 };
 

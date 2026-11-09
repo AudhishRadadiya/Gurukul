@@ -4,12 +4,9 @@ import { z } from "zod";
 import type { DonationEntryFormFieldValues } from "@web/components/Donation/donationEntry/addDonationEntry/DonationEntryForm";
 import {
   emailRegex,
-  licenseNumberRegex,
   mobileNumberRegex,
   panCardRegex,
-  passportNumberRegex,
   pinCodeRegex,
-  voterIdRegex,
 } from "@web/utils/regex";
 
 export const EventDonationSchema = z.object({
@@ -28,12 +25,12 @@ export const SelectedPreviousDonationSchema = z.object({
 
 export const DonationEntryFormSchema = z
   .object({
-    aadhar_no: z
-      .string()
-      .trim()
-      .min(12, { message: "common.aadhar_no.invalid" })
-      .nullable()
-      .optional(),
+    // aadhar_no: z
+    //   .string()
+    //   .trim()
+    //   .min(12, { message: "common.aadhar_no.invalid" })
+    //   .nullable()
+    //   .optional(),
     address: z.string().nullable().optional(),
     amount: z
       .number()
@@ -71,17 +68,14 @@ export const DonationEntryFormSchema = z
       .refine((value) => !!value, {
         message: "common.required",
       }),
-    driving_licence_no: z.string().nullable().optional(),
-    electors_number: z.string().nullable().optional(),
+    // driving_licence_no: z.string().nullable().optional(),
+    // electors_number: z.string().nullable().optional(),
     email_id: z
       .string()
       .trim()
-      .min(1, { message: "common.required" })
       .regex(emailRegex, "common.email.invalid")
-      .nullable()
-      .refine((value) => !!value, {
-        message: "common.required",
-      }),
+      .optional()
+      .nullable(),
 
     event_donation: z.array(EventDonationSchema).nullable().optional(),
     event_reminder_date: z.string().nullable().optional(),
@@ -117,7 +111,7 @@ export const DonationEntryFormSchema = z
       .regex(panCardRegex, "common.pan_card_no.invalid")
       .optional()
       .nullable(),
-    passport_no: z.string().nullable().optional(),
+    // passport_no: z.string().nullable().optional(),
     pincode: z
       .string()
       .regex(pinCodeRegex, "common.pin_code.invalid")
@@ -142,7 +136,7 @@ export const DonationEntryFormSchema = z
     send_sms: z.boolean().nullable(),
     send_whatsapp: z.boolean().nullable(),
     show_business_name: z.boolean().nullable().optional(),
-    show_id_fields: z.boolean(),
+    // show_id_fields: z.boolean(),
     state: z.string().nullable().optional(),
     trust_data: z
       .object({
@@ -173,12 +167,14 @@ export const DonationEntryFormSchema = z
     const hasAmountExceedingLimit =
       !!data.amount && data.amount > (data.trust_data?.cheque_limit ?? 0);
 
-    const hasAnyDocument =
-      !!data.aadhar_no ||
-      !!data.driving_licence_no ||
-      !!data.electors_number ||
-      !!data.pan_no ||
-      !!data.passport_no;
+    // const hasAnyDocument =
+    //   !!data.aadhar_no ||
+    //   !!data.driving_licence_no ||
+    //   !!data.electors_number ||
+    //   !!data.pan_no ||
+    //   !!data.passport_no;
+
+    const hasAnyDocument = !!data.pan_no;
 
     if (data.is_bank_mode) {
       if (!data.cheque_no) {
@@ -238,24 +234,24 @@ export const DonationEntryFormSchema = z
       });
     }
 
-    if (
-      data.driving_licence_no &&
-      !licenseNumberRegex.test(data.driving_licence_no)
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "common.license_no.invalid",
-        path: ["driving_licence_no"],
-      });
-    }
+    // if (
+    //   data.driving_licence_no &&
+    //   !licenseNumberRegex.test(data.driving_licence_no)
+    // ) {
+    //   ctx.addIssue({
+    //     code: z.ZodIssueCode.custom,
+    //     message: "common.license_no.invalid",
+    //     path: ["driving_licence_no"],
+    //   });
+    // }
 
-    if (data.electors_number && !voterIdRegex.test(data.electors_number)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "common.elector_no.invalid",
-        path: ["electors_number"],
-      });
-    }
+    // if (data.electors_number && !voterIdRegex.test(data.electors_number)) {
+    //   ctx.addIssue({
+    //     code: z.ZodIssueCode.custom,
+    //     message: "common.elector_no.invalid",
+    //     path: ["electors_number"],
+    //   });
+    // }
 
     if (data.pan_no && !panCardRegex.test(data.pan_no)) {
       ctx.addIssue({
@@ -265,13 +261,13 @@ export const DonationEntryFormSchema = z
       });
     }
 
-    if (data.passport_no && !passportNumberRegex.test(data.passport_no)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "common.passport_no.invalid",
-        path: ["passport_no"],
-      });
-    }
+    // if (data.passport_no && !passportNumberRegex.test(data.passport_no)) {
+    //   ctx.addIssue({
+    //     code: z.ZodIssueCode.custom,
+    //     message: "common.passport_no.invalid",
+    //     path: ["passport_no"],
+    //   });
+    // }
 
     if (data.is_cancel) {
       if (data.amount === null || data.amount < 0) {
@@ -301,7 +297,7 @@ export const DonationEntryFormSchema = z
   });
 
 export const donationEntryFormDefaultValues: DonationEntryFormFieldValues = {
-  aadhar_no: null,
+  // aadhar_no: null,
   address: null,
   amount: 0,
   atg: true,
@@ -315,8 +311,8 @@ export const donationEntryFormDefaultValues: DonationEntryFormFieldValues = {
   direct_print: false,
   donation_mode_id: null,
   donation_type_id: null,
-  driving_licence_no: null,
-  electors_number: null,
+  // driving_licence_no: null,
+  // electors_number: null,
   email_id: null,
   event_donation: [],
   event_reminder_date: null,
@@ -332,7 +328,7 @@ export const donationEntryFormDefaultValues: DonationEntryFormFieldValues = {
   name_of_receipt: null,
   organize_remark: null,
   pan_no: null,
-  passport_no: null,
+  // passport_no: null,
   pincode: null,
   prasad: false,
   print_receipt: true,
@@ -352,7 +348,7 @@ export const donationEntryFormDefaultValues: DonationEntryFormFieldValues = {
   send_sms: false,
   send_whatsapp: false,
   show_business_name: false,
-  show_id_fields: false,
+  // show_id_fields: false,
   state: null,
   trust_data: {
     label: "",

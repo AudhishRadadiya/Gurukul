@@ -6,6 +6,7 @@ import { useState, type PropsWithChildren } from "react";
 
 import { Drawer } from "@web/components/Drawer/Drawer";
 import { Header } from "@web/components/Header";
+import { useShouldShowBranchSelector } from "@web/components/Header/useShouldShowBranchSelector";
 import { BranchProvider } from "@web/context/BranchContext";
 
 export function PrivatePageLayout({ children }: Readonly<PropsWithChildren>) {
@@ -17,19 +18,28 @@ export function PrivatePageLayout({ children }: Readonly<PropsWithChildren>) {
     layout === "mobile" ? false : true
   );
 
+  const shouldShowBranchSelector = useShouldShowBranchSelector();
+
   return (
     <BranchProvider>
       <Stack direction={isMobile ? "column" : "row"}>
         <Drawer open={isDrawerOpen} />
 
-        <Stack spacing="64px" flexGrow={1} sx={{ overflow: "hidden" }}>
+        <Stack
+          spacing={{
+            sm: "70px",
+            xs: shouldShowBranchSelector ? "110px" : "64px",
+          }}
+          flexGrow={1}
+          sx={{ overflow: "hidden" }}
+        >
           <Header
             isDrawerOpen={isDrawerOpen}
             setIsDrawerOpen={setIsDrawerOpen}
           />
 
           <Box component="main" sx={{ flexGrow: 1 }}>
-            <PadBox padding={{ padding: "15px 30px" }}>{children}</PadBox>
+            <PadBox padding={{ padding: "12px" }}>{children}</PadBox>
           </Box>
         </Stack>
       </Stack>

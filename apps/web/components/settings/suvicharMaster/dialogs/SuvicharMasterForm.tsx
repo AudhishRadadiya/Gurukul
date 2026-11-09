@@ -86,7 +86,7 @@ export const SuvicharMasterForm = forwardRef(
     const { suvichar } = errors;
 
     return (
-      <Stack gap="15px">
+      <Stack gap={{ sm: "15px", xs: "10px" }}>
         <FormContainer>
           <TextField
             loading={loading}
@@ -99,7 +99,12 @@ export const SuvicharMasterForm = forwardRef(
             helperText={errorMessages(suvichar?.message)}
           />
 
-          <Stack direction="row" gap="120px">
+          <Stack
+            direction="row"
+            gap={{ sm: 3, xs: 2 }}
+            flexWrap="wrap"
+            alignItems="center"
+          >
             <CheckboxWithLabel
               control={control}
               name="is_sms"

@@ -26,6 +26,7 @@ export const useCancelReceiptColumns = () => {
     },
     {
       field: "receipt_sequence",
+      filter: "agNumberColumnFilter",
       headerName: t("common.sequence.label"),
     },
     {
@@ -39,6 +40,7 @@ export const useCancelReceiptColumns = () => {
           : formatToIndianNumber(value);
       },
       field: "amount",
+      filter: "agNumberColumnFilter",
       headerName: t("amount.label"),
       maxWidth: 200,
     },

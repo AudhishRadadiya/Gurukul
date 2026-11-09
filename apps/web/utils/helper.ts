@@ -230,11 +230,14 @@ export const validateMaxDigit = (
   }
 };
 
-export const formatToIndianNumber = (num: number | null) => {
+export const formatToIndianNumber = (
+  num: number | string | null,
+  fractionDigits: number = 2
+) => {
   if (num) {
     return replace(
-      num.toLocaleString("en-IN", {
-        minimumFractionDigits: 2,
+      Number(num).toLocaleString("en-IN", {
+        minimumFractionDigits: fractionDigits,
       }),
       /,/g,
       ","
@@ -250,4 +253,21 @@ export const toRoundNumber = (value: number) => {
 
 export const errorMessages = (messageKey?: string) => {
   return messageKey && t(messageKey);
+};
+
+export const handleCopyToClipboard = (text: string) => {
+  const input = document.createElement("input");
+
+  input.type = "text";
+  input.value = text;
+  input.readOnly = true;
+  input.style.position = "fixed";
+  input.style.top = "0";
+  input.style.left = "-9999px";
+  document.body.appendChild(input);
+  input.focus({ preventScroll: true });
+  input.setSelectionRange(0, input.value.length);
+  // eslint-disable-next-line sonarjs/deprecation
+  document.execCommand("copy");
+  document.body.removeChild(input);
 };

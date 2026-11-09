@@ -12,8 +12,6 @@ import {
   type FormRef,
 } from "@web/components/settings/branch-master/Dialogs/BranchMasterForm";
 import { useAddBranchMaster } from "@web/components/settings/branch-master/Dialogs/hooks/useAddBranchMaster";
-import { useDisabledButtonsCache } from "@web/context/DisabledButtonsCacheContext/DisabledButtonsCacheContext";
-import { submitButtonId } from "@web/hooks/useEnableDisableButtonToggle";
 import { onError } from "@web/utils/errors";
 
 type AddBranchMasterDialogProps = {
@@ -28,8 +26,6 @@ export const AddBranchMasterDialog = ({
   open,
 }: AddBranchMasterDialogProps) => {
   const formRef = useRef<FormRef>(null);
-
-  const { isDisabled } = useDisabledButtonsCache(submitButtonId);
 
   const { isPending, mutate } = useAddBranchMaster({
     options: {
@@ -62,11 +58,7 @@ export const AddBranchMasterDialog = ({
             {t("common.cancel.button")}
           </Button>
 
-          <Button
-            onClick={onCreateBranchMaster}
-            loading={isPending}
-            disabled={isDisabled()}
-          >
+          <Button onClick={onCreateBranchMaster} loading={isPending}>
             {t("common.save.button")}
           </Button>
         </ButtonContainer>

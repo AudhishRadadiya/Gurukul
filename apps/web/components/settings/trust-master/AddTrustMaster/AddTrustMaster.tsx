@@ -1,4 +1,9 @@
-import { Button, PadBox, toasts } from "@codezee/sixtify-brahma";
+import {
+  Button,
+  ButtonContainer,
+  PadBox,
+  toasts,
+} from "@codezee/sixtify-brahma";
 import { Stack } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/navigation";
@@ -32,26 +37,24 @@ export const AddTrustMaster = () => {
   };
 
   return (
-    <PadBox padding={{ padding: "20px" }}>
-      <Stack gap="10px">
+    <PadBox padding={{ padding: { md: "20px", xs: "12px 10px" } }}>
+      <Stack gap={{ md: "10px", xs: "8px" }}>
         <TrustMasterForm ref={formRef} loading={isPending} />
 
-        <PadBox padding={{ paddingRight: "20px" }}>
-          <Stack direction="row" justifyContent="end" gap="10px">
-            <Button
-              variant="outlined"
-              onClick={() => {
-                router.push("/settings/trust-master");
-              }}
-            >
-              {t("common.cancel.button")}
-            </Button>
+        <ButtonContainer>
+          <Button
+            variant="outlined"
+            onClick={() => {
+              router.push("/settings/trust-master");
+            }}
+          >
+            {t("common.cancel.button")}
+          </Button>
 
-            <Button loading={isPending} onClick={onCreateTrustMaster}>
-              {t("common.save.button")}
-            </Button>
-          </Stack>
-        </PadBox>
+          <Button loading={isPending} onClick={onCreateTrustMaster}>
+            {t("common.save.button")}
+          </Button>
+        </ButtonContainer>
       </Stack>
     </PadBox>
   );

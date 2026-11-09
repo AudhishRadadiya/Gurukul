@@ -1,4 +1,5 @@
 import { Autocomplete, type AutocompleteProps } from "@codezee/sixtify-brahma";
+import { t } from "i18next";
 import type { FieldValues } from "react-hook-form";
 
 import { useGetDonationModeOptions } from "@web/components/common/Autocomplete/hooks/useGetDonationModeOptions";
@@ -6,18 +7,24 @@ import { useGetDonationModeOptions } from "@web/components/common/Autocomplete/h
 type DonationModeAutocompleteProps<P extends FieldValues> = Omit<
   AutocompleteProps<P>,
   "options"
->;
+> & {
+  isUserWiseAll?: boolean;
+};
 
 export const DonationModeAutocomplete = <P extends FieldValues>(
-  props: DonationModeAutocompleteProps<P>
+  {isUserWiseAll = false, ...props}: DonationModeAutocompleteProps<P>
 ) => {
-  const { data: donationModeOptions } = useGetDonationModeOptions();
+  const { data: donationModeOptions } = useGetDonationModeOptions({
+    isUserWiseAll
+  });
 
   return (
     <Autocomplete
-      label="Donation Mode"
+      label={t("donationMode.label")}
       options={donationModeOptions}
-      placeholder="Select Donation Mode"
+      placeholder={t("common.select.label", {
+        label: t("donationMode.label"),
+      })}
       {...props}
     />
   );

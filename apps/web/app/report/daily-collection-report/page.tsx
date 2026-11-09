@@ -5,26 +5,25 @@ import { Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 
 import { DailyCollectionReport } from "@web/components/report/dailyCollectionReport/DailyCollectionReport";
-import { DailyCollectionReportBreadcrumbs } from "@web/components/report/dailyCollectionReport/DailyCollectionReportBreadcrumbs";
 
 // eslint-disable-next-line import/no-default-export
 export default function Page() {
   return (
     <Stack gap="10px">
-      <DailyCollectionReportBreadcrumbs />
-
       <ContentBox>
-        <PadBox padding={{ padding: "10px" }}>
+        <PadBox padding={{ padding: { sm: "10px", xs: "8px" } }}>
           <Stack
             direction="row"
             justifyContent="space-between"
             alignItems="center"
           >
-            <Typography variant="h6">{t("daily.collection.report")}</Typography>
+            <Typography variant="h6" fontSize={{ sm: "1.25rem", xs: "1rem" }}>
+              {t("daily.collection.report")}
+            </Typography>
           </Stack>
         </PadBox>
 
-        <PadBox padding={{ padding: "15px" }}>
+        <PadBox padding={{ padding: { sm: "15px", xs: "10px" } }}>
           <DailyCollectionReport />
         </PadBox>
       </ContentBox>

@@ -27,6 +27,14 @@ export type EventItemDetail =
       kind: "event_item_multi";
       title: string;
       value: number;
+    }
+  | {
+      event_item_id: string;
+      kind: "event_item_sub_field";
+      sub_field_title: string;
+      title: string;
+      type: number;
+      value: string[];
     };
 
 export type EventDonation = {

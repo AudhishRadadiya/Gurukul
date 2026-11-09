@@ -3,6 +3,7 @@ import {
   DeleteIconAction,
   EditIconAction,
   LoadingCell,
+  useGetDeviceType,
 } from "@codezee/sixtify-brahma";
 import { Stack } from "@mui/material";
 import type { CustomCellRendererProps } from "ag-grid-react";
@@ -22,6 +23,8 @@ type UseBankDetailColumns = {
 export const useBankDetailColumns = ({
   onAction,
 }: AgColumnsArgs<UseBankDetailColumns>) => {
+  const { isMobile } = useGetDeviceType();
+
   const column: AgColumnsWithActions<BankDetailFormFieldValues> = [
     {
       cellRenderer: ({ value }: CustomCellRendererProps) => {
@@ -72,12 +75,14 @@ export const useBankDetailColumns = ({
         return (
           <Stack direction="row">
             <EditIconAction
+              size={isMobile ? "small" : "medium"}
               onClick={() => {
                 onAction("edit", data);
               }}
             />
 
             <DeleteIconAction
+              size={isMobile ? "small" : "medium"}
               onClick={() => {
                 onAction("delete", data);
               }}
@@ -88,7 +93,7 @@ export const useBankDetailColumns = ({
       field: "action",
       headerName: "",
       lockPinned: true,
-      maxWidth: 120,
+      maxWidth: isMobile ? 100 : 120,
       pinned: "right",
       sortable: false,
     },

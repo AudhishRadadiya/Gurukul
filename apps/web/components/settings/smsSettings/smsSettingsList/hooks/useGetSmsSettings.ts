@@ -9,6 +9,7 @@ import type { GetListArgsAg2 } from "@web/types/shared-types";
 export type SmsSettingDetail = {
   full_count: string;
   is_active: boolean;
+  left_sms_count: number;
   sms_auth_key: string;
   sms_sender_id: string;
   sms_setting_id: string;

@@ -2,6 +2,7 @@ export * from "./Autocomplete";
 export * from "./CheckBox";
 export * from "./DatePicker";
 export * from "./DateRangePicker";
+export * from "./DateRangePickerField";
 export * from "./DateRangeSelector";
 export * from "./DateTimePicker";
 export * from "./FileUpload";

@@ -79,7 +79,7 @@ export const EditDonationEntry = ({ donationId }: EditDonationEntryProps) => {
   }, [donationEntryDetails]);
 
   return (
-    <PadBox padding={{ padding: "10px" }}>
+    <PadBox padding={{ padding: { sm: "10px", xs: "8px" } }}>
       <Stack gap="10px">
         <DonationEntryForm
           ref={formRef}
@@ -87,8 +87,17 @@ export const EditDonationEntry = ({ donationId }: EditDonationEntryProps) => {
           defaultValues={defaultValues}
         />
 
-        <PadBox padding={{ paddingRight: "20px" }}>
-          <Stack direction="row" justifyContent="end" gap="10px">
+        <PadBox padding={{ paddingRight: { sm: "20px", xs: 0 } }}>
+          <Stack
+            direction="row"
+            justifyContent={{ sm: "end", xs: "stretch" }}
+            gap="10px"
+            sx={{
+              "& .MuiButton-root": {
+                flex: { sm: "0 0 auto", xs: 1 },
+              },
+            }}
+          >
             <Button
               variant="outlined"
               onClick={() => {

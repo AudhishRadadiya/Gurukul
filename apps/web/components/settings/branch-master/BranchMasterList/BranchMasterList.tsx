@@ -1,4 +1,5 @@
-import type { FilterModel } from "ag-grid-community";
+import { useGetDeviceType } from "@codezee/sixtify-brahma";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import { t } from "i18next";
 import { useState } from "react";
 
@@ -21,6 +22,8 @@ type BranchMasterListProps = {
 };
 
 export const BranchMasterList = ({ isActive }: BranchMasterListProps) => {
+  const { isMobile } = useGetDeviceType();
+
   const { validateAccess } = useUserPermissions();
 
   const { onDialogClose, onDialogOpen, openedDialog } = useDialogActions();
@@ -30,7 +33,10 @@ export const BranchMasterList = ({ isActive }: BranchMasterListProps) => {
   const { onPageChange, onRowsPerPageChange, page, rowsPerPage } =
     usePaginationParams();
 
-  const [agGridFilterModel, setAgGridFilterModel] = useState<FilterModel>({});
+  const [agGridState, setAgGridState] = useState<{
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }>({ filterModel: {}, sortModel: [] });
 
   const startRow = page * rowsPerPage;
 
@@ -41,7 +47,8 @@ export const BranchMasterList = ({ isActive }: BranchMasterListProps) => {
     externalFilter: {
       is_active: isActive,
     },
-    filterModel: agGridFilterModel,
+    filterModel: agGridState.filterModel,
+    sortModel: agGridState.sortModel,
     startRow,
   });
 
@@ -84,8 +91,8 @@ export const BranchMasterList = ({ isActive }: BranchMasterListProps) => {
         onPageChange={onPageChange}
         count={totalCount}
         onRowsPerPageChange={onRowsPerPageChange}
-        onFilterChange={setAgGridFilterModel}
-        height={200}
+        onGridStateChange={setAgGridState}
+        height={isMobile ? 190 : 160}
         actions={[
           {
             isView: validateAccess(BRANCH_MASTER_PERMISSION.EDIT),

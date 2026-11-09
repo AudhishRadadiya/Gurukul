@@ -17,16 +17,16 @@ export const EventDropdownAutocomplete = <P extends FieldValues>(
   const { eventMasterId, ...autocompleteProps } = props;
 
   const { data: eventDropdownOptions } = useGetEventDropdownOptions({
-    eventMasterId: eventMasterId ?? "",
+    eventId: eventMasterId ?? "",
   });
 
   return (
     <Autocomplete
-      label={t("common.event.dropdown")}
+      label={t("common.form.options.label")}
       limitTags={1}
       options={eventDropdownOptions}
       placeholder={t("common.select.label", {
-        label: t("common.event.dropdown"),
+        label: t("common.form.options.label"),
       })}
       disabled={!eventMasterId}
       {...autocompleteProps}

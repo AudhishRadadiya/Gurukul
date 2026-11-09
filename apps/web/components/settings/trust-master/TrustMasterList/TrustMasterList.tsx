@@ -1,4 +1,4 @@
-import type { FilterModel } from "ag-grid-community";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import { t } from "i18next";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -24,7 +24,10 @@ export const TrustMasterList = () => {
 
   const { validateAccess } = useUserPermissions();
 
-  const [agGridFilterModel, setAgGridFilterModel] = useState<FilterModel>({});
+  const [agGridState, setAgGridState] = useState<{
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }>({ filterModel: {}, sortModel: [] });
 
   const startRow = page * rowsPerPage;
 
@@ -36,7 +39,8 @@ export const TrustMasterList = () => {
 
   const { data, isFetching, refetch } = useGetTrustMaster({
     endRow,
-    filterModel: agGridFilterModel,
+    filterModel: agGridState.filterModel,
+    sortModel: agGridState.sortModel,
     startRow,
   });
 
@@ -68,8 +72,8 @@ export const TrustMasterList = () => {
         onPageChange={onPageChange}
         count={totalCount}
         onRowsPerPageChange={onRowsPerPageChange}
-        onFilterChange={setAgGridFilterModel}
-        height={200}
+        onGridStateChange={setAgGridState}
+        height={160}
         actions={[
           {
             isView: validateAccess(TRUST_MASTER_PERMISSION.EDIT),

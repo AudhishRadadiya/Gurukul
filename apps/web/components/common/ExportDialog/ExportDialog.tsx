@@ -17,7 +17,7 @@ const ExportOtpSchema = z.object({
     .number()
     .nullable()
     .refine((value) => !!value, {
-      message: "common.otp.required",
+      message: "common.required",
     }),
 });
 

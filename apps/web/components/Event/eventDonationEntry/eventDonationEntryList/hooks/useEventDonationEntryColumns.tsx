@@ -14,6 +14,7 @@ export const useEventDonationEntryColumns = () => {
         return !value ? AG_GRID_CELL_DEFAULT_VALUE : dateFormat(value, true);
       },
       field: "date",
+      filter: "agDateColumnFilter",
       headerName: t("date.label"),
     },
     {
@@ -37,6 +38,7 @@ export const useEventDonationEntryColumns = () => {
     {
       field: "event_master_name",
       headerName: t("common.event.master.name"),
+      minWidth: 150,
     },
     {
       cellRenderer: ({ value }: CustomCellRendererProps) => {
@@ -45,10 +47,12 @@ export const useEventDonationEntryColumns = () => {
           : formatToIndianNumber(value);
       },
       field: "amount",
+      filter: "agNumberColumnFilter",
       headerName: t("amount.label"),
     },
     {
       field: "received_amount",
+      filter: "agNumberColumnFilter",
       headerName: t("common.received.amount"),
     },
     {

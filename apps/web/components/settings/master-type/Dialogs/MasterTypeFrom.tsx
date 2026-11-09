@@ -1,4 +1,8 @@
-import { FormContainer, TextField } from "@codezee/sixtify-brahma";
+import {
+  FormContainer,
+  RadioGroupField,
+  TextField,
+} from "@codezee/sixtify-brahma";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { ForwardedRef } from "react";
 import { forwardRef, useImperativeHandle } from "react";
@@ -11,6 +15,7 @@ import { useEnableDisableButton } from "@web/hooks/useEnableDisableButton";
 import { errorMessages, filterChangedFormFields } from "@web/utils/helper";
 
 const MasterTypeFromSchema = z.object({
+  is_hastak: z.boolean(),
   master_type: z
     .string()
     .max(50, "common.maxLength")
@@ -35,6 +40,7 @@ export type FormRef = {
 };
 
 const formDefaultValues: MasterTypeFormFieldValues = {
+  is_hastak: false,
   master_type: null,
 };
 
@@ -84,6 +90,18 @@ export const MasterTypeFrom = forwardRef(
           required
           error={!!master_type}
           helperText={errorMessages(master_type?.message)}
+        />
+
+        <RadioGroupField
+          name="is_hastak"
+          control={control}
+          label="Is Hastak"
+          isHorizontal
+          loading={loading}
+          options={[
+            { disabled: false, label: t("common.yes"), values: true },
+            { disabled: false, label: t("common.no"), values: false },
+          ]}
         />
       </FormContainer>
     );

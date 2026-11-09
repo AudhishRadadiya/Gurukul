@@ -52,7 +52,7 @@ export const useEventSummaryColumns = ({
           : formatToIndianNumber(Number(value));
       },
       field: "total_amount",
-      filter: "agTextColumnFilter",
+      filter: "agNumberColumnFilter",
       headerName: t("amount.label"),
       sortable: true,
     },

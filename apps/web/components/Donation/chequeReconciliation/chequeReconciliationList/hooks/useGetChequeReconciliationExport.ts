@@ -1,7 +1,5 @@
 import type { UseMutationOptions } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
-import type { IGetRowsParams } from "ag-grid-community";
-import type { FieldValues } from "react-hook-form";
 
 import { CHEQUE_RECONCILIATION_ROUTES } from "@web/constants/routes/cheque_reconciliation/routes";
 import { useAxiosPrivate } from "@web/hooks/useAxiosPrivate";
@@ -10,17 +8,17 @@ import type {
   ApiErrorResponse,
   ApiSuccessResponse,
 } from "@web/types/apiResponse";
-import type { FilType, GetExportPayload } from "@web/types/shared-types";
+import type {
+  FilType,
+  GetExportPayload,
+  GetListArgsAg2,
+} from "@web/types/shared-types";
 
 export type GetChequeReconciliationExportApiSuccessResponse =
   ApiSuccessResponse<GetExportPayload>;
 
 type ExportMutationVariables = {
-  body?:
-    | IGetRowsParams
-    | Partial<{
-        externalFilter: FieldValues;
-      }>;
+  body?: GetListArgsAg2;
   fileType: FilType;
 };
 

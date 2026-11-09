@@ -33,7 +33,7 @@ export const AddEventDropdownDialog = ({
       onClose={onClose}
       open={open}
       title={t("common.button.add", {
-        label: t("common.event.dropdown"),
+        label: t("common.form.options.label"),
       })}
       actions={
         <ButtonContainer>

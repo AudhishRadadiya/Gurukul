@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Breadcrumbs,
-  ContentBox,
-  PadBox,
-  SvgHome,
-} from "@codezee/sixtify-brahma";
+import { ContentBox, PadBox } from "@codezee/sixtify-brahma";
 import { Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import _isEqual from "lodash/isEqual";
@@ -13,6 +8,11 @@ import { useRouter } from "next/navigation";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import type { ReactNode } from "react";
 
+import {
+  RolesPageEnums,
+  rolesPage,
+  type RolesPageType,
+} from "@web/app/permission/role/hooks/constant";
 import { ButtonLayoutProvider } from "@web/components/common/responsive/ButtonLayoutProvider";
 import { AddRoles } from "@web/components/permission/role/addRole/AddRole";
 import { EditRole } from "@web/components/permission/role/roleList/editRole/EditRole";
@@ -21,25 +21,7 @@ import { ROLL_ENTRY_PERMISSION } from "@web/constants/permission/permissions/rol
 import { useUserPermissions } from "@web/hooks/useUserPermissions/useUserPermissions";
 import { PermissionGuard } from "@web/provider/PermissionGuard";
 
-export const rolesPage = {
-  "add-roles": "Add Roles",
-  "edit-roles": "Edit Roles",
-  "list-roles": "Roles List",
-} as const;
-
-export type RolesPageType = keyof typeof rolesPage;
-
-export const RolesPageEnums: RolesPageType[] = Object.keys(
-  rolesPage
-) as RolesPageType[];
-
-export type BreadcrumbItem =
-  | { icon: React.ReactElement; onClick: () => void }
-  | { onClick?: () => void; text: string };
-
 type RolesPageRenderer = Record<RolesPageType, ReactNode>;
-
-type BreadcrumbsMap = Record<RolesPageType, BreadcrumbItem[]>;
 
 // eslint-disable-next-line import/no-default-export
 export default function Page() {
@@ -62,39 +44,6 @@ export default function Page() {
 
   const isListRoles = _isEqual(queryPage, "list-roles");
 
-  const baseBreadcrumbs: BreadcrumbItem[] = [
-    {
-      icon: <SvgHome />,
-      onClick: () => router.push("/"),
-    },
-    {
-      text: t("permission.menu.label"),
-    },
-  ];
-
-  const breadcrumbsMap: BreadcrumbsMap = {
-    "add-roles": [
-      {
-        onClick: () => router.push("/permission/role?page=list-roles"),
-        text: rolesPage["list-roles"],
-      },
-      { text: rolesPage["add-roles"] },
-    ],
-    "edit-roles": [
-      {
-        onClick: () => router.push("/permission/role?page=list-roles"),
-        text: rolesPage["list-roles"],
-      },
-      { text: rolesPage["edit-roles"] },
-    ],
-    "list-roles": [{ text: rolesPage["list-roles"] }],
-  };
-
-  const breadcrumbsItems: BreadcrumbItem[] = [
-    ...baseBreadcrumbs,
-    ...(queryPage ? (breadcrumbsMap[queryPage] ?? []) : []),
-  ];
-
   if (!queryPage || !(queryPage in rolesPage)) {
     router.push("/permission/role?page=list-roles");
 
@@ -103,8 +52,6 @@ export default function Page() {
 
   return (
     <Stack gap="10px">
-      <Breadcrumbs items={breadcrumbsItems} />
-
       <ContentBox>
         <PadBox padding={{ padding: "20px" }}>
           <Stack gap="20px">
@@ -113,7 +60,7 @@ export default function Page() {
               justifyContent="space-between"
               alignItems="center"
             >
-              <Typography variant="h6">
+              <Typography variant="h6" fontSize={{ lg: "18px", xs: "16px" }}>
                 {queryPage && rolesPage[queryPage]}
               </Typography>
 
@@ -122,7 +69,6 @@ export default function Page() {
                   canAccess={validateAccess(ROLL_ENTRY_PERMISSION.CREATE)}
                 >
                   <ButtonLayoutProvider
-                    variant="outlined"
                     onClick={() =>
                       router.push("/permission/role?page=add-roles")
                     }

@@ -1,6 +1,7 @@
 import type { FilterListType } from "@codezee/sixtify-brahma";
 import { FilterListV2 } from "@codezee/sixtify-brahma";
 import { t } from "i18next";
+import _isEmpty from "lodash/isEmpty";
 import { useMemo, useState } from "react";
 import type { FieldValues } from "react-hook-form";
 
@@ -22,7 +23,11 @@ export const EventSummaryFilter = ({
 
   const { data: trustOption } = useGetTrustOptions({ useShortName: true });
 
-  const fromDate = currentFilter?.from_date;
+  useMemo(() => {
+    if (!_isEmpty(filterListData)) {
+      setCurrentFilter(filterListData);
+    }
+  }, [filterListData]);
 
   const filterListItems: FilterListType[] = useMemo(
     () => [
@@ -35,25 +40,11 @@ export const EventSummaryFilter = ({
         value: currentFilter?.trust_id,
       },
       {
-        key: "event_type",
+        key: "event_id",
         label: t("eventType.label"),
         options: filterEventOptions,
         type: "autoComplete",
-        value: currentFilter?.event_type,
-      },
-      {
-        key: "from_date",
-        label: t("fromDate.label"),
-        type: "date",
-        value: fromDate ?? "",
-      },
-      {
-        isDisabled: !fromDate,
-        key: "to_date",
-        label: t("toDate.label"),
-        required: !!fromDate,
-        type: "date",
-        value: currentFilter?.to_date ?? "",
+        value: currentFilter?.event_id,
       },
     ],
     [filterEventOptions, trustOption, currentFilter]

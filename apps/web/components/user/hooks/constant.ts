@@ -9,6 +9,8 @@ export const ROUTES_WITH_BRANCH_SELECTOR: DrawerMenuItemsKeys[] = [
 export const REPORT_ROUTES_WITH_BRANCH_SELECTOR =
   "/report/donation-collection-report" as const;
 
+export const DASHBOARD_ROUTES_WITH_BRANCH_SELECTOR = "/" as const;
+
 export const ROUTES_WITHOUT_BRANCH_SELECTOR = [
   {
     pathname: "/donation/donation-entry/",

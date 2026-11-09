@@ -23,6 +23,7 @@ export const useCurrencyDetailColumns = () => {
           : formatToIndianNumber(value);
       },
       field: "amount",
+      filter: "agNumberColumnFilter",
       headerName: t("currency.detail.amount"),
     },
   ];

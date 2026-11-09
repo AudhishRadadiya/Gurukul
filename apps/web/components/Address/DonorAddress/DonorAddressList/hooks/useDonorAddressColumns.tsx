@@ -1,4 +1,4 @@
-import { ActionCell } from "@codezee/sixtify-brahma";
+import { ActionCell, useGetDeviceType } from "@codezee/sixtify-brahma";
 import {
   CancelOutlined,
   CheckCircleOutlineOutlined,
@@ -7,8 +7,10 @@ import type { CustomCellRendererProps } from "ag-grid-react";
 import { t } from "i18next";
 
 import type { DonorAddress } from "@web/components/Address/DonorAddress/DonorAddressList/hooks/useGetDonorAddress";
+import { useGetTrueFalseOptions } from "@web/components/common/Autocomplete/hooks/useGetTrueFalseOptions";
 import type { AgColumnsArgs, AgColumnsWithActions } from "@web/types/agGrid";
 import type { AgGridActionItems } from "@web/types/shared-types";
+import { CustomEnumFilter } from "@web/utils/ag-grid-custom-filter";
 
 type UseDonorAddressColumns = {
   onAction: (rowData: DonorAddress) => void;
@@ -17,6 +19,10 @@ type UseDonorAddressColumns = {
 export const useDonorAddressColumns = ({
   onAction,
 }: AgColumnsArgs<UseDonorAddressColumns>) => {
+  const { trueFalseOptions } = useGetTrueFalseOptions();
+
+  const { isMobile } = useGetDeviceType();
+
   const column: AgColumnsWithActions<DonorAddress> = [
     {
       field: "contact_no",
@@ -51,6 +57,11 @@ export const useDonorAddressColumns = ({
     },
     {
       field: "is_ignored",
+      filter: CustomEnumFilter,
+      filterParams: {
+        filterOptions: trueFalseOptions,
+        source: "server",
+      },
       headerName: t("isActive.label"),
     },
     {
@@ -77,18 +88,18 @@ export const useDonorAddressColumns = ({
           <>
             <ActionCell items={items} />
             {is_ignored ? (
-              <CheckCircleOutlineOutlined
-                fontSize="medium"
-                color="success"
+              <CancelOutlined
+                fontSize={isMobile ? "small" : "medium"}
+                color="error"
                 style={{ cursor: "pointer" }}
                 onClick={() => {
                   onAction(data);
                 }}
               />
             ) : (
-              <CancelOutlined
-                fontSize="medium"
-                color="error"
+              <CheckCircleOutlineOutlined
+                fontSize={isMobile ? "small" : "medium"}
+                color="success"
                 style={{ cursor: "pointer" }}
                 onClick={() => {
                   onAction(data);

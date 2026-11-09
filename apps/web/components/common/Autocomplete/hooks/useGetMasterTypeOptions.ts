@@ -6,11 +6,17 @@ import { masterTypeKeys } from "@web/queryKeysFactories/masterType";
 import type { ApiSuccessResponse } from "@web/types/apiResponse";
 import type { OptionsType } from "@web/types/options";
 
+export type MasterTypeOptionType = OptionsType & {
+  is_hastak: boolean;
+};
+
+type MasterTypeOptionsType = MasterTypeOptionType[];
+
 export function useGetMasterTypeOptions() {
   const { axiosPrivate } = useAxiosPrivate();
 
   const fetchMasterTypeOption = async () => {
-    const { data } = await axiosPrivate.get<ApiSuccessResponse<OptionsType[]>>(
+    const { data } = await axiosPrivate.get<ApiSuccessResponse<MasterTypeOptionsType>>(
       MASTER_TYPE_ROUTES.options
     );
 

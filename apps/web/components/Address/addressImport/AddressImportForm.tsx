@@ -107,6 +107,7 @@ export const AddressImportForm = forwardRef(
           <Stack gap="25px">
             <ExcelImportProcess<AddressImportDetails>
               name="excel_file"
+              required
               excelImportFieldLabels={addressFieldLabels}
               excelImportData={excelAddressImportData}
               setExcelImportData={setExcelAddressImportData}

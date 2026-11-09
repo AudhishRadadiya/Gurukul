@@ -9,7 +9,33 @@ export type FilterComponentType =
   | "dateRange"
   | "checkbox"
   | "radio"
-  | "switch";
+  | "switch"
+  | "amountFilter";
+
+type AmountFilterKeys = {
+  betweenOperatorValue: string;
+  fromAmountKey: string;
+  operatorKey: string;
+  toAmountKey: string;
+};
+
+export type AmountFilterValues = {
+  fromAmount: number | null;
+  toAmount: number | null;
+  operator: string | null;
+};
+
+export type AmountFilterCurrentValue = {
+  fromAmount: number | null;
+  operator: string | null;
+  toAmount: number | null;
+};
+
+export type FilterCurrentValue =
+  | string
+  | string[]
+  | AmountFilterCurrentValue
+  | null;
 
 type Options = readonly {
   label: string;
@@ -21,18 +47,20 @@ type Options = readonly {
 }[];
 
 export type FilterListType = {
-  label: string;
+  amountFilterKeys?: AmountFilterKeys;
+  amountFilterValues?: AmountFilterValues;
+  employeeAutocomplete?: boolean;
+  isDefaultCurrentDate?: boolean;
   isDisabled?: boolean;
   key: string;
-  value: string;
-  type: FilterComponentType;
+  label: string;
   menuInfo?: string;
-  options?: Options;
-  multiSelect?: boolean;
-  required?: boolean;
   monthYearFormat?: boolean;
-  isDefaultCurrentDate?: boolean;
-  employeeAutocomplete?: boolean;
+  multiSelect?: boolean;
+  options?: Options;
+  required?: boolean;
+  type: FilterComponentType;
+  value: string;
 };
 type FilterTypeWrapperProps = {
   filter: FilterListType;

@@ -18,7 +18,7 @@ export const EventDropdownSummaryBreadcrumbs = () => {
           text: t("common.event.label"),
         },
         {
-          text: t("event.dropdown.summary.label"),
+          text: t("form.options.summary.label"),
         },
       ]}
     />

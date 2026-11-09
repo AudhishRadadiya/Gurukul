@@ -1,15 +1,17 @@
 import type { DialogRenderer } from "@codezee/sixtify-brahma";
 import {
-  Button,
   ColumnArrangerDialog,
   ColumnIconAction,
+  ContentBox,
   PadBox,
   toasts,
   useDialogActions,
+  useGetDeviceType,
 } from "@codezee/sixtify-brahma";
-import { Stack, Typography, useTheme } from "@mui/material";
+import type { SmartGridRef } from "@codezee-org/sixtify-smartgrid";
+import { SmartGrid } from "@codezee-org/sixtify-smartgrid";
+import { Box, Stack, Typography } from "@mui/material";
 import { isActive } from "@tiptap/core";
-import { type FilterModel } from "ag-grid-community";
 import { t } from "i18next";
 import { Mail, PrintingPage } from "iconoir-react";
 import _split from "lodash/split";
@@ -18,18 +20,23 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { type FieldValues } from "react-hook-form";
 
-import { AgGridV2 } from "@web/components/common/AgGridV2/AgGridV2";
 import { usePaginationParams } from "@web/components/common/AgGridV2/hooks/usePaginationParams";
 import { DataExport } from "@web/components/common/DataExport/DataExport";
 import {
   ExportDialog,
   useExportDialog,
 } from "@web/components/common/ExportDialog";
+import { ButtonLayoutProvider } from "@web/components/common/responsive/ButtonLayoutProvider";
 import type { DonationEntryApiSuccessResponse } from "@web/components/Donation/donationEntry/addDonationEntry/hooks/useAddDonationEntry";
 import { MailConfirmationDialog } from "@web/components/Donation/donationEntry/dialogs/bulkMail/MailConfirmationDialog";
 import { CancelDonationEntryDialog } from "@web/components/Donation/donationEntry/donationEntryList/dialogs/CancelDonationEntryDialog";
 import { DonationEntryFilter } from "@web/components/Donation/donationEntry/donationEntryList/DonationEntryFilter";
+import {
+  DonationEntryListPagination,
+  pageSizeDefault,
+} from "@web/components/Donation/donationEntry/donationEntryList/DonationEntryListPagination";
 import type { DonationEntryColumnHideTypes } from "@web/components/Donation/donationEntry/donationEntryList/hooks/templateTypes";
+import { useActivateDonationEntry } from "@web/components/Donation/donationEntry/donationEntryList/hooks/useActivateDonationEntry";
 import { useCancelDonationEntry } from "@web/components/Donation/donationEntry/donationEntryList/hooks/useCancelDonationEntry";
 import { useDonationEntryColumns } from "@web/components/Donation/donationEntry/donationEntryList/hooks/useDonationEntryColumns";
 import type { GetDonationAddressPdfApiSuccessResponse } from "@web/components/Donation/donationEntry/donationEntryList/hooks/useGetDonationAddressPdf";
@@ -45,19 +52,23 @@ import { useGetDonationLetter } from "@web/components/Donation/donationEntry/don
 import type { GetDonationReceiptApiSuccessResponse } from "@web/components/Donation/donationEntry/donationEntryList/hooks/useGetDonationReceipt";
 import { useGetDonationReceipt } from "@web/components/Donation/donationEntry/donationEntryList/hooks/useGetDonationReceipt";
 import { ExportModule } from "@web/constants/export";
-import { DONATION_ENTRY_PERMISSION } from "@web/constants/permission/donation/donationEntry/permission";
 import { useBranch } from "@web/context/BranchContext";
+import { useGridLayoutHeight } from "@web/hooks/useGridLayoutHeight";
 import { useUserPermissions } from "@web/hooks/useUserPermissions/useUserPermissions";
 import { PermissionGuard } from "@web/provider/PermissionGuard";
 import type { FilType } from "@web/types/shared-types";
 import { onError } from "@web/utils/errors";
-import { formatToIndianNumber } from "@web/utils/helper";
+import { filterSearchParams, formatToIndianNumber } from "@web/utils/helper";
 
 export type DonationEntryListProps = {
   columnHide: DonationEntryColumnHideTypes;
   externalDateFilter?: FieldValues;
+  filterListData: FieldValues;
+  handleApplyFilter: (data: FieldValues) => void;
   isDonationEntryList: boolean;
+  search: string;
   setColumnHide: (col: DonationEntryColumnHideTypes) => void;
+  setFilterListData: (data: FieldValues) => void;
 };
 
 const EVENT_SUMMARY = "event-summary";
@@ -68,38 +79,36 @@ export const toFilterDate = DateTime.now().toISODate();
 export const DonationEntryList = ({
   columnHide,
   externalDateFilter,
+  filterListData,
+  handleApplyFilter,
+  search,
   setColumnHide,
+  setFilterListData,
 }: DonationEntryListProps) => {
-  const theme = useTheme();
-
   const router = useRouter();
 
   const searchParams = useSearchParams();
 
-  const { orchid, red } = theme.palette.app.color;
-
-  const { allowPrintExport, validateAccess } = useUserPermissions();
-
   const { branchIds } = useBranch();
+
+  const { allowPrintExport } = useUserPermissions();
+
+  const { isMobile } = useGetDeviceType();
+
+  const smartGridRef = useRef<SmartGridRef<DonationEntry>>(null);
 
   const params = Object.fromEntries(searchParams.entries());
 
   const { contact_no, event_type_id, page: moduleName, ...restParams } = params;
 
-  const [filterListData, setFilterListData] = useState<FieldValues>({
-    branch_id: [""],
-  });
-
   useMemo(() => {
-    setFilterListData((prev) => ({
+    setFilterListData((prev: FieldValues) => ({
       ...prev,
       branch_id: [branchIds],
     }));
   }, [branchIds]);
 
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-
-  const [agGridFilterModel, setAgGridFilterModel] = useState<FilterModel>({});
 
   const [selectedDonationEntry, setSelectedDonationEntry] =
     useState<DonationEntry | null>(null);
@@ -113,6 +122,13 @@ export const DonationEntryList = ({
 
   const { onDialogClose, onDialogOpen, openedDialog } = useDialogActions();
 
+  smartGridRef.current?.setNotifyCallback(() => {
+    setSelectedRows(
+      smartGridRef.current?.getSelectedRows().map((row) => row.donation_id) ??
+        []
+    );
+  });
+
   useMemo(() => {
     const trustId = searchParams.get("trust_id");
 
@@ -125,7 +141,7 @@ export const DonationEntryList = ({
       )
     );
 
-    setFilterListData((prev) => ({
+    setFilterListData((prev: FieldValues) => ({
       ...prev,
       ...filterParams,
       ...(!!trustId && {
@@ -151,7 +167,7 @@ export const DonationEntryList = ({
       ...(contact_no && { contact_no }),
       ...(event_type_id && { event_type_id }),
     },
-    filterModel: agGridFilterModel,
+    quickFilter: filterSearchParams(search),
     startRow,
   });
 
@@ -203,7 +219,7 @@ export const DonationEntryList = ({
       ...(contact_no && { contact_no }),
       ...(event_type_id && { event_type_id }),
     },
-    filterModel: agGridFilterModel,
+    quickFilter: filterSearchParams(search),
     startRow: 0,
   });
 
@@ -211,10 +227,6 @@ export const DonationEntryList = ({
     handleExport(fileType, getExportBody());
     onDialogOpen("exportOptions");
   };
-
-  const { columns } = useDonationEntryColumns({
-    columnHide,
-  });
 
   const { isPending: isPendingPrintAddress, mutate: printAddress } =
     useGetDonationAddressPdf({
@@ -274,12 +286,80 @@ export const DonationEntryList = ({
     });
 
   const {
+    isPending: isPendingActivateDonation,
+    mutate: activateDonationEntry,
+  } = useActivateDonationEntry({
+    options: {
+      onError: (error) => onError(error),
+      onSuccess: ({ message }) => {
+        refetch();
+
+        toasts.success({ title: message });
+      },
+    },
+  });
+
+  const {
     donationDetail,
     full_count,
     total_amount,
     total_cancel_amount,
     total_receipt,
   } = donationEntryList;
+
+  const { columns } = useDonationEntryColumns({
+    columnHide,
+    onAction: (actionType, data) => {
+      if (actionType === "edit") {
+        router.push(
+          `/donation/donation-entry/${data.donation_id}?page=edit-donation-entry`
+        );
+
+        return;
+      }
+
+      if (actionType === "clone") {
+        router.push(
+          `/donation/donation-entry/${data.donation_id}?page=clone-donation-entry`
+        );
+
+        return;
+      }
+
+      if (actionType === "donationLetter") {
+        donationLetter({
+          donation_id: data.donation_id,
+        });
+      }
+
+      if (actionType === "donationReceipt") {
+        donationReceipt({
+          donation_id: data.donation_id,
+        });
+
+        return;
+      }
+
+      if (actionType === "cancelDonationEntryConfirmation") {
+        if (data.is_cancel) {
+          activateDonationEntry({
+            donation_id: data.donation_id,
+            is_active: true,
+          });
+
+          return;
+        }
+
+        setSelectedDonationEntry(data);
+        onDialogOpen("cancelDonationEntryConfirmation");
+
+        return;
+      }
+
+      setSelectedDonationEntry(data);
+      onDialogOpen(actionType);
+    },
+  });
 
   const dialogRenderer: DialogRenderer = {
     cancelDonationEntryConfirmation: (
@@ -333,43 +413,57 @@ export const DonationEntryList = ({
     ),
   };
 
+  const shouldShowPagination = Number(full_count) > pageSizeDefault;
+
+  const gridHeight = useGridLayoutHeight({
+    baseHeight: isMobile ? 330 : 320,
+    noNeedToApplyPaginationHeight: true,
+    showPagination: shouldShowPagination,
+  });
+
   return (
     <>
-      <PadBox padding={{ padding: "3px 5px" }}>
+      <PadBox padding={{ padding: { md: "3px 5px", xs: "8px 10px" } }}>
         <Stack
           direction="row"
           gap="10px"
-          justifyContent="end"
+          justifyContent={{ md: "flex-end", xs: "flex-start" }}
           alignItems="center"
+          flexWrap="wrap"
+          width="100%"
+          sx={{
+            "& .MuiButton-root": {
+              flexGrow: { md: 0, xs: 1 },
+              minWidth: { md: "auto", xs: "calc(50% - 10px)" },
+              whiteSpace: "nowrap",
+            },
+          }}
         >
           <DonationEntryFilter
             filterListData={filterListData}
-            setFilterListData={setFilterListData}
+            handleApplyFilter={handleApplyFilter}
           />
 
-          <Button
-            variant="outlined"
+          <ButtonLayoutProvider
+            size={isMobile ? "small" : "medium"}
             startIcon={<Mail width={20} height={20} />}
             onClick={() => {
               onDialogOpen("confirmation");
             }}
             disabled={!selectedRows.length}
-          >
-            {t("common.bulk.mail")}
-          </Button>
+            label={t("common.bulk.mail")}
+          />
 
           <PermissionGuard canAccess={allowPrintExport}>
-            <Button
+            <ButtonLayoutProvider
               loading={isPendingPrintAddress}
-              variant="outlined"
               startIcon={<PrintingPage width={20} height={20} />}
               onClick={() => {
                 printAddress();
               }}
               disabled={!selectedRows.length}
-            >
-              {t("common.print.address")}
-            </Button>
+              label={t("common.print.address")}
+            />
 
             <DataExport onExport={onExport} />
           </PermissionGuard>
@@ -382,104 +476,73 @@ export const DonationEntryList = ({
         </Stack>
       </PadBox>
 
-      <AgGridV2<DonationEntry>
-        defaultColDef={{
-          cellStyle: ({ data }) => {
-            if (data?.is_cancel) {
-              return {
-                color: red[500],
-              };
-            }
+      <ContentBox>
+        <SmartGrid<DonationEntry>
+          ref={smartGridRef}
+          columns={columns}
+          data={donationDetail}
+          loading={
+            isFetching || isPendingDonationReceipt || isPendingActivateDonation
+          }
+          totalCount={full_count}
+          rowSelection
+          checkBoxPinning="left"
+          height={gridHeight}
+        />
 
-            if (data?.edit_date) {
-              return {
-                color: orchid[900],
-              };
-            }
-          },
-        }}
-        rowSelection="multiple"
-        getRowId={(params) => params.data.donation_id}
-        isLoading={isFetching || isPendingDonationReceipt}
-        page={page}
-        count={full_count}
-        columnDefs={columns}
-        onSelectionChanged={setSelectedRows}
-        rowData={donationDetail}
-        rowsPerPage={rowsPerPage}
-        onPageChange={onPageChange}
-        onFilterChange={setAgGridFilterModel}
-        onRowsPerPageChange={onRowsPerPageChange}
-        height={350}
-        footer={
-          <Stack direction="row" gap="60px">
-            <Stack direction="row" gap="10px">
-              <Typography variant="body2">Total Amount:</Typography>
+        <Box>
+          <PadBox padding={{ padding: { md: "8px 25px", xs: "8px 12px" } }}>
+            <Stack
+              direction={{
+                lg: "column",
+                md: "column",
+                sm: "column",
+                xl: "row",
+                xs: "column",
+                xxl: "row",
+              }}
+              gap="6px"
+              justifyContent="space-between"
+            >
+              <Stack
+                direction="row"
+                gap={{ md: "20px", xs: "12px" }}
+                flexWrap="wrap"
+              >
+                <Stack direction="row" gap="10px" flexShrink={0}>
+                  <Typography variant="body2">Total Amount:</Typography>
 
-              <Typography variant="body1">
-                {formatToIndianNumber(Number(total_amount))}
-              </Typography>
+                  <Typography variant="body1">
+                    {formatToIndianNumber(Number(total_amount))}
+                  </Typography>
+                </Stack>
+
+                <Stack direction="row" gap="10px" flexShrink={0}>
+                  <Typography variant="body2">Total Receipt:</Typography>
+
+                  <Typography variant="body1">{total_receipt || 0}</Typography>
+                </Stack>
+
+                <Stack direction="row" gap="10px" flexShrink={0}>
+                  <Typography variant="body2">Total Cancel Amount:</Typography>
+
+                  <Typography variant="body1">
+                    {formatToIndianNumber(Number(total_cancel_amount))}
+                  </Typography>
+                </Stack>
+              </Stack>
+
+              <DonationEntryListPagination
+                page={page}
+                fullCount={full_count}
+                rowsPerPage={rowsPerPage}
+                onPageChange={onPageChange}
+                onRowsPerPageChange={onRowsPerPageChange}
+              />
             </Stack>
-
-            <Stack direction="row" gap="10px">
-              <Typography variant="body2">Total Receipt:</Typography>
-
-              <Typography variant="body1">{total_receipt || 0}</Typography>
-            </Stack>
-
-            <Stack direction="row" gap="10px">
-              <Typography variant="body2">Total Cancel Amount:</Typography>
-
-              <Typography variant="body1">
-                {formatToIndianNumber(Number(total_cancel_amount))}
-              </Typography>
-            </Stack>
-          </Stack>
-        }
-        actions={[
-          {
-            isView: validateAccess(DONATION_ENTRY_PERMISSION.EDIT),
-            onClick: (data) => {
-              router.push(
-                `/donation/donation-entry/${data.donation_id}?page=edit-donation-entry`
-              );
-            },
-            title: t("common.edit"),
-          },
-          {
-            isView: validateAccess(DONATION_ENTRY_PERMISSION.CREATE),
-            onClick: (data) => {
-              router.push(
-                `/donation/donation-entry/${data.donation_id}?page=clone-donation-entry`
-              );
-            },
-            title: t("common.clone"),
-          },
-          {
-            onClick: (data) => {
-              donationLetter({
-                donation_id: data.donation_id,
-              });
-            },
-            title: t("common.donation.letter"),
-          },
-          {
-            onClick: (data) => {
-              donationReceipt({
-                donation_id: data.donation_id,
-              });
-            },
-            title: t("donationReceipt.label"),
-          },
-          {
-            onClick: (data) => {
-              setSelectedDonationEntry(data);
-              onDialogOpen("cancelDonationEntryConfirmation");
-            },
-            title: t("common.cancel.button"),
-          },
-        ]}
-      />
+          </PadBox>
+        </Box>
+      </ContentBox>
 
       {openedDialog && dialogRenderer[openedDialog]}
     </>

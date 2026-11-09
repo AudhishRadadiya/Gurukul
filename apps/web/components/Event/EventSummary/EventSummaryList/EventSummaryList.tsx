@@ -1,10 +1,11 @@
-import type { FilterModel } from "ag-grid-community";
+import { useGetDeviceType } from "@codezee/sixtify-brahma";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import { t } from "i18next";
 import _isEmpty from "lodash/isEmpty";
 import _mapValues from "lodash/mapValues";
 import _pickBy from "lodash/pickBy";
 import { useRouter } from "next/navigation";
-import { forwardRef, useState } from "react";
+import { forwardRef } from "react";
 import type { FieldValues } from "react-hook-form";
 
 import { AgGridV2 } from "@web/components/common/AgGridV2/AgGridV2";
@@ -13,9 +14,19 @@ import { useEventSummaryColumns } from "@web/components/Event/EventSummary/Event
 import type { EventSummary } from "@web/components/Event/EventSummary/EventSummaryList/hooks/useGetEventSummary";
 import { useGetEventSummary } from "@web/components/Event/EventSummary/EventSummaryList/hooks/useGetEventSummary";
 import { useBranch } from "@web/context/BranchContext";
+import { filterSearchParams } from "@web/utils/helper";
 
 export type EventSummaryListProps = {
+  agGridState: {
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  };
   externalFilter: FieldValues;
+  search: string;
+  setAgGridState: (data: {
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }) => void;
 };
 
 export const buildQuery = (filters: Record<string, string>) =>
@@ -25,15 +36,20 @@ export const buildQuery = (filters: Record<string, string>) =>
   );
 
 export const EventSummaryList = forwardRef(
-  ({ externalFilter }: EventSummaryListProps) => {
+  ({
+    agGridState,
+    externalFilter,
+    search,
+    setAgGridState,
+  }: EventSummaryListProps) => {
     const router = useRouter();
+
+    const { isMobile } = useGetDeviceType();
 
     const { branchIds } = useBranch();
 
     const { onPageChange, onRowsPerPageChange, page, rowsPerPage } =
       usePaginationParams();
-
-    const [agGridFilterModel, setAgGridFilterModel] = useState<FilterModel>({});
 
     const startRow = page * rowsPerPage;
 
@@ -42,7 +58,9 @@ export const EventSummaryList = forwardRef(
     const { data, isFetching, isLoading } = useGetEventSummary({
       endRow,
       externalFilter: { ...externalFilter, branch_id: [branchIds] },
-      filterModel: agGridFilterModel,
+      filterModel: agGridState.filterModel,
+      quickFilter: filterSearchParams(search),
+      sortModel: agGridState.sortModel,
       startRow,
     });
 
@@ -61,15 +79,15 @@ export const EventSummaryList = forwardRef(
         rowData={rowData}
         onPageChange={onPageChange}
         count={totalCount}
-        onFilterChange={setAgGridFilterModel}
+        onGridStateChange={setAgGridState}
         onRowsPerPageChange={onRowsPerPageChange}
-        height={260}
+        height={isMobile ? 220 : 240}
         actions={[
           {
             onClick: (data) => {
               const query: FieldValues = buildQuery({
                 ...externalFilter,
-                event_type_id: data.event_type_id,
+                event_id: data.event_type_id,
               });
 
               const params = new URLSearchParams(query).toString();

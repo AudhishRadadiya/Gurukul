@@ -18,7 +18,11 @@ import {
   type FieldValues,
   type UseControllerProps,
 } from "react-hook-form";
-import { NumericFormat, type NumericFormatProps } from "react-number-format";
+import {
+  NumericFormat,
+  type NumericFormatProps,
+  type NumberFormatValues,
+} from "react-number-format";
 
 import { Skeleton } from "./Skeleton";
 
@@ -40,6 +44,7 @@ export type NumericTextFieldProps<P extends FieldValues> =
       infoMessage?: ReactNode;
       label?: string;
       loading?: boolean;
+      minValue?: number;
       removeDecimalScale?: boolean;
       styling?: "custom" | "default";
       thousandSeparator?: boolean;
@@ -58,6 +63,7 @@ export function NumericTextField<P extends FieldValues>({
   infoMessage,
   label = "",
   loading = false,
+  minValue,
   name,
   placeholder = "",
   removeDecimalScale,
@@ -68,6 +74,12 @@ export function NumericTextField<P extends FieldValues>({
   thousandsGroupStyle = "lakh",
   ...inputFieldProps
 }: NumericTextFieldProps<P>) {
+  const {
+    allowNegative: allowNegativeProp,
+    isAllowed: isAllowedProp,
+    ...restInputFieldProps
+  } = inputFieldProps;
+
   const {
     field: { onChange, value, ...restField },
     fieldState: { error },
@@ -107,6 +119,25 @@ export function NumericTextField<P extends FieldValues>({
         onValueChange={(values: { floatValue: number | undefined }) => {
           onChange(values.floatValue ?? null);
         }}
+        allowNegative={
+          allowNegativeProp ??
+          (minValue !== undefined ? minValue < 0 : undefined)
+        }
+        isAllowed={(values: NumberFormatValues) => {
+          if (isAllowedProp && !isAllowedProp(values)) {
+            return false;
+          }
+
+          if (minValue === undefined) {
+            return true;
+          }
+
+          if (values.floatValue === undefined) {
+            return true;
+          }
+
+          return values.floatValue >= minValue;
+        }}
         disabled={disabled}
         required={required}
         fullWidth
@@ -117,7 +148,7 @@ export function NumericTextField<P extends FieldValues>({
         error={errorProp ?? Boolean(error)}
         helperText={helperTextProp ?? error?.message}
         {...restField}
-        {...inputFieldProps}
+        {...restInputFieldProps}
       />
     </Stack>
   );

@@ -76,7 +76,11 @@ export function UserProfileMenu({
           <Stack direction="row" alignItems="center" gap={1} color="black">
             <Avatar
               src={userDetails.avatar}
-              sx={{ border: `1px solid ${iron[700]}` }}
+              sx={{
+                border: `1px solid ${iron[700]}`,
+                width: { sm: "40px", xs: "30px" },
+                height: { sm: "40px", xs: "30px" },
+              }}
             />
 
             {isDesktop && (

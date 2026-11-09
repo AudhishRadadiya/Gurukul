@@ -1,3 +1,4 @@
+import { useGetDeviceType } from "@codezee/sixtify-brahma";
 import _compact from "lodash/compact";
 import _join from "lodash/join";
 import { useFormContext } from "react-hook-form";
@@ -29,6 +30,8 @@ export const AddressDetailList = ({
   nameField,
   onClose,
 }: AddressDetailListProps) => {
+  const { isMobile } = useGetDeviceType();
+
   const { onPageChange, onRowsPerPageChange, page, rowsPerPage } =
     usePaginationParams();
 
@@ -78,7 +81,7 @@ export const AddressDetailList = ({
       rowsPerPage={rowsPerPage}
       onPageChange={onPageChange}
       onRowsPerPageChange={onRowsPerPageChange}
-      height={315}
+      height={isMobile ? 190 : 315}
     />
   );
 };

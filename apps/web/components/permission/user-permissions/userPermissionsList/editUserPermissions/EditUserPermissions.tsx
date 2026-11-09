@@ -29,7 +29,7 @@ export const EditUserPermissions = ({ userId }: EditUserPermissionsProps) => {
   const { isDisabled } = useDisabledButtonsCache(submitButtonId);
 
   const onCancel = () => {
-    router.push("/permission/role?page=list-user-permissions");
+    router.push("/permission/user-permissions?page=list-user-permissions");
   };
 
   const { data: rolesDetails, isLoading: isPenaltyRuleLoading } =

@@ -176,7 +176,12 @@ export const DailyCollectionReportFrom = forwardRef(
             {...getError("to_date")}
           />
 
-          <PadBox padding={{ paddingLeft: "10px", paddingTop: "40px" }}>
+          <PadBox
+            padding={{
+              paddingLeft: { md: "10px", xs: 0 },
+              paddingTop: { md: "40px", xs: "16px" },
+            }}
+          >
             <CheckboxRow
               size="small"
               name="show_all"

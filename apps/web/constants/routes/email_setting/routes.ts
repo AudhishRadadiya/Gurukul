@@ -3,6 +3,9 @@ import { API, LIST, OPTION } from "@web/constants/routes/common";
 export const EMAIL_SETTING_ROUTES_BASE_URL = `${API}/email_setting` as const;
 
 export const EMAIL_SETTING_ROUTES = {
+  delete: (emailSettingId: string) =>
+    `${EMAIL_SETTING_ROUTES_BASE_URL}/${emailSettingId}` as const,
+
   get: (emailSettingId: string) =>
     `${EMAIL_SETTING_ROUTES_BASE_URL}/${emailSettingId}` as const,
 

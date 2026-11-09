@@ -4,8 +4,9 @@ import { t } from "i18next";
 import type { AddressBookDetails } from "@web/components/Address/address-book/AddressBook/AddressBookList/hooks/useGetAddressBook";
 import type { AddressBookColumnHideTypes } from "@web/components/Address/address-book/template/dialogs/hooks/templateTypes";
 import { AG_GRID_CELL_DEFAULT_VALUE } from "@web/components/common/AgGridV2/AgGridV2";
-import { useGetIsActiveOptions } from "@web/components/common/hooks/useGetIsActiveOptions";
+import { useGetTrueFalseOptions } from "@web/components/common/Autocomplete/hooks/useGetTrueFalseOptions";
 import type { AgColumnsArgs, AgColumnsWithActions } from "@web/types/agGrid";
+import { CustomEnumFilter } from "@web/utils/ag-grid-custom-filter";
 import { dateFormat } from "@web/utils/date";
 
 type UseGetAddressBookColumnsArgs = {
@@ -16,9 +17,9 @@ export const useGetAddressBookColumns = ({
   columnHide,
 }: AgColumnsArgs<UseGetAddressBookColumnsArgs>) => {
   const {
+    aadhar_no,
     address,
     address_type,
-    adhar_no,
     alternet_mobile_no,
     anniversary_date,
     anniversary_day,
@@ -62,7 +63,7 @@ export const useGetAddressBookColumns = ({
     zone_name,
   } = columnHide || {};
 
-  const { isActiveOptions } = useGetIsActiveOptions();
+  const { trueFalseOptions } = useGetTrueFalseOptions();
 
   const columns: AgColumnsWithActions<AddressBookDetails> = [
     {
@@ -108,13 +109,8 @@ export const useGetAddressBookColumns = ({
       minWidth: 200,
     },
     {
-      field: "leave_in",
-      headerName: t("common.locality"),
-      hide: !leave_in,
-      minWidth: 150,
-    },
-    {
       field: "pincode",
+      filter: "agNumberColumnFilter",
       headerName: t("common.zip.code"),
       hide: !pincode,
       minWidth: 150,
@@ -147,7 +143,7 @@ export const useGetAddressBookColumns = ({
       field: "blood_group",
       headerName: t("common.blood.group"),
       hide: !blood_group,
-      minWidth: 100,
+      minWidth: 110,
     },
     {
       field: "district",
@@ -160,6 +156,7 @@ export const useGetAddressBookColumns = ({
         return !value ? AG_GRID_CELL_DEFAULT_VALUE : dateFormat(value, true);
       },
       field: "birth_date",
+      filter: "agDateColumnFilter",
       headerName: t("common.birth.date"),
       hide: !birth_date,
       minWidth: 100,
@@ -175,6 +172,7 @@ export const useGetAddressBookColumns = ({
         return !value ? AG_GRID_CELL_DEFAULT_VALUE : dateFormat(value, true);
       },
       field: "anniversary_date",
+      filter: "agDateColumnFilter",
       headerName: t("common.anniversary.date"),
       hide: !anniversary_date,
       minWidth: 150,
@@ -187,6 +185,11 @@ export const useGetAddressBookColumns = ({
     },
     {
       field: "is_vip",
+      filter: CustomEnumFilter,
+      filterParams: {
+        filterOptions: trueFalseOptions,
+        source: "server",
+      },
       headerName: t("common.is.vip"),
       hide: !is_vip,
       minWidth: 80,
@@ -231,10 +234,15 @@ export const useGetAddressBookColumns = ({
       field: "b_note",
       headerName: t("common.business.note"),
       hide: !b_note,
-      minWidth: 100,
+      minWidth: 120,
     },
     {
       field: "patrika",
+      filter: CustomEnumFilter,
+      filterParams: {
+        filterOptions: trueFalseOptions,
+        source: "server",
+      },
       headerName: t("common.patrika"),
       hide: !patrika,
       minWidth: 100,
@@ -253,14 +261,14 @@ export const useGetAddressBookColumns = ({
     },
     {
       field: "is_past_student",
-
+      filter: CustomEnumFilter,
       filterParams: {
-        filterOptions: isActiveOptions,
-        source: "note",
+        filterOptions: trueFalseOptions,
+        source: "server",
       },
       headerName: t("common.is.past.student"),
       hide: !is_past_student,
-      minWidth: 100,
+      minWidth: 120,
     },
     {
       field: "gurukul_name",
@@ -270,6 +278,7 @@ export const useGetAddressBookColumns = ({
     },
     {
       field: "ssc_year",
+      filter: "agNumberColumnFilter",
       headerName: t("common.ssc.year"),
       hide: !ssc_year,
       minWidth: 100,
@@ -288,12 +297,13 @@ export const useGetAddressBookColumns = ({
     },
     {
       field: "medium",
+      filter: "agNumberColumnFilter",
       headerName: t("common.medium"),
       hide: !medium,
       minWidth: 100,
     },
     {
-      field: "class_mate",
+      field: "class_mate_name",
       headerName: t("common.class.mate"),
       hide: !class_mate,
       minWidth: 150,
@@ -312,6 +322,7 @@ export const useGetAddressBookColumns = ({
     },
     {
       field: "family_member",
+      filter: "agNumberColumnFilter",
       headerName: t("common.family.member"),
       hide: !family_member,
       minWidth: 200,
@@ -323,9 +334,9 @@ export const useGetAddressBookColumns = ({
       minWidth: 100,
     },
     {
-      field: "adhar_no",
-      headerName: t("common.adhar.no"),
-      hide: !adhar_no,
+      field: "aadhar_no",
+      headerName: t("common.aadhar.no"),
+      hide: !aadhar_no,
       minWidth: 200,
     },
     {
@@ -338,12 +349,6 @@ export const useGetAddressBookColumns = ({
       field: "electors_number",
       headerName: t("common.electors.number"),
       hide: !electors_number,
-      minWidth: 200,
-    },
-    {
-      field: "driving_licence_no",
-      headerName: t("common.dlno"),
-      hide: !driving_licence_no,
       minWidth: 200,
     },
     {

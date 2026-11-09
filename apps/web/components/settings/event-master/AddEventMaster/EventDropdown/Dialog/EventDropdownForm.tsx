@@ -112,7 +112,7 @@ export const EventDropdownForm = forwardRef(
 
     const fieldType = watch("field_type");
 
-    const { field_type, sequence, title, values } = errors;
+    const { description, field_type, sequence, title, values } = errors;
 
     useMemo(() => {
       if (fieldType !== 8) {
@@ -129,7 +129,9 @@ export const EventDropdownForm = forwardRef(
             required
             characterType="any-character"
             letterCase="mixed"
-            label={t("common.event.dropdown.title")}
+            label={t("common.form.options", {
+              label: t("title.label"),
+            })}
             error={!!title}
             helperText={errorMessages(title?.message)}
           />
@@ -141,6 +143,8 @@ export const EventDropdownForm = forwardRef(
             multiline
             characterType="any-character"
             label={t("description.label")}
+            error={!!description}
+            helperText={errorMessages(description?.message)}
           />
         </FormGridLayout>
 
@@ -205,7 +209,9 @@ export const EventDropdownForm = forwardRef(
                 <Stack gap="5px">
                   <MuiTextField
                     fullWidth
-                    label={t("common.event.dropdown.values")}
+                    label={t("common.form.options", {
+                      label: t("title.values"),
+                    })}
                     value={inputValue}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       setInputValue(e.target.value)

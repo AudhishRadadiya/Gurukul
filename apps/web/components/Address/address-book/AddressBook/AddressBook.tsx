@@ -5,6 +5,7 @@ import {
   PadBox,
   TabBar,
   useDialogActions,
+  useGetDeviceType,
 } from "@codezee/sixtify-brahma";
 import { Add } from "@mui/icons-material";
 import { Box, IconButton, Stack, Typography, useTheme } from "@mui/material";
@@ -23,12 +24,14 @@ import {
 export type SelectedRecords = Record<string, boolean> | null;
 
 export const AddressBook = () => {
+  const { isMobile } = useGetDeviceType();
+
   const { onDialogClose, onDialogOpen, openedDialog } = useDialogActions();
 
   const [columnHide, setColumnHide] = useState<AddressBookColumnHideTypes>({
+    aadhar_no: true,
     address: true,
     address_type: true,
-    adhar_no: true,
     alternet_mobile_no: true,
     anniversary_date: true,
     anniversary_day: true,
@@ -178,9 +181,17 @@ export const AddressBook = () => {
       </Box>
 
       <ContentBox>
-        <PadBox padding={{ padding: "10px" }}>
-          <Stack direction="row" gap="10px" justifyContent="space-between">
-            <Typography variant="subtitle1">
+        <PadBox padding={{ padding: { md: "10px", xs: "8px 10px" } }}>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography
+              variant="subtitle1"
+              whiteSpace="nowrap"
+              fontSize={isMobile ? "15px" : "18px"}
+            >
               {t("address.book.menu.label")}
             </Typography>
           </Stack>
@@ -188,10 +199,12 @@ export const AddressBook = () => {
       </ContentBox>
 
       <ContentBox>
-        <AddressBookList
-          columnHide={columnHide}
-          setColumnHide={setColumnHide}
-        />
+        <Box sx={{ overflow: "hidden", width: "100%" }}>
+          <AddressBookList
+            columnHide={columnHide}
+            setColumnHide={setColumnHide}
+          />
+        </Box>
       </ContentBox>
 
       {openedDialog && dialogRenderer[openedDialog]}

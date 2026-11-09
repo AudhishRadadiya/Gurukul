@@ -6,6 +6,7 @@ import {
   useState,
   type HTMLAttributeAnchorTarget,
   type ReactNode,
+  useEffect,
 } from "react";
 
 import { PadBox } from "../PadBox";
@@ -38,15 +39,22 @@ export const Drawer = ({
   appLogoMedium,
   appLogoSmall,
 }: DrawerProps) => {
+  const { layout } = useGetDeviceType();
+
+  const isDesktop = layout === "desktop";
+
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
 
   const handleClose = () => {
     setAnchorEl(null);
   };
 
-  const { layout } = useGetDeviceType();
-
-  const isDesktop = layout === "desktop";
+  useEffect(() => {
+    // For close the ToolTip when the drawer is closed on desktop
+    if (isDesktop && !!open && !!anchorEl) {
+      handleClose();
+    }
+  }, [isDesktop]);
 
   return (
     <StyledDrawer variant="permanent" open={open}>
@@ -83,7 +91,17 @@ export const Drawer = ({
       )}
 
       {!isDesktop && (
-        <ClickAwayListener onClickAway={handleClose}>
+        <ClickAwayListener
+          onClickAway={(event) => {
+            const target = event.target as HTMLElement | null;
+
+            if (target?.closest(".MuiPopper-root")) {
+              return;
+            }
+
+            handleClose();
+          }}
+        >
           <List component="nav" onMouseLeave={handleClose}>
             <CloseDrawerMenuItemList
               menuItems={menuItems}

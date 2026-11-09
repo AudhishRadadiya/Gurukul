@@ -16,6 +16,7 @@ import { errorMessages, filterChangedFormFields } from "@web/utils/helper";
 
 const CancelReceiptFromSchema = z.object({
   branch_id: z.string().nullable(),
+  organize_remark: z.string().nullable().optional(),
   receipt_number: z
     .string()
     .nullable()
@@ -61,6 +62,7 @@ export type FormRef = {
 
 const formDefaultValues: CancelReceiptFormFieldValues = {
   branch_id: null,
+  organize_remark: null,
   receipt_number: null,
   total_receipt: null,
   trust_id: null,
@@ -128,7 +130,13 @@ export const CancelReceiptFrom = forwardRef(
       }
     }, [data]);
 
-    const { receipt_number, total_receipt, trust_id, user_id } = errors;
+    const {
+      organize_remark,
+      receipt_number,
+      total_receipt,
+      trust_id,
+      user_id,
+    } = errors;
 
     return (
       <FormContainer>
@@ -183,6 +191,19 @@ export const CancelReceiptFrom = forwardRef(
             helperText={errorMessages(user_id?.message)}
           />
         </FormRow>
+
+        <TextField
+          name="organize_remark"
+          control={control}
+          loading={loading}
+          label={t("organize.remark.label")}
+          multiline
+          letterCase="mixed"
+          characterType="any-character"
+          rows={4}
+          error={!!organize_remark}
+          helperText={errorMessages(organize_remark?.message)}
+        />
       </FormContainer>
     );
   }

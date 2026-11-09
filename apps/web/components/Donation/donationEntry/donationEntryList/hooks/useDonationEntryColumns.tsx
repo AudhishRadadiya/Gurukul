@@ -1,25 +1,36 @@
-import type { IRowNode } from "ag-grid-community";
-import type { CustomCellRendererProps } from "ag-grid-react";
+import { ActionCell, type DialogTypes, Tooltip } from "@codezee/sixtify-brahma";
+import type { AppColumnDef } from "@codezee-org/sixtify-smartgrid";
+import { Typography, useTheme } from "@mui/material";
 import { t } from "i18next";
 
 import { AG_GRID_CELL_DEFAULT_VALUE } from "@web/components/common/AgGridV2/AgGridV2";
+import { useGetTrueFalseOptions } from "@web/components/common/Autocomplete/hooks/useGetTrueFalseOptions";
 import type { DonationEntryColumnHideTypes } from "@web/components/Donation/donationEntry/donationEntryList/hooks/templateTypes";
 import type { DonationEntry } from "@web/components/Donation/donationEntry/donationEntryList/hooks/useGetDonationEntry";
-import type {
-  AgColumnsArgs,
-  AgColumnsWithActions,
-  AgDataWithActions,
-} from "@web/types/agGrid";
+import { DONATION_ENTRY_PERMISSION } from "@web/constants/permission/donation/donationEntry/permission";
+import { useUserPermissions } from "@web/hooks/useUserPermissions/useUserPermissions";
+import type { AgColumnsArgs } from "@web/types/agGrid";
+import type { SmartGridActionItems } from "@web/types/shared-types";
 import { dateFormat } from "@web/utils/date";
 import { formatToIndianNumber } from "@web/utils/helper";
 
 type UseGetDonationEntryColumnsArgs = {
   columnHide: DonationEntryColumnHideTypes;
+  onAction: (actionType: DialogTypes, rowData: DonationEntry) => void;
 };
 
 export const useDonationEntryColumns = ({
   columnHide,
+  onAction,
 }: AgColumnsArgs<UseGetDonationEntryColumnsArgs>) => {
+  const theme = useTheme();
+
+  const { black, orchid, red } = theme.palette.app.color;
+
+  const { trueFalseOptions } = useGetTrueFalseOptions();
+
+  const { validateAccess } = useUserPermissions();
+
   const {
     aadhar_no,
     address,
@@ -52,230 +63,644 @@ export const useDonationEntryColumns = ({
     state,
   } = columnHide || {};
 
-  const columns: AgColumnsWithActions<DonationEntry> = [
+  const getColumnValueColor = ({
+    edit_date,
+    is_cancel,
+  }: Pick<DonationEntry, "edit_date" | "is_cancel">) => {
+    if (edit_date) {
+      return orchid[900];
+    }
+
+    if (is_cancel) {
+      return red[500];
+    }
+
+    return black[900];
+  };
+
+  const columns: AppColumnDef<DonationEntry>[] = [
     {
-      cellRenderer: ({ value }: CustomCellRendererProps) => {
-        return !value ? AG_GRID_CELL_DEFAULT_VALUE : dateFormat(value, true);
+      accessorKey: "date",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { date } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {date ? dateFormat(date, true) : AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
       },
-      field: "date",
-      headerName: t("date.label"),
+      enableGrouping: true,
+      filterVariant: "smartDateFilter",
+      header: t("date.label"),
       hide: !date,
-      minWidth: 100,
+      size: 200,
     },
     {
-      comparator: (
-        _valueA: string,
-        _valueB: string,
-        nodeA: IRowNode<AgDataWithActions<DonationEntry>>,
-        nodeB: IRowNode<AgDataWithActions<DonationEntry>>
-      ) => {
-        const seqA = nodeA.data?.receipt_sequence ?? 0;
+      accessorKey: "trust_name",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { trust_name } = original;
 
-        const seqB = nodeB.data?.receipt_sequence ?? 0;
+        const receiptColor = getColumnValueColor(original);
 
-        return seqA - seqB;
+        return (
+          <Tooltip toolTipLabel={trust_name}>
+            <Typography variant="body2" color={receiptColor}>
+              {trust_name ?? AG_GRID_CELL_DEFAULT_VALUE}
+            </Typography>
+          </Tooltip>
+        );
       },
-      field: "receipt_no",
-      headerName: t("common.receipt.label", {
+      enableGrouping: true,
+      filterVariant: "smartTextFilter",
+      header: t("trust.label"),
+    },
+    {
+      accessorKey: "receipt_no",
+      cell: ({ row: { original } }) => {
+        const { receipt_no } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {receipt_no ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
+      },
+      enableGrouping: true,
+      filterVariant: "smartTextFilter",
+      header: t("common.receipt.label", {
         label: t("common.number.label"),
       }),
       hide: !receipt_no,
-      minWidth: 170,
+      minSize: 170,
     },
     {
-      field: "receipt_name",
-      headerName: t("common.receipt.label", {
+      accessorKey: "receipt_name",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { receipt_name } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {receipt_name ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
+      },
+      enableGrouping: true,
+      filterVariant: "smartTextFilter",
+      header: t("common.receipt.label", {
         label: t("common.name"),
       }),
       hide: !receipt_name,
-      minWidth: 170,
+      minSize: 170,
     },
     {
-      field: "event",
-      headerName: t("common.event.label"),
-      hide: !event,
+      accessorKey: "event",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { event } = original;
 
-      minWidth: 200,
-    },
-    {
-      field: "contact_no",
-      headerName: t("common.contact.label"),
-      hide: !contact_no,
+        const receiptColor = getColumnValueColor(original);
 
-      minWidth: 130,
-    },
-    {
-      cellRenderer: ({ value }: CustomCellRendererProps) => {
-        return !value
-          ? AG_GRID_CELL_DEFAULT_VALUE
-          : formatToIndianNumber(value);
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {event ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
       },
-      field: "amount",
-      headerName: t("amount.label"),
+      enableGrouping: true,
+      filterVariant: "smartTextFilter",
+      header: t("common.event.label"),
+      hide: !event,
+      minSize: 200,
+    },
+    {
+      accessorKey: "contact_no",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { contact_no } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {contact_no ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
+      },
+      enableGrouping: true,
+      filterVariant: "smartTextFilter",
+      header: t("common.contact.label"),
+      hide: !contact_no,
+      minSize: 130,
+    },
+    {
+      accessorKey: "amount",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { amount } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {formatToIndianNumber(amount) ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
+      },
+      filterVariant: "smartNumberFilter",
+      header: t("amount.label"),
       hide: !amount,
-
-      minWidth: 170,
+      minSize: 170,
     },
     {
-      field: "donation_mode",
-      headerName: t("donationMode.label"),
+      accessorKey: "donation_mode",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { donation_mode } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {donation_mode ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
+      },
+      enableGrouping: true,
+      filterVariant: "smartTextFilter",
+      header: t("donationMode.label"),
       hide: !donation_mode,
-
-      minWidth: 150,
+      minSize: 150,
     },
     {
-      field: "bank_name",
-      headerName: t("bank.name.label"),
+      accessorKey: "bank_name",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { bank_name } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {bank_name ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
+      },
+      enableGrouping: true,
+      filterVariant: "smartTextFilter",
+      header: t("bank.name.label"),
       hide: !bank_name,
-
-      minWidth: 200,
+      minSize: 200,
     },
     {
-      field: "cheque_no",
-      headerName: t("cheque.label", {
+      accessorKey: "cheque_no",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { cheque_no } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {cheque_no ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
+      },
+      enableGrouping: true,
+      filterVariant: "smartNumberFilter",
+      header: t("cheque.label", {
         label: t("common.number.label"),
       }),
       hide: !cheque_no,
-
-      minWidth: 200,
+      minSize: 200,
     },
     {
-      field: "pan_no",
-      headerName: t("common.pan.no"),
+      accessorKey: "pan_no",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { pan_no } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {pan_no ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
+      },
+      enableGrouping: true,
+      filterVariant: "smartTextFilter",
+      header: t("common.pan.no"),
       hide: !pan_no,
-
-      minWidth: 130,
+      minSize: 130,
     },
     {
-      field: "donation_type",
-      headerName: t("donation.type.label"),
+      accessorKey: "donation_type",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { donation_type } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {donation_type ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
+      },
+      enableGrouping: true,
+      filterVariant: "smartTextFilter",
+      header: t("donation.type.label"),
       hide: !donation_type,
-
-      minWidth: 220,
+      minSize: 220,
     },
     {
-      field: "ref_receipt_no",
-      headerName: t("ref.receipt.no.label"),
+      accessorKey: "ref_receipt_no",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { ref_receipt_no } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {ref_receipt_no ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
+      },
+      enableGrouping: true,
+      filterVariant: "smartNumberFilter",
+      header: t("ref.receipt.no.label"),
       hide: !ref_receipt_no,
-
-      minWidth: 180,
+      minSize: 180,
     },
     {
-      field: "address",
-      headerName: t("address.label"),
+      accessorKey: "address",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { address } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {address ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
+      },
+      enableGrouping: true,
+      filterVariant: "smartTextFilter",
+      header: t("address.label"),
       hide: !address,
-
-      minWidth: 250,
+      minSize: 250,
     },
     {
-      field: "email",
-      headerName: t("email.label"),
+      accessorKey: "email",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { email } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {email ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
+      },
+      enableGrouping: true,
+      filterVariant: "smartTextFilter",
+      header: t("email.label"),
       hide: !email,
-
-      minWidth: 200,
+      minSize: 200,
     },
     {
-      field: "city",
-      headerName: t("common.city"),
+      accessorKey: "city",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { city } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {city ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
+      },
+      enableGrouping: true,
+      filterVariant: "smartTextFilter",
+      header: t("common.city"),
       hide: !city,
-
-      minWidth: 150,
+      minSize: 150,
     },
     {
-      field: "is_cancel_active",
-      headerName: t("is.cancel.activate.label"),
+      accessorKey: "is_cancel_active",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { is_cancel_active } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {is_cancel_active ? t("common.yes") : t("common.no")}
+          </Typography>
+        );
+      },
+      filterParams: {
+        filterOptions: trueFalseOptions,
+      },
+      filterVariant: "smartSelectFilter",
+      header: t("is.cancel.activate.label"),
       hide: !is_cancel_active,
-
-      minWidth: 130,
+      minSize: 130,
     },
     {
-      field: "organize_remark",
-      headerName: t("organize.remark.label"),
+      accessorKey: "organize_remark",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { organize_remark } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {organize_remark ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
+      },
+      enableGrouping: true,
+      filterVariant: "smartTextFilter",
+      header: t("organize.remark.label"),
       hide: !organize_remark,
-
-      minWidth: 200,
+      minSize: 200,
     },
     {
-      field: "entry_by",
-      headerName: t("entry.by.label"),
+      accessorKey: "entry_by",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { entry_by } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {entry_by ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
+      },
+      enableGrouping: true,
+      filterVariant: "smartTextFilter",
+      header: t("entry.by.label"),
       hide: !entry_by,
-
-      minWidth: 200,
+      minSize: 200,
     },
     {
-      cellRenderer: ({ value }: CustomCellRendererProps) => {
-        return !value ? AG_GRID_CELL_DEFAULT_VALUE : dateFormat(value, true);
+      accessorKey: "entry_date",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { entry_date } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {dateFormat(entry_date, true) ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
       },
-      field: "entry_date",
-      headerName: t("entry.date.label"),
+      enableGrouping: true,
+      filterVariant: "smartDateFilter",
+      header: t("entry.date.label"),
       hide: !entry_date,
+      minSize: 120,
+    },
+    {
+      accessorKey: "aadhar_no",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { aadhar_no } = original;
 
-      minWidth: 120,
-    },
-    {
-      field: "aadhar_no",
-      headerName: t("aadhar.no.label"),
-      hide: !aadhar_no,
+        const receiptColor = getColumnValueColor(original);
 
-      minWidth: 150,
-    },
-    {
-      field: "dl_no",
-      headerName: t("dl.no.label"),
-      hide: !dl_no,
-      minWidth: 150,
-    },
-    {
-      field: "elector_number",
-      headerName: t("common.electors.number"),
-      hide: !elector_number,
-      minWidth: 150,
-    },
-    {
-      field: "passport_no",
-      headerName: t("common.passport.no"),
-      hide: !passport_no,
-      minWidth: 150,
-    },
-    {
-      field: "mode_of_receipt",
-      headerName: t("mode.of.receipt.label"),
-      hide: !mode_of_receipt,
-      minWidth: 150,
-    },
-    {
-      field: "prasad",
-      headerName: t("prasad.label"),
-      hide: !prasad,
-      minWidth: 80,
-    },
-    {
-      field: "state",
-      headerName: t("state.label"),
-      hide: !state,
-      minWidth: 170,
-    },
-    {
-      field: "atg",
-      headerName: t("atg.label"),
-      hide: !atg,
-      minWidth: 80,
-    },
-    {
-      cellRenderer: ({ value }: CustomCellRendererProps) => {
-        return !value ? AG_GRID_CELL_DEFAULT_VALUE : dateFormat(value, true);
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {aadhar_no ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
       },
-      field: "cancel_date",
-      headerName: t("cancelDate.label"),
+      enableGrouping: true,
+      filterVariant: "smartTextFilter",
+      header: t("aadhar.no.label"),
+      hide: !aadhar_no,
+      minSize: 150,
+    },
+    {
+      accessorKey: "dl_no",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { dl_no } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {dl_no ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
+      },
+      enableGrouping: true,
+      filterVariant: "smartTextFilter",
+      header: t("dl.no.label"),
+      hide: !dl_no,
+      minSize: 150,
+    },
+    {
+      accessorKey: "elector_number",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { elector_number } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {elector_number ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
+      },
+      enableGrouping: true,
+      filterVariant: "smartTextFilter",
+      header: t("common.electors.number"),
+      hide: !elector_number,
+      minSize: 150,
+    },
+    {
+      accessorKey: "passport_no",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { passport_no } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {passport_no ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
+      },
+      enableGrouping: true,
+      filterVariant: "smartTextFilter",
+      header: t("common.passport.no"),
+      hide: !passport_no,
+      minSize: 150,
+    },
+    {
+      accessorKey: "mode_of_receipt",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { mode_of_receipt } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {mode_of_receipt ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
+      },
+      enableGrouping: true,
+      filterVariant: "smartTextFilter",
+      header: t("mode.of.receipt.label"),
+      hide: !mode_of_receipt,
+      minSize: 150,
+    },
+    {
+      accessorKey: "prasad",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { prasad } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {prasad ? t("common.yes") : t("common.no")}
+          </Typography>
+        );
+      },
+      filterParams: {
+        filterOptions: trueFalseOptions,
+      },
+      filterVariant: "smartSelectFilter",
+      header: t("prasad.label"),
+      hide: !prasad,
+      minSize: 80,
+    },
+    {
+      accessorKey: "state",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { state } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {state ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
+      },
+      enableGrouping: true,
+      filterVariant: "smartTextFilter",
+      header: t("state.label"),
+      hide: !state,
+      minSize: 170,
+    },
+    {
+      accessorKey: "atg",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { atg } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {atg ? t("common.yes") : t("common.no")}
+          </Typography>
+        );
+      },
+      filterParams: {
+        filterOptions: trueFalseOptions,
+      },
+      filterVariant: "smartSelectFilter",
+      header: t("atg.label"),
+      hide: !atg,
+      minSize: 80,
+    },
+    {
+      accessorKey: "cancel_date",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { cancel_date } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {cancel_date
+              ? dateFormat(cancel_date, true)
+              : AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
+      },
+      enableGrouping: true,
+      filterVariant: "smartDateFilter",
+      header: t("cancelDate.label"),
       hide: !cancel_date,
 
-      minWidth: 120,
+      minSize: 120,
     },
     {
-      field: "remark",
-      headerName: t("common.remark"),
+      accessorKey: "remark",
+      cell: ({ row: { original } }: { row: { original: DonationEntry } }) => {
+        const { remark } = original;
+
+        const receiptColor = getColumnValueColor(original);
+
+        return (
+          <Typography variant="body2" color={receiptColor}>
+            {remark ?? AG_GRID_CELL_DEFAULT_VALUE}
+          </Typography>
+        );
+      },
+      enableGrouping: true,
+      filterVariant: "smartTextFilter",
+      header: t("common.remark"),
       hide: !remark,
-      minWidth: 200,
+      minSize: 200,
+    },
+    {
+      cell: ({ row }) => {
+        const data = row.original;
+
+        const items: SmartGridActionItems[] = [
+          {
+            isView: validateAccess(DONATION_ENTRY_PERMISSION.EDIT),
+            onClick: () => onAction("edit", data),
+            title: t("common.edit"),
+          },
+          {
+            isView: validateAccess(DONATION_ENTRY_PERMISSION.CREATE),
+            onClick: () => onAction("clone", data),
+            title: t("common.clone"),
+          },
+          {
+            onClick: () => onAction("donationLetter", data),
+            title: t("common.donation.letter"),
+          },
+          {
+            onClick: () => onAction("donationReceipt", data),
+            title: t("donationReceipt.label"),
+          },
+          {
+            onClick: () => onAction("cancelDonationEntryConfirmation", data),
+            title: data.is_cancel ? "Active" : "Cancel",
+          },
+        ];
+
+        return <ActionCell items={items} />;
+      },
+      enableGrouping: false,
+      enableSorting: false,
+      header: "",
+      id: "action",
+      minSize: 40,
+      pinned: "right",
+      size: 10,
     },
   ];
 

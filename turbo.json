@@ -3,6 +3,7 @@
   "globalEnv": [
     "NEXT_PUBLIC_MOCKING_ENABLED",
     "NEXT_PUBLIC_API_SERVER",
+    "NEXT_PUBLIC_CERTIFICATE_UPLOAD_API_SERVER",
     "NEXTAUTH_URL"
   ],
   "pipeline": {

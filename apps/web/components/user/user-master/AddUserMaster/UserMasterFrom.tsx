@@ -31,6 +31,8 @@ import { useGetAddressBookColumnsDefault } from "@web/components/Address/address
 import type { AddressBookColumnHideTypes } from "@web/components/Address/address-book/template/dialogs/hooks/templateTypes";
 import { AddressTypeAutocomplete } from "@web/components/common/Autocomplete/AddressTypeAutocomplete";
 import { BranchAutocomplete } from "@web/components/common/Autocomplete/BranchAutocomplete";
+import { DonationAutocomplete } from "@web/components/common/Autocomplete/DonationAutocomplete";
+import { DonationModeAutocomplete } from "@web/components/common/Autocomplete/DonationModeAutocomplete";
 import { EventAutocomplete } from "@web/components/common/Autocomplete/EventAutocomplete";
 import { FinancialYearAutocomplete } from "@web/components/common/Autocomplete/FinancialYearAutocomplete";
 import { PermittedUserAutocomplete } from "@web/components/common/Autocomplete/PermittedUserAutocomplete";
@@ -77,6 +79,8 @@ const UserMasterFromSchema = z
     donation_edit_from_date: z.string().nullable().optional(),
     donation_edit_to_date: z.string().nullable().optional(),
     donation_edit_type: z.boolean().optional(),
+    donation_mode_id: z.array(z.string()).default([]),
+    donation_type_id: z.array(z.string()).default([]),
     donation_view_from_date: z.string().nullable(),
     email: z
       .string()
@@ -117,6 +121,7 @@ const UserMasterFromSchema = z
         message: "common.required",
       }),
     receipt_print_name: z.string().max(255, "common.maxLength").nullable(),
+    show_cancel_donation: z.boolean().optional(),
     trust_id: z
       .array(z.string())
       .min(1, { message: "common.required" })
@@ -176,6 +181,8 @@ const formDefaultValues: UserMasterFormFieldValues = {
   donation_edit_day: null,
   donation_edit_from_date: null,
   donation_edit_to_date: null,
+  donation_mode_id: [],
+  donation_type_id: [],
   donation_view_from_date: null,
   email: null,
   event_id: [],
@@ -187,6 +194,7 @@ const formDefaultValues: UserMasterFormFieldValues = {
   login_name: null,
   password: null,
   receipt_print_name: null,
+  show_cancel_donation: false,
   trust_id: [],
   user_permission_id: null,
   user_type: null,
@@ -446,7 +454,6 @@ export const UserMasterFrom = forwardRef(
             <UserTypeAutocomplete
               loading={loading}
               name="user_type"
-              disabled={defaultValues.user_type == "admin"}
               control={control}
               required
               error={!!user_type}
@@ -544,6 +551,29 @@ export const UserMasterFrom = forwardRef(
               name="event_id"
               control={control}
               multiple
+            />
+
+            <DonationModeAutocomplete
+              loading={loading}
+              name="donation_mode_id"
+              control={control}
+              multiple
+              isUserWiseAll
+              limitTags={2}
+              error={!!errors.donation_mode_id}
+              helperText={errorMessages(errors.donation_mode_id?.message)}
+            />
+
+            <DonationAutocomplete
+              loading={loading}
+              name="donation_type_id"
+              label={t("common.donation.for")}
+              control={control}
+              isUserWiseAll
+              multiple
+              limitTags={2}
+              error={!!errors.donation_type_id}
+              helperText={errorMessages(errors.donation_type_id?.message)}
             />
           </GridProvider>
 
@@ -741,6 +771,25 @@ export const UserMasterFrom = forwardRef(
                 ]}
               />
             )}
+
+            <RadioGroupField
+              name="show_cancel_donation"
+              control={control}
+              loading={loading}
+              label="Show Cancel Donation"
+              options={[
+                {
+                  disabled: false,
+                  label: "Yes",
+                  values: true,
+                },
+                {
+                  disabled: false,
+                  label: "No",
+                  values: false,
+                },
+              ]}
+            />
           </FormGridLayout>
 
           <FormGridLayout columns={5}>

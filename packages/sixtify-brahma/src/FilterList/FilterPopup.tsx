@@ -13,7 +13,11 @@ import { isFunction, sortBy } from "lodash";
 import { useEffect, useState, type PropsWithChildren } from "react";
 import { Button } from "../Button";
 import { PadBox } from "../PadBox";
-import type { FilterListType } from "./FilterTypeWrapper";
+import type {
+  AmountFilterCurrentValue,
+  FilterCurrentValue,
+  FilterListType,
+} from "./FilterTypeWrapper";
 import type { OnAction } from "../utils/types";
 
 type FilterPopupProps = PropsWithChildren<PopoverProps> & {
@@ -24,8 +28,46 @@ type FilterPopupProps = PropsWithChildren<PopoverProps> & {
   required?: boolean;
   background?: boolean;
   filterItem?: FilterListType;
-  currentFilterValue?: string | string[] | null;
+  currentFilterValue?: FilterCurrentValue;
   reset?: OnAction;
+};
+
+const getSnapshotValue = (
+  value: FilterCurrentValue,
+  filterItem?: FilterListType
+  // eslint-disable-next-line sonarjs/function-return-type
+): FilterCurrentValue => {
+  if (!value) {
+    return value;
+  }
+
+  if (filterItem?.type === "amountFilter") {
+    return { ...(value as AmountFilterCurrentValue) };
+  }
+
+  if (filterItem?.multiSelect) {
+    return sortBy(value as string[]);
+  }
+
+  return value;
+};
+
+const isFilterValueChanged = (
+  current: FilterCurrentValue,
+  initial: FilterCurrentValue,
+  filterItem?: FilterListType
+): boolean => {
+  if (filterItem?.type === "amountFilter") {
+    return JSON.stringify(current) !== JSON.stringify(initial);
+  }
+
+  if (filterItem?.multiSelect) {
+    return (
+      JSON.stringify(sortBy(current as string[])) !== JSON.stringify(initial)
+    );
+  }
+
+  return current !== initial;
 };
 
 export const FilterPopup = ({
@@ -47,18 +89,14 @@ export const FilterPopup = ({
 
   const { slate } = theme.palette.app.color;
 
-  const [initialValue, setInitialValue] = useState<string | string[] | null>(
-    null
-  );
+  const [initialValue, setInitialValue] = useState<FilterCurrentValue>(null);
 
   const [isDisabled, setIsDisabled] = useState(true);
 
   useEffect(() => {
     if (open) {
       if (!initialValue && !!currentFilterValue) {
-        const changedValue = filterItem?.multiSelect
-          ? sortBy(currentFilterValue)
-          : currentFilterValue;
+        const changedValue = getSnapshotValue(currentFilterValue, filterItem);
 
         setInitialValue(changedValue);
       }
@@ -67,14 +105,22 @@ export const FilterPopup = ({
     }
 
     if (!!currentFilterValue && !!initialValue) {
-      const isChanged = filterItem?.multiSelect
-        ? JSON.stringify(sortBy(currentFilterValue)) !==
-          JSON.stringify(initialValue)
-        : currentFilterValue !== initialValue;
+      const isChanged = isFilterValueChanged(
+        currentFilterValue,
+        initialValue,
+        filterItem
+      );
 
       setIsDisabled(!isChanged);
     }
-  }, [open, currentFilterValue, initialValue, filterItem?.multiSelect]);
+  }, [
+    open,
+    currentFilterValue,
+    initialValue,
+    filterItem,
+    filterItem?.multiSelect,
+    filterItem?.type,
+  ]);
 
   const handleApply = () => {
     setInitialValue(null);

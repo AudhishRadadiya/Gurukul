@@ -1,5 +1,6 @@
 import type { DialogRenderer } from "@codezee/sixtify-brahma";
-import { useDialogActions } from "@codezee/sixtify-brahma";
+import { useDialogActions, useGetDeviceType } from "@codezee/sixtify-brahma";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import { t } from "i18next";
 import { useState } from "react";
 import type { FieldValues } from "react-hook-form";
@@ -14,12 +15,24 @@ import { useGetDonationCollectionReport } from "@web/components/report/donationR
 import { useBranch } from "@web/context/BranchContext";
 
 export type DonationCollectionReportListProps = {
+  agGridState: {
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  };
   externalFilter: FieldValues;
+  setAgGridState: (data: {
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }) => void;
 };
 
 export const DonationCollectionReportList = ({
+  agGridState,
   externalFilter,
+  setAgGridState,
 }: DonationCollectionReportListProps) => {
+  const { isMobile } = useGetDeviceType();
+
   const { onDialogClose, onDialogOpen, openedDialog } = useDialogActions();
 
   const { branchIds } = useBranch();
@@ -37,6 +50,8 @@ export const DonationCollectionReportList = ({
   const { data, isFetching } = useGetDonationCollectionReport({
     endRow,
     externalFilter: { ...externalFilter, branch_id: [branchIds] },
+    filterModel: agGridState.filterModel,
+    sortModel: agGridState.sortModel,
     startRow,
   });
 
@@ -86,9 +101,10 @@ export const DonationCollectionReportList = ({
         rowsPerPage={rowsPerPage}
         rowData={dailyDonationReportList}
         onPageChange={onPageChange}
+        onGridStateChange={setAgGridState}
         count={totalCount}
         onRowsPerPageChange={onRowsPerPageChange}
-        height={250}
+        height={isMobile ? 300 : 240}
       />
 
       {openedDialog && dialogRenderer[openedDialog]}

@@ -4,6 +4,7 @@ import {
   PadBox,
   toasts,
   useDialogActions,
+  useGetDeviceType,
 } from "@codezee/sixtify-brahma";
 import { Stack } from "@mui/material";
 import { t } from "i18next";
@@ -20,6 +21,8 @@ import { useGetDailyCollectionReport } from "@web/components/report/dailyCollect
 import type { GetDonationReportApiSuccessResponse } from "@web/components/report/donationReport/hooks/useGetDonationReport";
 
 export const DailyCollectionReport = () => {
+  const { isMobile } = useGetDeviceType();
+
   const router = useRouter();
 
   const formRef = useRef<FormRef>(null);
@@ -60,10 +63,18 @@ export const DailyCollectionReport = () => {
     <>
       <DailyCollectionReportFrom ref={formRef} />
 
-      <PadBox padding={{ paddingTop: "20px" }}>
-        <Stack direction="row" justifyContent="end" gap="10px">
+      <PadBox padding={{ paddingTop: { sm: "20px", xs: "32px" } }}>
+        <Stack
+          direction={{ sm: "row", xs: "column" }}
+          alignItems={{ sm: "center", xs: "stretch" }}
+          justifyContent="flex-end"
+          gap={{ sm: "10px", xs: "8px" }}
+          flexWrap={{ sm: "wrap", xs: "nowrap" }}
+        >
           <Button
             variant="outlined"
+            size={isMobile ? "small" : "medium"}
+            sx={{ width: { sm: "auto", xs: "100%" } }}
             onClick={() => {
               router.push("/donation/donation-entry");
             }}
@@ -75,8 +86,12 @@ export const DailyCollectionReport = () => {
             <Button
               key={reportMode}
               loading={isPending}
+              size={isMobile ? "small" : "medium"}
               onClick={() => onGenerateDonationReport(reportMode)}
-              sx={{ minWidth: "100px" }}
+              sx={{
+                minWidth: { sm: "100px", xs: "unset" },
+                width: { sm: "auto", xs: "100%" },
+              }}
             >
               {label}
             </Button>
@@ -84,7 +99,11 @@ export const DailyCollectionReport = () => {
 
           <Button
             loading={isPending}
-            sx={{ minWidth: "150px" }}
+            size={isMobile ? "small" : "medium"}
+            sx={{
+              minWidth: { sm: "150px", xs: "unset" },
+              width: { sm: "auto", xs: "100%" },
+            }}
             onClick={() => {
               onDialogOpen("add");
             }}

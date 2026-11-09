@@ -1,6 +1,6 @@
 import type { DialogRenderer } from "@codezee/sixtify-brahma";
-import { useDialogActions } from "@codezee/sixtify-brahma";
-import type { FilterModel } from "ag-grid-community";
+import { useDialogActions, useGetDeviceType } from "@codezee/sixtify-brahma";
+import type { FilterModel, SortModelItem } from "ag-grid-community";
 import { t } from "i18next";
 import { forwardRef, useState } from "react";
 import type { FieldValues } from "react-hook-form";
@@ -15,9 +15,13 @@ import { useGetEventDonationEntry } from "@web/components/Event/eventDonationEnt
 import { EVENT_DONATION_ENTRY_PERMISSION } from "@web/constants/permission/event/eventDonationEntry/permission";
 import { useBranch } from "@web/context/BranchContext";
 import { useUserPermissions } from "@web/hooks/useUserPermissions/useUserPermissions";
+import { filterSearchParams } from "@web/utils/helper";
 
 export type EventDonationEntryListProps = {
-  agGridFilterModel: FilterModel;
+  agGridState: {
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  };
   endRow: number;
   eventId: string[];
   externalDateFilter?: FieldValues;
@@ -25,13 +29,17 @@ export type EventDonationEntryListProps = {
   onRowsPerPageChange: (newRows: number) => void;
   page: number;
   rowsPerPage: number;
-  setAgGridFilterModel: (data: FilterModel) => void;
+  search: string;
+  setAgGridState: (data: {
+    filterModel: FilterModel;
+    sortModel: SortModelItem[];
+  }) => void;
   startRow: number;
 };
 
 export const EventDonationEntryList = forwardRef(
   ({
-    agGridFilterModel,
+    agGridState,
     endRow,
     eventId,
     externalDateFilter,
@@ -39,10 +47,13 @@ export const EventDonationEntryList = forwardRef(
     onRowsPerPageChange,
     page,
     rowsPerPage,
-    setAgGridFilterModel,
+    search,
+    setAgGridState,
     startRow,
   }: EventDonationEntryListProps) => {
     const { validateAccess } = useUserPermissions();
+
+    const { isMobile } = useGetDeviceType();
 
     const { branchIds } = useBranch();
 
@@ -58,7 +69,9 @@ export const EventDonationEntryList = forwardRef(
         ...externalDateFilter,
         branch_id: [branchIds],
       },
-      filterModel: agGridFilterModel,
+      filterModel: agGridState.filterModel,
+      quickFilter: filterSearchParams(search),
+      sortModel: agGridState.sortModel,
       startRow,
     });
 
@@ -107,8 +120,8 @@ export const EventDonationEntryList = forwardRef(
           onPageChange={onPageChange}
           count={totalCount}
           onRowsPerPageChange={onRowsPerPageChange}
-          onFilterChange={setAgGridFilterModel}
-          height={280}
+          onGridStateChange={setAgGridState}
+          height={isMobile ? 240 : 250}
           actions={[
             {
               isView: validateAccess(EVENT_DONATION_ENTRY_PERMISSION.EDIT),

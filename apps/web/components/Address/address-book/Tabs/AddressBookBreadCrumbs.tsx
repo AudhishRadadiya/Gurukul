@@ -2,16 +2,52 @@
 
 import { Breadcrumbs, SvgHome } from "@codezee/sixtify-brahma";
 import { t } from "i18next";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-export type AddressBookBreadcrumbsProps = {
-  page: "add-address-book" | "edit-address-book" | null;
+import {
+  ADD_ADDRESS_BOOK,
+  EDIT_ADDRESS_BOOK,
+} from "@web/app/address/address-book/hooks/constant";
+import {
+  addressBookOptionTabs,
+  categories,
+  type OptionKey,
+} from "@web/components/Address/address-book/Tabs/hooks/useTabsOptions";
+
+const addressBookPage = {
+  [ADD_ADDRESS_BOOK]: "Add Address Book",
+  [EDIT_ADDRESS_BOOK]: "Edit Address Book",
 };
 
-export const AddressBookBreadcrumbs = ({
-  page,
-}: AddressBookBreadcrumbsProps) => {
+const isAddressBookTab = (tab: string | null): tab is OptionKey => {
+  return addressBookOptionTabs.includes(tab as OptionKey);
+};
+
+export const AddressBookBreadcrumbs = () => {
   const router = useRouter();
+
+  const pathname = usePathname();
+
+  const searchParams = useSearchParams();
+
+  const page = searchParams.get("page");
+
+  const tab = searchParams.get("tab");
+
+  const segments = (pathname ?? "").split("/").filter(Boolean);
+
+  const isAddressBookDetail =
+    segments[0] === "address" &&
+    segments[1] === "address-book" &&
+    segments.length >= 3;
+
+  const addressBookSubPage =
+    page === ADD_ADDRESS_BOOK ||
+    (isAddressBookDetail && page === EDIT_ADDRESS_BOOK)
+      ? page
+      : null;
+
+  const selectedTab = isAddressBookTab(tab) ? tab : "address-list";
 
   const breadcrumbsItems = [
     {
@@ -22,9 +58,11 @@ export const AddressBookBreadcrumbs = ({
       text: t("address.menu.label"),
     },
     {
-      onClick: () => {
-        router.push("/address/address-book");
-      },
+      ...(addressBookSubPage && {
+        onClick: () => {
+          router.push("/address/address-book");
+        },
+      }),
       text: t("address.book.menu.label"),
     },
   ];
@@ -32,14 +70,19 @@ export const AddressBookBreadcrumbs = ({
   return (
     <Breadcrumbs
       items={
-        page
+        addressBookSubPage
           ? [
               ...breadcrumbsItems,
               {
-                text: `${page === "add-address-book" ? "Add" : "Edit"} Address Book`,
+                text: addressBookPage[addressBookSubPage],
               },
             ]
-          : breadcrumbsItems
+          : [
+              ...breadcrumbsItems,
+              {
+                text: categories[selectedTab],
+              },
+            ]
       }
     />
   );

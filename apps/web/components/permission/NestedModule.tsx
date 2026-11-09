@@ -1,4 +1,4 @@
-import { CheckBox } from "@codezee/sixtify-brahma";
+import { CheckBox, useGetDeviceType } from "@codezee/sixtify-brahma";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import KeyboardArrowUpRoundedIcon from "@mui/icons-material/KeyboardArrowUpRounded";
 import {
@@ -57,9 +57,9 @@ const updateModulePermissionsRecursively = (
       if (isDefaultSelected && key === "view" && !selectAll) {
         continue;
       }
-
-      updatedModule.permissions[key as keyof Permission] = selectAll;
     }
+
+    updatedModule.permissions[key as keyof Permission] = selectAll;
   }
 
   if (updatedModule.sub_modules && updatedModule.sub_modules.length > 0) {
@@ -81,6 +81,10 @@ export const NestedModule = ({
   module,
   moduleIndex,
 }: NestedModuleProps) => {
+  const { layout } = useGetDeviceType();
+
+  const isMobile = layout === "mobile";
+
   const { control, getValues, setValue, watch } =
     useFormContext<RolesPermissionsFormFieldValues>();
 
@@ -203,13 +207,48 @@ export const NestedModule = ({
     [moduleIndex]
   );
 
+  const selectAllControl = hasSubModules ? (
+    <>
+      <CheckBox
+        loading={loading}
+        size="small"
+        disabled={isView}
+        control={control}
+        name={`modules.${moduleIndex}.select_all`}
+        onClick={handleSelectAll}
+      />
+
+      <Typography
+        variant="subtitle2"
+        whiteSpace="nowrap"
+        fontSize={isMobile ? "12px" : "14px"}
+      >
+        Select All
+      </Typography>
+    </>
+  ) : (
+    <CheckBox
+      loading={loading}
+      size="small"
+      control={control}
+      disabled={isView}
+      name={`modules.${moduleIndex}.select_row`}
+      onClick={handleSelectRow}
+    />
+  );
+
   return (
     <Box>
       <Stack
-        flexDirection="row"
+        direction="row"
         alignItems="center"
-        paddingRight="20px"
+        flexWrap={{ md: "nowrap", xs: "wrap" }}
         sx={{
+          columnGap: { xs: 1 },
+          pl: { md: "16px", xs: 1.5 },
+          pr: { md: "20px", xs: "10px" },
+          py: { md: "12px", xs: 1.25 },
+          rowGap: { xs: 1 },
           ...(module.sub_modules?.length
             ? {
                 backgroundColor: "hsla(203, 70.10%, 62.00%, 0.09)",
@@ -221,23 +260,57 @@ export const NestedModule = ({
               }),
         }}
       >
+        <Typography
+          variant={module.sub_modules?.length ? "subtitle2" : "body2"}
+          sx={{
+            display: { md: "none", xs: "block" },
+            flex: "1 1 auto",
+            minWidth: 0,
+          }}
+        >
+          {module.module_name}
+        </Typography>
+
+        <Stack
+          direction="row"
+          alignItems="center"
+          gap="6px"
+          sx={{
+            flexShrink: 0,
+            ml: { md: 2 },
+            order: { md: 1, xs: 0 },
+            width: { md: "110px" },
+          }}
+        >
+          {selectAllControl}
+        </Stack>
+
         <Grid
           container
-          spacing={1.5}
+          spacing={{ md: 2, xs: 1 }}
           sx={{
             alignItems: "center",
             display: "flex",
+            flex: { md: 1, xs: "1 1 100%" },
             margin: "0px",
-            paddingBottom: "13px",
+            order: { md: 0, xs: 1 },
+            width: { md: "auto", xs: "100%" },
           }}
         >
-          <Grid item xs={2}>
+          <Grid
+            item
+            md={3}
+            xs={12}
+            sx={{ display: { md: "block", xs: "none" }, pr: { md: 1 } }}
+          >
             <Typography
               variant={module.sub_modules?.length ? "subtitle2" : "body2"}
+              sx={{ wordBreak: "break-word" }}
             >
               {module.module_name}
             </Typography>
           </Grid>
+
           {ALL_PERMISSION_KEYS.map((key) => {
             const isViewKey = key === "view";
 
@@ -295,15 +368,17 @@ export const NestedModule = ({
             return (
               <Grid
                 key={uuidv4()}
-                sx={{ display: "flex", gap: "5px" }}
                 item
-                xs={1}
+                md={2}
+                sm={3}
+                xs={6}
+                sx={{ display: "flex", gap: "5px" }}
               >
                 {key in module.permissions ? (
                   <Stack
                     flexDirection="row"
                     alignItems="center"
-                    gap="3px"
+                    gap={{ md: "6px", xs: "3px" }}
                     onClick={handleClick}
                     sx={{ cursor: isView ? "default" : "pointer" }}
                   >
@@ -314,7 +389,13 @@ export const NestedModule = ({
                       name={`modules.${moduleIndex}.permissions.${key as keyof Permission}`}
                       size="small"
                     />
-                    <Typography variant="body2">{_capitalize(key)}</Typography>
+                    <Typography
+                      variant="body2"
+                      fontSize={isMobile ? "12px" : "13px"}
+                      whiteSpace="nowrap"
+                    >
+                      {_capitalize(key)}
+                    </Typography>
                     {renderToggleIcon()}
                   </Stack>
                 ) : (
@@ -324,32 +405,6 @@ export const NestedModule = ({
             );
           })}
         </Grid>
-
-        <Stack flexDirection="row" width="100px" gap="6px">
-          {hasSubModules ? (
-            <>
-              <CheckBox
-                loading={loading}
-                size="small"
-                disabled={isView}
-                control={control}
-                name={`modules.${moduleIndex}.select_all`}
-                onClick={handleSelectAll}
-              />
-
-              <Typography variant="subtitle2">Select All</Typography>
-            </>
-          ) : (
-            <CheckBox
-              loading={loading}
-              size="small"
-              control={control}
-              disabled={isView}
-              name={`modules.${moduleIndex}.select_row`}
-              onClick={handleSelectRow}
-            />
-          )}
-        </Stack>
       </Stack>
 
       {isModuleVisible && hasSubModules && (
@@ -363,7 +418,12 @@ export const NestedModule = ({
             border: "1.5px solid rgba(0,0,0,0.08)",
           }}
         >
-          <AccordionDetails sx={{ padding: "10px" }}>
+          <AccordionDetails
+            sx={{
+              overflowX: "auto",
+              padding: { md: "8px 12px 8px 16px", xs: "8px" },
+            }}
+          >
             {module?.sub_modules?.map((sub, index) => (
               <NestedModule
                 isView={isView}

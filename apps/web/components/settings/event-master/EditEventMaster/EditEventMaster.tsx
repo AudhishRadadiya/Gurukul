@@ -58,6 +58,8 @@ export const EditEventMaster = ({ eventMasterId }: EditEventMasterProps) => {
           ...item,
           is_old: true,
         })),
+        whatsapp_group_redirect_link:
+          eventMasterData.whatsapp_group_redirect_link ?? null,
       };
 
       return eventMasterFormFieldValues;
@@ -69,6 +71,7 @@ export const EditEventMaster = ({ eventMasterId }: EditEventMasterProps) => {
       <EventMasterForm
         ref={formRef}
         defaultValues={defaultValues}
+        links={eventMasterData?.links}
         loading={isPendingEventMasterData}
         trustValue={eventMasterData?.trust_id}
         isOnlineValue={eventMasterData?.is_online}

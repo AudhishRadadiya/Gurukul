@@ -17,7 +17,7 @@ import { onError } from "@web/utils/errors";
 
 export const DONATION_ENTRY_PREFERENCES_KEY = "donationEntryPreferences";
 
-const DONATION_ENTRY_PREFERENCE_FIELDS = [
+export const DONATION_ENTRY_PREFERENCE_FIELDS = [
   "atg",
   "direct_print",
   "focus_on_trust",
@@ -166,7 +166,7 @@ export const AddDonationEntry = () => {
   };
 
   return (
-    <PadBox padding={{ padding: "10px" }}>
+    <PadBox padding={{ padding: { sm: "10px", xs: "8px" } }}>
       <Stack gap="10px">
         <DonationEntryForm
           defaultValues={defaultFormValues}
@@ -174,8 +174,17 @@ export const AddDonationEntry = () => {
           loading={isPending}
         />
 
-        <PadBox padding={{ paddingRight: "20px" }}>
-          <Stack direction="row" justifyContent="end" gap="10px">
+        <PadBox padding={{ paddingRight: { sm: "20px", xs: 0 } }}>
+          <Stack
+            direction="row"
+            justifyContent={{ sm: "end", xs: "stretch" }}
+            gap="10px"
+            sx={{
+              "& .MuiButton-root": {
+                flex: { sm: "0 0 auto", xs: 1 },
+              },
+            }}
+          >
             <Button
               variant="outlined"
               onClick={() => {

@@ -26,6 +26,7 @@ const MailSettingFormSchema = z.object({
     .refine((value) => !!value, {
       message: "common.required",
     }),
+  is_active: z.boolean(),
   password: z
     .string()
     .trim()
@@ -63,6 +64,7 @@ export type MailSettingFormFieldValues = z.infer<typeof MailSettingFormSchema>;
 
 const formDefaultValues: MailSettingFormFieldValues = {
   content: null,
+  is_active: true,
   password: null,
   port_no: null,
   sender_email: null,
@@ -120,7 +122,7 @@ export const MailSettingForm = forwardRef(
     return (
       <FormProvider {...methods}>
         <FormSection>
-          <GridProvider gap="15px" columns={5}>
+          <GridProvider gap="15px" columns={3}>
             <TextField
               name="sender_email"
               letterCase="mixed"
@@ -156,7 +158,9 @@ export const MailSettingForm = forwardRef(
               error={!!smtp_server}
               helperText={errorMessages(smtp_server?.message)}
             />
+          </GridProvider>
 
+          <GridProvider gap="15px" columns={3}>
             <TextField
               name="port_no"
               type="number"
@@ -171,9 +175,30 @@ export const MailSettingForm = forwardRef(
 
             <RadioGroupField
               name="smtp_enable"
+              isHorizontal
               control={control}
               loading={loading}
               label={t("smtpEnable.label")}
+              options={[
+                {
+                  disabled: false,
+                  label: t("common.yes"),
+                  values: true,
+                },
+                {
+                  disabled: false,
+                  label: t("common.no"),
+                  values: false,
+                },
+              ]}
+            />
+
+            <RadioGroupField
+              name="is_active"
+              isHorizontal
+              control={control}
+              loading={loading}
+              label={t("isActive.label")}
               options={[
                 {
                   disabled: false,

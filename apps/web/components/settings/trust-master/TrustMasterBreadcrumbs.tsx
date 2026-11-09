@@ -1,13 +1,21 @@
 import { Breadcrumbs, SvgHome } from "@codezee/sixtify-brahma";
 import { t } from "i18next";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export type TrustBreadcrumbProps = {
-  page: "add-trust-master" | "edit-trust-master" | null;
-};
+import {
+  ADD_TRUST_MASTER,
+  EDIT_TRUST_MASTER,
+} from "@web/app/settings/trust-master/hooks/constant";
 
-export const TrustMasterBreadcrumbs = ({ page }: TrustBreadcrumbProps) => {
+export const TrustMasterBreadcrumbs = () => {
   const router = useRouter();
+
+  const searchParams = useSearchParams();
+
+  const page = searchParams.get("page");
+
+  const trustMasterPage =
+    page === ADD_TRUST_MASTER || page === EDIT_TRUST_MASTER ? page : null;
 
   const breadcrumbsItems = [
     {
@@ -18,7 +26,7 @@ export const TrustMasterBreadcrumbs = ({ page }: TrustBreadcrumbProps) => {
       text: t("setting.menu.label"),
     },
     {
-      ...(page && {
+      ...(trustMasterPage && {
         onClick: () => {
           router.push("/settings/trust-master");
         },
@@ -32,11 +40,11 @@ export const TrustMasterBreadcrumbs = ({ page }: TrustBreadcrumbProps) => {
   return (
     <Breadcrumbs
       items={
-        page
+        trustMasterPage
           ? [
               ...breadcrumbsItems,
               {
-                text: `${page === "add-trust-master" ? "Add" : "Edit"} Trust Master`,
+                text: `${trustMasterPage === ADD_TRUST_MASTER ? "Add" : "Edit"} Trust Master`,
               },
             ]
           : breadcrumbsItems

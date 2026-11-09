@@ -1,13 +1,16 @@
 "use client";
 
-import { ContentBox, PadBox } from "@codezee/sixtify-brahma";
-import { Stack, Typography } from "@mui/material";
+import {
+  ContentBox,
+  PadBox,
+  useGetDeviceType,
+} from "@codezee/sixtify-brahma";
+import { Box, Stack, Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 
 import { ButtonLayoutProvider } from "@web/components/common/responsive/ButtonLayoutProvider";
 import { AddMasterTypeDialog } from "@web/components/settings/master-type/Dialogs/AddMasterTypeDialog";
-import { MasterTypeBreadcrumbs } from "@web/components/settings/master-type/MasterTypeBreadcrumbs";
 import { MasterTypeList } from "@web/components/settings/master-type/MasterTypeList/MasterTypeList";
 import { MASTER_TYPE_PERMISSION } from "@web/constants/permission/settings/masterType/permission";
 import { useUserPermissions } from "@web/hooks/useUserPermissions/useUserPermissions";
@@ -18,6 +21,8 @@ import { useDialogActions } from "@web/types/useDialogActions";
 
 // eslint-disable-next-line import/no-default-export
 export default function Page() {
+  const { isMobile } = useGetDeviceType();
+
   const queryClient = useQueryClient();
 
   const { validateAccess } = useUserPermissions();
@@ -39,17 +44,19 @@ export default function Page() {
   };
 
   return (
-    <Stack gap="10px">
-      <MasterTypeBreadcrumbs />
-
+    <Stack gap={{ md: "10px", xs: "8px" }}>
       <ContentBox>
-        <PadBox padding={{ padding: "10px" }}>
+        <PadBox padding={{ padding: { md: "10px", xs: "8px 10px" } }}>
           <Stack
             direction="row"
             justifyContent="space-between"
             alignItems="center"
+            gap={1}
           >
-            <Typography variant="subtitle1">
+            <Typography
+              variant="subtitle1"
+              fontSize={isMobile ? "16px" : "18px"}
+            >
               {t("master.type.menu.label")}
             </Typography>
 
@@ -69,7 +76,9 @@ export default function Page() {
           </Stack>
         </PadBox>
 
-        <MasterTypeList />
+        <Box sx={{ overflow: "hidden", width: "100%" }}>
+          <MasterTypeList />
+        </Box>
       </ContentBox>
 
       {openedDialog && dialogRenderer[openedDialog]}

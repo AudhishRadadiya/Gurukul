@@ -65,7 +65,7 @@ export const EditAddressTypeMasterDialog = ({
       open={open}
       title="Edit Address Type"
       actions={
-        <ButtonContainer>
+        <ButtonContainer columnsOnMobile={2}>
           <Button onClick={onClose} variant="outlined">
             {t("common.cancel.button")}
           </Button>

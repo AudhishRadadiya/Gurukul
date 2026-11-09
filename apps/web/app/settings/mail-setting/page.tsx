@@ -1,14 +1,18 @@
 "use client";
 
 import type { DialogRenderer } from "@codezee/sixtify-brahma";
-import { ContentBox, PadBox, useDialogActions } from "@codezee/sixtify-brahma";
-import { Stack, Typography } from "@mui/material";
+import {
+  ContentBox,
+  PadBox,
+  useDialogActions,
+  useGetDeviceType,
+} from "@codezee/sixtify-brahma";
+import { Box, Stack, Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 
 import { ButtonLayoutProvider } from "@web/components/common/responsive/ButtonLayoutProvider";
 import { AddMailSettingDialog } from "@web/components/settings/mailSetting/dialogs/AddMailSettingDialog";
-import { MailSettingBreadcrumbs } from "@web/components/settings/mailSetting/MailSettingBreadcrumbs";
 import { MailSettingList } from "@web/components/settings/mailSetting/MailSettingList/MailSettingList";
 import { EMAIL_SETTINGS_PERMISSION } from "@web/constants/permission/settings/emailSettings/permission";
 import { useUserPermissions } from "@web/hooks/useUserPermissions/useUserPermissions";
@@ -17,6 +21,8 @@ import { mailSettingKeys } from "@web/queryKeysFactories/mailSetting";
 
 // eslint-disable-next-line import/no-default-export
 export default function Page() {
+  const { isMobile } = useGetDeviceType();
+
   const { validateAccess } = useUserPermissions();
 
   const { onDialogClose, onDialogOpen, openedDialog } = useDialogActions();
@@ -38,17 +44,19 @@ export default function Page() {
   };
 
   return (
-    <Stack gap="10px">
-      <MailSettingBreadcrumbs />
-
+    <Stack gap={{ md: "10px", xs: "8px" }}>
       <ContentBox>
-        <PadBox padding={{ padding: "10px" }}>
+        <PadBox padding={{ padding: { md: "10px", xs: "8px 10px" } }}>
           <Stack
             direction="row"
             justifyContent="space-between"
             alignItems="center"
+            gap={1}
           >
-            <Typography variant="subtitle1">
+            <Typography
+              variant="subtitle1"
+              fontSize={isMobile ? "16px" : "18px"}
+            >
               {t("mailSetting.label")}
             </Typography>
 
@@ -68,7 +76,9 @@ export default function Page() {
           </Stack>
         </PadBox>
 
-        <MailSettingList />
+        <Box sx={{ overflow: "hidden", width: "100%" }}>
+          <MailSettingList />
+        </Box>
       </ContentBox>
 
       {openedDialog && dialogRenderer[openedDialog]}

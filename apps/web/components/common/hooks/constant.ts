@@ -21,7 +21,10 @@ export const FIRST_NAME = "first_name";
 export const MIDDLE_NAME = "middle_name";
 export const LAST_NAME = "last_name";
 export const CONTACT_NO = "contact_no";
+export const ADDRESS_LINE_1 = "address_line_1";
 export const CITY = "city";
+export const COUNTRY = "country";
+export const STATE = "state";
 export const PINCODE = "pincode";
 export const SURNAME = "surname";
 export const LANDMARK = "landmark";
@@ -58,3 +61,22 @@ export const ONE_MONTH = "1 Month";
 export const SINGLE = 0;
 export const MULTIPLE = 1;
 export const CUSTOM1 = 2;
+export const RADIO_OPTIONS = 3;
+export const CHECKBOX_OPTIONS = 4;
+
+export const DONATION_RECEIPT = "Donation Receipt";
+export const DONATION_BULK_MESSAGE = "Donation Bulk Message";
+export const DONATION_REMIDNER = "Donation Reminder";
+export const OTP_TEMPLATE = "OTP Template";
+
+export const TOTAL_DONATION_AMOUNT = "Total Donation Amount";
+export const NEW_CONTACT = "New Contact";
+export const PENDING_ADDRESS = "Pending Address";
+
+export const EQUALS = "eq";
+export const DOES_NOT_EQUAL = "dneq";
+export const GREATER_THAN = "gt";
+export const GREATER_THAN_OR_EQUAL_TO = "gte";
+export const LESS_THAN = "lt";
+export const LESS_THAN_OR_EQUAL_TO = "lte";
+export const BETWEEN = "between";

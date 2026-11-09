@@ -60,7 +60,7 @@ export const EditMasterTypeDialog = ({
 
   return (
     <Dialog
-      maxWidth="sm"
+      maxWidth="xs"
       onClose={onClose}
       open={open}
       title={t("common.edit.label", {

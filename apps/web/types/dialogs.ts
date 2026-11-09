@@ -20,6 +20,9 @@ export type DialogTypes =
   | "cancelConfirmation"
   | "confirmation"
   | "exportOptions"
+  | "printAddressBookOptions"
+  | "donationReceipt"
+  | "donationLetter"
   | "cancelDonationEntryConfirmation";
 
 export type DialogRenderer = { [key in DialogTypes]?: ReactNode };

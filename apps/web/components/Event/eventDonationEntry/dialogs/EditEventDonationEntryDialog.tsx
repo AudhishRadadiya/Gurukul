@@ -3,6 +3,7 @@ import {
   ButtonContainer,
   Dialog,
   toasts,
+  useGetDeviceType,
 } from "@codezee/sixtify-brahma";
 import { t } from "i18next";
 import { useRef } from "react";
@@ -30,6 +31,8 @@ export const EditEventDonationEntryDialog = ({
   open,
 }: EditEventDonationEntryDialogProps) => {
   const formRef = useRef<FormRef>(null);
+
+  const { isMobile } = useGetDeviceType();
 
   const { isDisabled } = useDisabledButtonsCache(submitButtonId);
 
@@ -60,7 +63,7 @@ export const EditEventDonationEntryDialog = ({
 
   return (
     <Dialog
-      maxWidth="md"
+      maxWidth={isMobile ? "sm" : "md"}
       onClose={onClose}
       open={open}
       title={t("common.edit.label", {
@@ -68,7 +71,11 @@ export const EditEventDonationEntryDialog = ({
       })}
       actions={
         <ButtonContainer>
-          <Button onClick={onClose} variant="outlined">
+          <Button
+            onClick={onClose}
+            variant="outlined"
+            size={isMobile ? "small" : "medium"}
+          >
             {t("common.cancel.button")}
           </Button>
 
@@ -76,6 +83,7 @@ export const EditEventDonationEntryDialog = ({
             onClick={onEditEventDonationEntry}
             loading={isPending}
             disabled={isDisabled()}
+            size={isMobile ? "small" : "medium"}
           />
         </ButtonContainer>
       }
